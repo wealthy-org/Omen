@@ -73,7 +73,7 @@ export default function AdminLoginForm({
     setIsAuthenticating(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const isAuthorized = authorizedAddresses.includes(trimmed.toLowerCase());
 
@@ -129,7 +129,7 @@ export default function AdminLoginForm({
     setIsAuthenticating(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const isValid = VALID_MASTER_KEYS.includes(trimmedKey);
 
@@ -168,42 +168,80 @@ export default function AdminLoginForm({
   };
 
   return (
-    <div className={`w-full max-w-md mx-auto ${className}`}>
+    <div className={`w-full max-w-[440px] mx-auto ${className}`}>
       <div
-        className={`rounded-3xl border p-6 sm:p-8 transition-all shadow-2xl ${
+        className={`relative overflow-hidden rounded-[22px] p-6 sm:p-7 transition-all duration-300 border ${
           isDark
-            ? "bg-[#0A0F0C]/90 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.7)] backdrop-blur-md"
-            : "bg-white/95 border-emerald-500/20 shadow-[0_8px_30px_rgba(14,122,78,0.1)] backdrop-blur-md"
+            ? "bg-[#030906] border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.8)]"
+            : "bg-gradient-to-b from-white via-[#FAFCFA] to-[#E2F7ED] border-emerald-500/15 shadow-[0_16px_40px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)]"
         }`}
       >
-        <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center border border-emerald-500/20 shadow-xs mb-3">
-            <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+        <div
+          className={`absolute top-0 inset-x-0 h-[1.5px] pointer-events-none ${
+            isDark ? "dark-emerald-seam" : "light-emerald-seam"
+          }`}
+        />
+
+        <div className="text-center mb-5">
+          <div
+            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-medium mb-3 backdrop-blur-md border ${
+              isDark
+                ? "bg-emerald-950/40 border-emerald-500/20 text-[#DCE5DF]"
+                : "bg-white/90 border-emerald-500/15 text-[#0E7A4E]"
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                isDark ? "bg-[#34D399]" : "bg-[#22C55E]"
+              }`}
+            />
+            <span>
+              Protocol Governance •{" "}
+              <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>
+                Arbitrum Sepolia
+              </strong>
+            </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-accent-navy dark:text-white tracking-tight">
-            Protocol Admin Portal
+
+          <h1
+            className={`text-xl sm:text-2xl font-black tracking-tight leading-tight ${
+              isDark ? "text-white" : "text-[#0B1F16]"
+            }`}
+          >
+            Admin Authentication
           </h1>
-          <p className="text-xs text-text-muted dark:text-[#A9B3AD] mt-1">
-            Cryptographic gateway for prediction market resolution & governance.
+
+          <p
+            className={`text-xs mt-1 leading-relaxed ${
+              isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
+            }`}
+          >
+            Authenticate with your whitelisted governance address or protocol master key.
           </p>
         </div>
 
-        <div className="flex rounded-xl p-1 bg-[#F4FBF7] dark:bg-[#121815] border border-emerald-500/10 dark:border-white/10 mb-6">
+        <div
+          className={`flex rounded-xl p-1 mb-5 border ${
+            isDark
+              ? "bg-white/[0.03] border-white/10"
+              : "bg-black/[0.03] border-emerald-500/10"
+          }`}
+        >
           <button
             type="button"
             onClick={() => {
               setAuthMethod("wallet");
               setErrorMessage(null);
             }}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               authMethod === "wallet"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                ? isDark
+                  ? "bg-white/10 text-white shadow-xs border border-white/10"
+                  : "bg-white text-[#0B1F16] shadow-xs border border-emerald-500/15"
+                : "text-text-muted hover:text-accent-navy dark:hover:text-white"
             }`}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             <span>Admin Wallet</span>
@@ -215,13 +253,15 @@ export default function AdminLoginForm({
               setAuthMethod("key");
               setErrorMessage(null);
             }}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
               authMethod === "key"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                ? isDark
+                  ? "bg-white/10 text-white shadow-xs border border-white/10"
+                  : "bg-white text-[#0B1F16] shadow-xs border border-emerald-500/15"
+                : "text-text-muted hover:text-accent-navy dark:hover:text-white"
             }`}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
             <span>Master Key</span>
@@ -231,7 +271,7 @@ export default function AdminLoginForm({
         {errorMessage && (
           <div
             role="alert"
-            className="mb-5 p-3.5 rounded-xl border border-no-red/30 bg-no-red-soft dark:bg-no-red/10 text-no-red text-xs flex items-start gap-2.5 animate-in fade-in"
+            className="mb-4 p-3 rounded-xl border border-no-red/30 bg-no-red-soft dark:bg-no-red/10 text-no-red text-xs flex items-start gap-2 animate-in fade-in"
           >
             <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -245,7 +285,7 @@ export default function AdminLoginForm({
             <div>
               <label
                 htmlFor="admin-wallet-input"
-                className="block text-xs font-mono font-bold uppercase tracking-wider text-accent-navy dark:text-[#CBD5E1] mb-1.5"
+                className="block text-[11px] font-mono font-bold uppercase tracking-wider text-accent-navy dark:text-[#CBD5E1] mb-1.5"
               >
                 Admin Whitelist Wallet Address <span className="text-no-red">*</span>
               </label>
@@ -256,25 +296,34 @@ export default function AdminLoginForm({
                 onChange={(e) => setWalletInput(e.target.value)}
                 placeholder="0x1234...5678"
                 aria-label="Admin Whitelist Wallet Address"
-                className={`w-full px-4 py-3 rounded-xl border font-mono text-xs sm:text-sm font-semibold transition-all outline-none ${
+                className={`w-full px-3.5 py-2.5 rounded-xl border font-mono text-xs sm:text-sm font-medium transition-all outline-none ${
                   isDark
-                    ? "bg-[#121815] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/60"
-                    : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy placeholder:text-accent-navy/40 focus:border-emerald-500"
+                    ? "bg-[#0A0F0C] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/60"
+                    : "bg-white border-emerald-500/20 text-[#0B1F16] placeholder:text-[#0B1F16]/40 focus:border-emerald-500"
                 }`}
               />
-              <p className="text-[11px] text-text-muted dark:text-[#A9B3AD] mt-1.5">
-                Must match registered on-chain multi-sig or governance owner.
-              </p>
             </div>
 
             <button
               type="submit"
               disabled={isAuthenticating}
-              className={`w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+              className={`w-full py-3 rounded-[12px] text-sm font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer ${
                 isAuthenticating
                   ? "opacity-60 cursor-not-allowed bg-emerald-600 text-white"
-                  : "bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white"
+                  : isDark
+                  ? "text-[#030906]"
+                  : "text-white bg-[#10221A] hover:bg-[#183428] shadow-[0_4px_16px_rgba(16,34,26,0.2)]"
               }`}
+              style={
+                isDark && !isAuthenticating
+                  ? {
+                      background:
+                        "linear-gradient(180deg, #34D399 0%, #047857 100%)",
+                      boxShadow:
+                        "0 0 25px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255,255,255,0.4)",
+                    }
+                  : undefined
+              }
             >
               {isAuthenticating ? (
                 <>
@@ -298,7 +347,7 @@ export default function AdminLoginForm({
             <div>
               <label
                 htmlFor="admin-access-key-input"
-                className="block text-xs font-mono font-bold uppercase tracking-wider text-accent-navy dark:text-[#CBD5E1] mb-1.5"
+                className="block text-[11px] font-mono font-bold uppercase tracking-wider text-accent-navy dark:text-[#CBD5E1] mb-1.5"
               >
                 Master Secret Passphrase <span className="text-no-red">*</span>
               </label>
@@ -310,17 +359,17 @@ export default function AdminLoginForm({
                   onChange={(e) => setAccessKey(e.target.value)}
                   placeholder="Enter administrator key..."
                   aria-label="Master Secret Passphrase"
-                  className={`w-full px-4 pr-11 py-3 rounded-xl border font-mono text-xs sm:text-sm font-semibold transition-all outline-none ${
+                  className={`w-full px-3.5 pr-10 py-2.5 rounded-xl border font-mono text-xs sm:text-sm font-medium transition-all outline-none ${
                     isDark
-                      ? "bg-[#121815] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/60"
-                      : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy placeholder:text-accent-navy/40 focus:border-emerald-500"
+                      ? "bg-[#0A0F0C] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/60"
+                      : "bg-white border-emerald-500/20 text-[#0B1F16] placeholder:text-[#0B1F16]/40 focus:border-emerald-500"
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-accent-navy dark:hover:text-white cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-accent-navy dark:hover:text-white cursor-pointer"
                 >
                   {showPassword ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -334,19 +383,28 @@ export default function AdminLoginForm({
                   )}
                 </button>
               </div>
-              <p className="text-[11px] text-text-muted dark:text-[#A9B3AD] mt-1.5">
-                Secured offline administrator authentication credential.
-              </p>
             </div>
 
             <button
               type="submit"
               disabled={isAuthenticating}
-              className={`w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+              className={`w-full py-3 rounded-[12px] text-sm font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer ${
                 isAuthenticating
                   ? "opacity-60 cursor-not-allowed bg-emerald-600 text-white"
-                  : "bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white"
+                  : isDark
+                  ? "text-[#030906]"
+                  : "text-white bg-[#10221A] hover:bg-[#183428] shadow-[0_4px_16px_rgba(16,34,26,0.2)]"
               }`}
+              style={
+                isDark && !isAuthenticating
+                  ? {
+                      background:
+                        "linear-gradient(180deg, #34D399 0%, #047857 100%)",
+                      boxShadow:
+                        "0 0 25px rgba(16, 185, 129, 0.35), inset 0 1px 0 rgba(255,255,255,0.4)",
+                    }
+                  : undefined
+              }
             >
               {isAuthenticating ? (
                 <>
@@ -367,20 +425,20 @@ export default function AdminLoginForm({
           </form>
         )}
 
-        <div className="mt-6 pt-5 border-t border-border-subtle dark:border-white/10 flex flex-col gap-3">
+        <div className="mt-5 pt-4 border-t border-border-subtle dark:border-white/10 flex items-center justify-between text-xs">
           <button
             type="button"
             onClick={handleFillDemoAdmin}
-            className="w-full py-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+            className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold hover:underline cursor-pointer"
           >
-            <span>⚡ Use Demo Admin Credentials</span>
+            ⚡ Use Demo Admin
           </button>
 
           <Link
             href="/"
-            className="text-center text-xs font-semibold text-text-muted hover:text-accent-navy dark:hover:text-white transition-colors"
+            className="text-[11px] font-medium text-text-muted hover:text-accent-navy dark:hover:text-white transition-colors"
           >
-            ← Return to Public Marketplace
+            ← Return to Markets
           </Link>
         </div>
       </div>

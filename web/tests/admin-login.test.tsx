@@ -18,7 +18,7 @@ describe("AdminLoginForm Component", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: /protocol admin portal/i })
+      screen.getByRole("heading", { name: /admin authentication/i })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^admin wallet$/i })
@@ -228,7 +228,7 @@ describe("AdminLoginForm Component", () => {
     );
 
     const quickFillBtn = screen.getByRole("button", {
-      name: /use demo admin credentials/i,
+      name: /use demo admin/i,
     });
     fireEvent.click(quickFillBtn);
 

@@ -42,7 +42,7 @@ export default function AdminDashboardPage({
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="min-h-[calc(100vh-180px)] flex items-center justify-center w-full">
         <AdminLoginForm
           onLoginSuccess={(address) => setConnectedAddress(address)}
           authorizedAddresses={AUTHORIZED_ADMIN_ADDRESSES}

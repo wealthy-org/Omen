@@ -8,7 +8,7 @@ describe("AdminDashboardPage Component", () => {
     render(<AdminDashboardPage initialConnectedAddress="" />);
 
     expect(
-      screen.getByRole("heading", { name: /protocol admin portal/i })
+      screen.getByRole("heading", { name: /admin authentication/i })
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText(/admin whitelist wallet address/i)
@@ -41,7 +41,7 @@ describe("AdminDashboardPage Component", () => {
     render(<AdminDashboardPage initialConnectedAddress="" />);
 
     const quickFillBtn = screen.getByRole("button", {
-      name: /use demo admin credentials/i,
+      name: /use demo admin/i,
     });
     fireEvent.click(quickFillBtn);
 
@@ -125,7 +125,7 @@ describe("AdminDashboardPage Component", () => {
     fireEvent.click(disconnectBtn);
 
     expect(
-      screen.getByRole("heading", { name: /protocol admin portal/i })
+      screen.getByRole("heading", { name: /admin authentication/i })
     ).toBeInTheDocument();
   });
 });
