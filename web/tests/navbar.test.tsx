@@ -17,6 +17,7 @@ describe("Navbar Component", () => {
   it("renders branding logo and testnet badge", () => {
     render(<Navbar />);
 
+    expect(screen.getByAltText("Omen Logo")).toBeInTheDocument();
     expect(screen.getByText("OMEN")).toBeInTheDocument();
     expect(screen.getByText("TESTNET")).toBeInTheDocument();
   });

@@ -46,6 +46,10 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Omen — Web3 Prediction Markets & Points Farming",
   description: "Institutional Web3 prediction market and points gamification dashboard built on Arbitrum Sepolia.",
+  icons: {
+    icon: "/images/logo.png",
+    apple: "/images/logo.png",
+  },
 };
 
 export default function RootLayout({

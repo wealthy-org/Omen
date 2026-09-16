@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useTheme } from "./ThemeProvider";
 
 const PLATFORM_LINKS = [
@@ -42,14 +43,14 @@ export default function Footer({ theme: propTheme }: FooterProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div
-                className={`w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm shadow-xs ${
-                  isDark
-                    ? "bg-emerald-500/20 text-[#34D399] border border-emerald-500/30"
-                    : "bg-[#10221A] text-white"
-                }`}
-              >
-                Ω
+              <div className="relative w-7 h-7 rounded-md overflow-hidden flex items-center justify-center">
+                <Image
+                  src="/images/logo.png"
+                  alt="Omen Logo"
+                  width={28}
+                  height={28}
+                  className="w-7 h-7 object-contain"
+                />
               </div>
               <span className={`font-bold text-lg tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
                 OMEN

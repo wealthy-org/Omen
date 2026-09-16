@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
@@ -76,16 +77,17 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 group focus:outline-none"
+              className="flex items-center gap-2.5 group focus:outline-none"
             >
-              <div
-                className={`w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm shadow-xs ${
-                  isDark
-                    ? "bg-emerald-500/20 text-[#34D399] border border-emerald-500/30"
-                    : "bg-[#10221A] text-white"
-                }`}
-              >
-                Ω
+              <div className="relative w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+                <Image
+                  src="/images/logo.png"
+                  alt="Omen Logo"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 object-contain"
+                  priority
+                />
               </div>
               <span
                 className={`text-[20px] sm:text-[22px] font-extrabold tracking-tight ${

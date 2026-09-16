@@ -6,6 +6,7 @@ describe("Footer Component", () => {
   it("renders branding title and description", () => {
     render(<Footer />);
 
+    expect(screen.getByAltText("Omen Logo")).toBeInTheDocument();
     expect(screen.getByText("OMEN")).toBeInTheDocument();
     expect(
       screen.getByText(/Institutional Web3 prediction market and gamified points farming protocol/i)
