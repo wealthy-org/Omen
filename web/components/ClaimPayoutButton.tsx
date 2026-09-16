@@ -1,41 +1,60 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useClaimPayout } from "@/hooks/useClaimPayout";
 
 export interface ClaimPayoutButtonProps {
   amount: string | number;
+  marketId?: string | number;
   isClaimed?: boolean;
   isLoading?: boolean;
   disabled?: boolean;
   onClaim?: () => Promise<void> | void;
+  onSuccess?: () => void;
   className?: string;
 }
 
 export const ClaimPayoutButton: React.FC<ClaimPayoutButtonProps> = ({
   amount,
+  marketId,
   isClaimed = false,
   isLoading = false,
   disabled = false,
   onClaim,
+  onSuccess,
   className = "",
 }) => {
   const [internalLoading, setInternalLoading] = useState<boolean>(false);
+  const [hasClaimedLocally, setHasClaimedLocally] = useState<boolean>(false);
+  const { claimPayout, isPending: isTxPending, isConfirming, isConfirmed } = useClaimPayout();
 
-  const isPending = isLoading || internalLoading;
+  useEffect(() => {
+    if (isConfirmed) {
+      setHasClaimedLocally(true);
+      onSuccess?.();
+    }
+  }, [isConfirmed, onSuccess]);
+
+  const effectivelyClaimed = isClaimed || hasClaimedLocally;
+  const isPending = isLoading || internalLoading || isTxPending || isConfirming;
 
   const handleClick = async () => {
-    if (isClaimed || isPending || disabled || !onClaim) return;
+    if (effectivelyClaimed || isPending || disabled) return;
 
     try {
       setInternalLoading(true);
-      await onClaim();
+      if (onClaim) {
+        await onClaim();
+      } else if (marketId !== undefined) {
+        await claimPayout(marketId);
+      }
     } catch {
     } finally {
       setInternalLoading(false);
     }
   };
 
-  if (isClaimed) {
+  if (effectivelyClaimed) {
     return (
       <span
         data-testid="claim-payout-claimed-badge"
