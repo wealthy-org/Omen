@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import PredictionsPage, { MOCK_MARKETS } from "../app/predictions/page";
 
@@ -70,7 +70,7 @@ describe("PredictionsPage Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("displays outcome selection status message when bet button is clicked", () => {
+  it("opens confirmation modal when clicking Bet YES and places bet successfully", async () => {
     render(<PredictionsPage />);
 
     const betYesBtn = screen.getByRole("button", {
@@ -78,8 +78,47 @@ describe("PredictionsPage Component", () => {
     });
     fireEvent.click(betYesBtn);
 
-    expect(screen.getByRole("status")).toHaveTextContent(
-      'Selected YES for "Will ETH reach $5,000 before Q4 2026?"'
-    );
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("heading", {
+        name: "Will ETH reach $5,000 before Q4 2026?",
+      })
+    ).toBeInTheDocument();
+
+    const confirmBtn = within(dialog).getByRole("button", { name: /confirm bet/i });
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent(
+        'Confirmed bet of 0.05 ETH on YES for "Will ETH reach $5,000 before Q4 2026?"! Position registered.'
+      );
+    });
+  });
+
+  it("opens confirmation modal when clicking Bet NO with NO selected by default", () => {
+    render(<PredictionsPage />);
+
+    const betNoBtn = screen.getByRole("button", {
+      name: /bet no on will doge reach \$1\.00 this cycle\?/i,
+    });
+    fireEvent.click(betNoBtn);
+
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole("heading", {
+        name: "Will DOGE reach $1.00 this cycle?",
+      })
+    ).toBeInTheDocument();
+
+    const noSelectBtn = within(dialog).getByRole("button", { name: /select no outcome/i });
+    expect(noSelectBtn).toHaveAttribute("aria-pressed", "true");
+
+    const closeBtn = within(dialog).getByRole("button", { name: /close betting modal/i });
+    fireEvent.click(closeBtn);
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

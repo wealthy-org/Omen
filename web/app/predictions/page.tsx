@@ -3,9 +3,9 @@
 import React, { useState, useMemo } from "react";
 import {
   MarketCategoryFilter,
-  MARKET_CATEGORIES,
 } from "@/components/MarketCategoryFilter";
 import { MarketCard, MarketData, MarketOutcome } from "@/components/MarketCard";
+import { BettingModal } from "@/components/BettingModal";
 
 export const MOCK_MARKETS: MarketData[] = [
   {
@@ -105,6 +105,16 @@ export default function PredictionsPage() {
   const [sortBy, setSortBy] = useState<string>("highest-pool");
   const [selectedOutcomeInfo, setSelectedOutcomeInfo] = useState<string | null>(null);
 
+  const [bettingModal, setBettingModal] = useState<{
+    isOpen: boolean;
+    market: MarketData | null;
+    outcome: MarketOutcome;
+  }>({
+    isOpen: false,
+    market: null,
+    outcome: "YES",
+  });
+
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {
       all: MOCK_MARKETS.length,
@@ -171,7 +181,27 @@ export default function PredictionsPage() {
   }, [selectedCategory, searchQuery, sortBy]);
 
   const handleSelectOutcome = (market: MarketData, outcome: MarketOutcome) => {
-    setSelectedOutcomeInfo(`Selected ${outcome} for "${market.title}"`);
+    setBettingModal({
+      isOpen: true,
+      market,
+      outcome,
+    });
+  };
+
+  const handleConfirmBet = async ({
+    marketId,
+    outcome,
+    amount,
+  }: {
+    marketId: string | number;
+    outcome: MarketOutcome;
+    amount: string;
+  }) => {
+    const market = MOCK_MARKETS.find((m) => m.id === marketId);
+    const marketTitle = market ? market.title : `Market #${marketId}`;
+    setSelectedOutcomeInfo(
+      `Confirmed bet of ${amount} ETH on ${outcome} for "${marketTitle}"! Position registered.`
+    );
   };
 
   const resetFilters = () => {
@@ -216,7 +246,7 @@ export default function PredictionsPage() {
           <span>{selectedOutcomeInfo}</span>
           <button
             onClick={() => setSelectedOutcomeInfo(null)}
-            className="text-xs underline hover:opacity-80"
+            className="text-xs underline hover:opacity-80 cursor-pointer"
           >
             Dismiss
           </button>
@@ -263,12 +293,20 @@ export default function PredictionsPage() {
           <button
             type="button"
             onClick={resetFilters}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-xs"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-xs cursor-pointer"
           >
             Reset Filters
           </button>
         </div>
       )}
+
+      <BettingModal
+        isOpen={bettingModal.isOpen}
+        onClose={() => setBettingModal((prev) => ({ ...prev, isOpen: false }))}
+        market={bettingModal.market}
+        initialOutcome={bettingModal.outcome}
+        onConfirmBet={handleConfirmBet}
+      />
     </div>
   );
 }
