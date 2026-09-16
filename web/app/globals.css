@@ -11,27 +11,66 @@
   --color-no-red-soft: #FFF1F2;
   --color-warning-amber: #F59E0B;
   --color-warning-soft: #FEF3C7;
-  --color-bg-main: #FFFFFF;
-  --color-bg-subtle: #F8FAFC;
-  --color-card-surface: #FFFFFF;
-  --color-border-subtle: #E2E8F0;
-  --color-text-primary: #0F172A;
-  --color-text-muted: #64748B;
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', "SF Mono", Menlo, Consolas, monospace;
+  --color-bg-black: #030906;
+  --color-panel-frame: #B9C2BC;
+  --color-header-bg-dark: #0A0F0C;
+  --color-text-primary-dark: #FFFFFF;
+  --color-text-muted-dark: #A9B3AD;
+  --color-text-nav-dark: #DCE5DF;
+  --color-accent-emerald-light: #34D399;
+  --color-accent-emerald-deep: #047857;
+  --color-accent-emerald: #0E7A4E;
+  --color-accent-emerald-bright: #22C55E;
+
+  --color-bg-white: #FFFFFF;
+  --color-bg-mint-soft: #CFF3E2;
+  --color-bg-mint-mid: #A9EAC9;
+  --color-text-primary-light: #0B1F16;
+  --color-text-muted-light: #4B5D55;
+  --color-text-nav-light: #17241D;
+  --color-button-dark-bg: #10221A;
+  --color-button-dark-text: #FFFFFF;
+
+  --font-sans: var(--font-sans), 'Proxima Nova', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-mono), 'JetBrains Mono', "SF Mono", Menlo, Consolas, monospace;
 }
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #0F172A;
+  --bg-black: #030906;
+  --header-bg-dark: #0A0F0C;
+  --text-primary-dark: #FFFFFF;
+  --text-muted-dark: #A9B3AD;
+  --accent-emerald-light: #34D399;
+  --accent-emerald-deep: #047857;
+  --glow-emerald: rgba(16, 185, 129, 0.45);
+
+  --bg-white: #FFFFFF;
+  --bg-mint-soft: #CFF3E2;
+  --bg-mint-mid: #A9EAC9;
+  --text-primary-light: #0B1F16;
+  --text-muted-light: #4B5D55;
+  --button-dark-bg: #10221A;
+}
+
+.light-hero-gradient {
+  background:
+    radial-gradient(circle at 78% 55%, rgba(34, 197, 94, 0.35) 0%, rgba(34, 197, 94, 0) 45%),
+    radial-gradient(circle at 100% 100%, rgba(16, 122, 78, 0.35) 0%, rgba(16, 122, 78, 0) 60%),
+    linear-gradient(160deg, #FFFFFF 0%, #FFFFFF 35%, #EAFBF3 65%, #CFF3E2 100%);
+}
+
+.dark-hero-button-glow {
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.dark-emerald-seam {
+  background: linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.2) 20%, #10B981 50%, rgba(16, 185, 129, 0.2) 80%, transparent 100%);
 }
 
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
-  background-color: var(--background);
-  color: var(--foreground);
+  overflow-x: clip;
   font-family: var(--font-sans);
 }

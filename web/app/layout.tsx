@@ -1,10 +1,41 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { JetBrains_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
+const proximaNova = localFont({
+  src: [
+    {
+      path: "../public/fonts/ProximaNova-Regular.woff",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/ProximaNova-Semibold.woff",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/ProximaNova-Bold.woff",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/ProximaNova-Extrabld.woff",
+      weight: "800",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/ProximaNova-Black.woff",
+      weight: "900",
+      style: "normal",
+    },
+  ],
   variable: "--font-sans",
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -14,7 +45,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Omen — Web3 Prediction Markets & Points Farming",
-  description: "Institutional Web3 prediction market and points gamification dashboard.",
+  description: "Institutional Web3 prediction market and points gamification dashboard built on Arbitrum Sepolia.",
 };
 
 export default function RootLayout({
@@ -23,9 +54,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen bg-bg-main text-text-primary antialiased">
-        {children}
+    <html lang="en" className={`${proximaNova.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-screen antialiased font-sans">
+        <ThemeProvider>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );
