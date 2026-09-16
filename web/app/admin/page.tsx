@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useTheme } from "../../components/ThemeProvider";
-import { AdminMarketCreateForm } from "../../components/AdminMarketCreateForm";
-import AdminQuestManagementForm from "../../components/AdminQuestManagementForm";
-import AdminMarketResolutionTable from "../../components/AdminMarketResolutionTable";
+import { AdminMarketCreateForm, AdminMarketFormData } from "../../components/AdminMarketCreateForm";
+import AdminQuestManagementForm, { AdminQuestItem } from "../../components/AdminQuestManagementForm";
+import AdminMarketResolutionTable, { ResolutionOutcome, CancellationReasonCategory } from "../../components/AdminMarketResolutionTable";
 import AdminLoginForm from "../../components/AdminLoginForm";
 
 export type AdminTab = "create-market" | "manage-quests" | "resolve-markets";
@@ -32,12 +32,53 @@ export default function AdminDashboardPage({
   );
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
+  const [totalMarketsCreated, setTotalMarketsCreated] = useState<number>(18);
+  const [activeQuestsCount, setActiveQuestsCount] = useState<number>(4);
+  const [pendingResolutionsCount, setPendingResolutionsCount] = useState<number>(3);
+  const [globalNotice, setGlobalNotice] = useState<{ message: string; type: "success" | "info" } | null>(null);
+
   const isAuthorized =
     Boolean(connectedAddress) &&
     AUTHORIZED_ADMIN_ADDRESSES.includes(connectedAddress?.toLowerCase() || "");
 
   const handleDisconnect = () => {
     setConnectedAddress(null);
+    setGlobalNotice(null);
+  };
+
+  const handleMarketCreated = (marketData: AdminMarketFormData) => {
+    setTotalMarketsCreated((prev) => prev + 1);
+    setGlobalNotice({
+      message: `Prediction market "${marketData.title}" initialized on Arbitrum Sepolia.`,
+      type: "success",
+    });
+  };
+
+  const handleQuestCreated = (quest: AdminQuestItem) => {
+    if (quest.isActive) {
+      setActiveQuestsCount((prev) => prev + 1);
+    }
+    setGlobalNotice({
+      message: `Quest "${quest.title}" created with +${quest.points} PTS reward.`,
+      type: "success",
+    });
+  };
+
+  const handleQuestToggle = (_id: string, active: boolean) => {
+    setActiveQuestsCount((prev) => (active ? prev + 1 : Math.max(0, prev - 1)));
+  };
+
+  const handleMarketResolved = (
+    marketId: string,
+    outcome: ResolutionOutcome,
+    _notes?: string,
+    _cancellationReason?: CancellationReasonCategory
+  ) => {
+    setPendingResolutionsCount((prev) => Math.max(0, prev - 1));
+    setGlobalNotice({
+      message: `Market ${marketId} settled as [${outcome}]. Collateral and payouts updated.`,
+      type: "success",
+    });
   };
 
   if (!isAuthorized) {
@@ -68,7 +109,7 @@ export default function AdminDashboardPage({
             Admin Dashboard
           </h1>
           <p className="text-xs sm:text-sm text-text-muted dark:text-[#A9B3AD] mt-1">
-            Create prediction markets, curate gamification quests, and resolve expired event outcomes.
+            Deploy prediction markets, manage gamification rewards, and execute resolution settlements.
           </p>
         </div>
 
@@ -97,6 +138,27 @@ export default function AdminDashboardPage({
         </div>
       </header>
 
+      {globalNotice && (
+        <div
+          role="status"
+          className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 text-sm flex items-center justify-between gap-3 shadow-xs"
+        >
+          <div className="flex items-center gap-2 font-medium">
+            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{globalNotice.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setGlobalNotice(null)}
+            className="text-xs font-mono font-bold hover:underline cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <section
         aria-label="Admin Metrics Overview"
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
@@ -110,10 +172,10 @@ export default function AdminDashboardPage({
             Total Markets Created
           </div>
           <div className="text-2xl font-mono font-black text-accent-navy dark:text-white mt-2">
-            18
+            {totalMarketsCreated}
           </div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
-            +3 new markets this week
+            Active on Arbitrum Sepolia
           </div>
         </div>
 
@@ -126,10 +188,10 @@ export default function AdminDashboardPage({
             Configured Quests
           </div>
           <div className="text-2xl font-mono font-black text-primary-blue mt-2">
-            6 Active
+            {activeQuestsCount} Active
           </div>
           <div className="text-[11px] text-text-muted dark:text-[#A9B3AD] mt-1">
-            2,450 total completions
+            Live gamification tasks
           </div>
         </div>
 
@@ -142,10 +204,10 @@ export default function AdminDashboardPage({
             Pending Resolutions
           </div>
           <div className="text-2xl font-mono font-black text-warning-amber mt-2">
-            3 Expired
+            {pendingResolutionsCount} Expired
           </div>
           <div className="text-[11px] text-warning-amber mt-1 font-medium">
-            Awaiting oracle confirmation
+            Awaiting oracle review & settlement
           </div>
         </div>
       </section>
@@ -179,6 +241,9 @@ export default function AdminDashboardPage({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
           </svg>
           <span>Manage Quests</span>
+          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/10 dark:bg-white/10">
+            {activeQuestsCount}
+          </span>
         </button>
 
         <button
@@ -194,13 +259,27 @@ export default function AdminDashboardPage({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>Resolve Expired Markets</span>
+          {pendingResolutionsCount > 0 && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-amber-500/20 text-warning-amber font-bold">
+              {pendingResolutionsCount}
+            </span>
+          )}
         </button>
       </div>
 
       <main className="pt-2">
-        {activeTab === "create-market" && <AdminMarketCreateForm />}
-        {activeTab === "manage-quests" && <AdminQuestManagementForm />}
-        {activeTab === "resolve-markets" && <AdminMarketResolutionTable />}
+        {activeTab === "create-market" && (
+          <AdminMarketCreateForm onSubmitMarket={handleMarketCreated} />
+        )}
+        {activeTab === "manage-quests" && (
+          <AdminQuestManagementForm
+            onCreateQuest={handleQuestCreated}
+            onToggleQuestStatus={handleQuestToggle}
+          />
+        )}
+        {activeTab === "resolve-markets" && (
+          <AdminMarketResolutionTable onResolveMarket={handleMarketResolved} />
+        )}
       </main>
     </div>
   );

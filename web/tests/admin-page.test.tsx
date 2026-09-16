@@ -58,7 +58,7 @@ describe("AdminDashboardPage Component", () => {
     });
   });
 
-  it("renders metrics overview and default Create Market tab for authorized admin", () => {
+  it("renders metrics overview and default Create Market tab with live badges for authorized admin", () => {
     render(
       <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
     );

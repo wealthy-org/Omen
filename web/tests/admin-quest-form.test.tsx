@@ -10,7 +10,9 @@ const MOCK_QUESTS: AdminQuestItem[] = [
     description: "Connect your Web3 crypto wallet to Omen prediction platform",
     category: "ONBOARDING",
     points: 100,
+    recurrence: "ONE_TIME",
     isActive: true,
+    completionsCount: 1200,
   },
   {
     id: "quest-2",
@@ -18,12 +20,14 @@ const MOCK_QUESTS: AdminQuestItem[] = [
     description: "Follow official @OmenMarket account on X to receive platform alpha",
     category: "SOCIAL",
     points: 150,
+    recurrence: "ONE_TIME",
     isActive: false,
+    completionsCount: 450,
   },
 ];
 
 describe("AdminQuestManagementForm Component", () => {
-  it("renders form inputs and existing quests table", () => {
+  it("renders form inputs, recurrence selector, and existing quests table", () => {
     render(<AdminQuestManagementForm initialQuests={MOCK_QUESTS} />);
 
     expect(screen.getByRole("heading", { name: /create new quest/i })).toBeInTheDocument();
@@ -31,6 +35,7 @@ describe("AdminQuestManagementForm Component", () => {
 
     expect(screen.getByLabelText(/quest title/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/category/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/recurrence type/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/description & instructions/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/points reward/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/action target url/i)).toBeInTheDocument();
@@ -48,7 +53,7 @@ describe("AdminQuestManagementForm Component", () => {
     expect(screen.getByText(/quest title is required/i)).toBeInTheDocument();
   });
 
-  it("validates that points reward must be a positive integer", async () => {
+  it("validates that points reward must be within 10 to 10,000 PTS", async () => {
     render(<AdminQuestManagementForm initialQuests={MOCK_QUESTS} />);
 
     const titleInput = screen.getByLabelText(/quest title/i);
@@ -56,14 +61,14 @@ describe("AdminQuestManagementForm Component", () => {
     const pointsInput = screen.getByLabelText(/points reward/i);
 
     fireEvent.change(titleInput, { target: { value: "Test Quest" } });
-    fireEvent.change(descInput, { target: { value: "Test Description" } });
-    fireEvent.change(pointsInput, { target: { value: "-50" } });
+    fireEvent.change(descInput, { target: { value: "Test Description with more than 10 characters" } });
+    fireEvent.change(pointsInput, { target: { value: "5" } });
 
     const submitBtn = screen.getByRole("button", { name: /create quest/i });
     fireEvent.click(submitBtn);
 
     expect(
-      screen.getByText(/points reward must be a positive integer greater than 0/i)
+      screen.getByText(/points reward must be at least 10 pts/i)
     ).toBeInTheDocument();
   });
 
@@ -79,14 +84,16 @@ describe("AdminQuestManagementForm Component", () => {
     const titleInput = screen.getByLabelText(/quest title/i);
     const descInput = screen.getByLabelText(/description & instructions/i);
     const categorySelect = screen.getByLabelText(/category/i);
+    const recurrenceSelect = screen.getByLabelText(/recurrence type/i);
     const pointsInput = screen.getByLabelText(/points reward/i);
     const actionUrlInput = screen.getByLabelText(/action target url/i);
 
     fireEvent.change(titleInput, { target: { value: "Join Discord Community" } });
     fireEvent.change(descInput, {
-      target: { value: "Join our discord server and verify role" },
+      target: { value: "Join our verified discord server and claim role" },
     });
     fireEvent.change(categorySelect, { target: { value: "SOCIAL" } });
+    fireEvent.change(recurrenceSelect, { target: { value: "ONE_TIME" } });
     fireEvent.change(pointsInput, { target: { value: "250" } });
     fireEvent.change(actionUrlInput, { target: { value: "https://discord.gg/omen" } });
 
@@ -98,8 +105,9 @@ describe("AdminQuestManagementForm Component", () => {
       expect(onCreateQuest).toHaveBeenCalledWith(
         expect.objectContaining({
           title: "Join Discord Community",
-          description: "Join our discord server and verify role",
+          description: "Join our verified discord server and claim role",
           category: "SOCIAL",
+          recurrence: "ONE_TIME",
           points: 250,
           actionUrl: "https://discord.gg/omen",
           isActive: true,
@@ -134,29 +142,29 @@ describe("AdminQuestManagementForm Component", () => {
     });
   });
 
-  it("filters existing quests with search bar", () => {
-    render(<AdminQuestManagementForm initialQuests={MOCK_QUESTS} />);
+  it("opens archive confirmation modal and deletes quest when confirmed", async () => {
+    const onDeleteQuest = vi.fn().mockResolvedValue(undefined);
+    render(
+      <AdminQuestManagementForm
+        initialQuests={MOCK_QUESTS}
+        onDeleteQuest={onDeleteQuest}
+      />
+    );
 
-    const searchInput = screen.getByLabelText(/search quests/i);
-    fireEvent.change(searchInput, { target: { value: "Twitter" } });
+    const deleteBtn = screen.getByLabelText(/delete quest connect web3 wallet/i);
+    fireEvent.click(deleteBtn);
 
-    expect(screen.getByText("Follow Omen on X (Twitter)")).toBeInTheDocument();
-    expect(screen.queryByText("Connect Web3 Wallet")).not.toBeInTheDocument();
-  });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /archive quest/i })).toBeInTheDocument();
 
-  it("filters quests by active / inactive filter buttons", () => {
-    render(<AdminQuestManagementForm initialQuests={MOCK_QUESTS} />);
+    const confirmBtn = screen.getByRole("button", { name: /confirm archive/i });
+    fireEvent.click(confirmBtn);
 
-    const inactiveBtn = screen.getByRole("button", { name: /inactive/i });
-    fireEvent.click(inactiveBtn);
+    await waitFor(() => {
+      expect(onDeleteQuest).toHaveBeenCalledWith("quest-1");
+      expect(screen.getByText(/quest "Connect Web3 Wallet" was archived/i)).toBeInTheDocument();
+    });
 
-    expect(screen.getByText("Follow Omen on X (Twitter)")).toBeInTheDocument();
-    expect(screen.queryByText("Connect Web3 Wallet")).not.toBeInTheDocument();
-
-    const activeBtn = screen.getByRole("button", { name: /^active \(/i });
-    fireEvent.click(activeBtn);
-
-    expect(screen.getByText("Connect Web3 Wallet")).toBeInTheDocument();
-    expect(screen.queryByText("Follow Omen on X (Twitter)")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

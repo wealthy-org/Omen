@@ -5,6 +5,12 @@ import { useTheme } from "./ThemeProvider";
 
 export type ResolutionOutcome = "YES" | "NO" | "CANCEL";
 
+export type CancellationReasonCategory =
+  | "ORACLE_FAILURE"
+  | "AMBIGUOUS_CRITERIA"
+  | "EVENT_CANCELLED"
+  | "EMERGENCY_SAFEGUARD";
+
 export interface ResolvableMarketItem {
   id: string;
   title: string;
@@ -15,7 +21,11 @@ export interface ResolvableMarketItem {
   noPercentage: number;
   endTime: string;
   resolutionSourceUrl: string;
+  resolutionCriteria?: string;
   resolvedOutcome?: ResolutionOutcome;
+  resolvedAt?: string;
+  cancellationReason?: CancellationReasonCategory;
+  resolutionNotes?: string;
   status: "PENDING_RESOLUTION" | "RESOLVED" | "CANCELLED";
 }
 
@@ -24,10 +34,38 @@ export interface AdminMarketResolutionTableProps {
   onResolveMarket?: (
     marketId: string,
     outcome: ResolutionOutcome,
-    notes?: string
+    notes?: string,
+    cancellationReason?: CancellationReasonCategory
   ) => Promise<void> | void;
   className?: string;
 }
+
+export const CANCELLATION_REASONS: {
+  code: CancellationReasonCategory;
+  label: string;
+  description: string;
+}[] = [
+  {
+    code: "ORACLE_FAILURE",
+    label: "Oracle Data Source Unavailable / Disputed",
+    description: "The primary oracle feed is offline, corrupted, or returned disputed results.",
+  },
+  {
+    code: "AMBIGUOUS_CRITERIA",
+    label: "Ambiguous or Contradictory Market Criteria",
+    description: "The initial market resolution conditions were unclear or conflicting.",
+  },
+  {
+    code: "EVENT_CANCELLED",
+    label: "Real-World Event Cancelled or Postponed",
+    description: "The underlying event was permanently cancelled or delayed past acceptable limits.",
+  },
+  {
+    code: "EMERGENCY_SAFEGUARD",
+    label: "Protocol Emergency / Smart Contract Safeguard",
+    description: "Administrative emergency intervention to preserve protocol integrity.",
+  },
+];
 
 const DEFAULT_RESOLVABLE_MARKETS: ResolvableMarketItem[] = [
   {
@@ -40,6 +78,7 @@ const DEFAULT_RESOLVABLE_MARKETS: ResolvableMarketItem[] = [
     noPercentage: 12,
     endTime: "2026-03-10T12:00:00Z",
     resolutionSourceUrl: "https://l2fees.info",
+    resolutionCriteria: "Resolves to YES if median L2 transaction gas costs drop by >= 80% within 14 days post-Dencun.",
     status: "PENDING_RESOLUTION",
   },
   {
@@ -52,6 +91,7 @@ const DEFAULT_RESOLVABLE_MARKETS: ResolvableMarketItem[] = [
     noPercentage: 55,
     endTime: "2026-03-12T18:30:00Z",
     resolutionSourceUrl: "https://spacex.com/launches",
+    resolutionCriteria: "Resolves to YES if SpaceX officially confirms successful Starship booster soft ocean splashdown or tower catch.",
     status: "PENDING_RESOLUTION",
   },
   {
@@ -64,6 +104,7 @@ const DEFAULT_RESOLVABLE_MARKETS: ResolvableMarketItem[] = [
     noPercentage: 28,
     endTime: "2026-03-14T00:00:00Z",
     resolutionSourceUrl: "https://snapshot.org/#/arbitrumfoundation.eth",
+    resolutionCriteria: "Resolves to YES if the Snapshot and Tally on-chain governance votes surpass quorum and pass before deadline.",
     status: "PENDING_RESOLUTION",
   },
 ];
@@ -79,14 +120,19 @@ export default function AdminMarketResolutionTable({
   const [markets, setMarkets] = useState<ResolvableMarketItem[]>(initialMarkets);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "PENDING" | "RESOLVED" | "CANCELLED">("ALL");
 
   const [activeModal, setActiveModal] = useState<{
     market: ResolvableMarketItem;
     outcome: ResolutionOutcome;
   } | null>(null);
 
+  const [detailsModalMarket, setDetailsModalMarket] = useState<ResolvableMarketItem | null>(null);
+
   const [isVerifiedCheck, setIsVerifiedCheck] = useState(false);
+  const [isIrreversibleCheck, setIsIrreversibleCheck] = useState(false);
   const [resolutionNotes, setResolutionNotes] = useState("");
+  const [cancellationReason, setCancellationReason] = useState<CancellationReasonCategory>("ORACLE_FAILURE");
   const [isResolving, setIsResolving] = useState(false);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -97,7 +143,9 @@ export default function AdminMarketResolutionTable({
   ) => {
     setActiveModal({ market, outcome });
     setIsVerifiedCheck(false);
+    setIsIrreversibleCheck(false);
     setResolutionNotes("");
+    setCancellationReason("ORACLE_FAILURE");
     setErrorNotice(null);
   };
 
@@ -105,6 +153,7 @@ export default function AdminMarketResolutionTable({
     if (isResolving) return;
     setActiveModal(null);
     setIsVerifiedCheck(false);
+    setIsIrreversibleCheck(false);
     setResolutionNotes("");
     setErrorNotice(null);
   };
@@ -112,20 +161,33 @@ export default function AdminMarketResolutionTable({
   const handleConfirmResolution = async () => {
     if (!activeModal) return;
 
-    if (!isVerifiedCheck) {
-      setErrorNotice("You must check and confirm the oracle verification before executing.");
-      return;
+    if (activeModal.outcome === "CANCEL") {
+      if (!resolutionNotes.trim() || resolutionNotes.trim().length < 10) {
+        setErrorNotice("Detailed cancellation justification is required (minimum 10 characters).");
+        return;
+      }
+      if (!isVerifiedCheck || !isIrreversibleCheck) {
+        setErrorNotice("Please confirm both safety checks before executing market cancellation.");
+        return;
+      }
+    } else {
+      if (!isVerifiedCheck) {
+        setErrorNotice("You must check and confirm the oracle verification before executing settlement.");
+        return;
+      }
     }
 
     setIsResolving(true);
     setErrorNotice(null);
 
     try {
+      const resolvedTimestamp = new Date().toISOString();
       if (onResolveMarket) {
         await onResolveMarket(
           activeModal.market.id,
           activeModal.outcome,
-          resolutionNotes.trim() || undefined
+          resolutionNotes.trim() || undefined,
+          activeModal.outcome === "CANCEL" ? cancellationReason : undefined
         );
       }
 
@@ -136,14 +198,20 @@ export default function AdminMarketResolutionTable({
                 ...m,
                 status: activeModal.outcome === "CANCEL" ? "CANCELLED" : "RESOLVED",
                 resolvedOutcome: activeModal.outcome,
+                resolvedAt: resolvedTimestamp,
+                cancellationReason: activeModal.outcome === "CANCEL" ? cancellationReason : undefined,
+                resolutionNotes: resolutionNotes.trim() || undefined,
               }
             : m
         )
       );
 
-      setSuccessToast(
-        `Market "${activeModal.market.title}" successfully resolved as [${activeModal.outcome}]!`
-      );
+      const actionText =
+        activeModal.outcome === "CANCEL"
+          ? `Market "${activeModal.market.title}" successfully cancelled & refunded 100% to bettors!`
+          : `Market "${activeModal.market.title}" successfully resolved as [${activeModal.outcome}]!`;
+
+      setSuccessToast(actionText);
       handleCloseModal();
     } catch {
       setErrorNotice("Failed to execute market resolution on blockchain. Please try again.");
@@ -161,10 +229,19 @@ export default function AdminMarketResolutionTable({
     const matchesCategory =
       filterCategory === "ALL" || m.category.toUpperCase() === filterCategory.toUpperCase();
 
-    return matchesSearch && matchesCategory;
+    const matchesStatus =
+      statusFilter === "ALL" ||
+      (statusFilter === "PENDING" && m.status === "PENDING_RESOLUTION") ||
+      (statusFilter === "RESOLVED" && m.status === "RESOLVED") ||
+      (statusFilter === "CANCELLED" && m.status === "CANCELLED");
+
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const categories = Array.from(new Set(markets.map((m) => m.category)));
+  const pendingCount = markets.filter((m) => m.status === "PENDING_RESOLUTION").length;
+  const resolvedCount = markets.filter((m) => m.status === "RESOLVED").length;
+  const cancelledCount = markets.filter((m) => m.status === "CANCELLED").length;
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -198,7 +275,7 @@ export default function AdminMarketResolutionTable({
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border-subtle dark:border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-warning-soft dark:bg-amber-500/15 text-warning-amber flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-warning-amber flex items-center justify-center font-bold">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -208,35 +285,33 @@ export default function AdminMarketResolutionTable({
                 Expired Markets Pending Resolution
               </h2>
               <p className="text-xs sm:text-sm text-text-muted dark:text-[#A9B3AD]">
-                Review official oracle sources and execute final outcome resolutions.
+                Review official oracle sources and execute final outcome settlements or 100% capital refunds.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-3 py-1.5 rounded-xl font-mono text-xs font-bold bg-amber-500/10 text-warning-amber border border-amber-500/20">
-              {markets.filter((m) => m.status === "PENDING_RESOLUTION").length} Pending
+              {pendingCount} Pending Resolution
             </span>
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
+        <div className="mt-6 flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+          <div className="flex flex-1 flex-col sm:flex-row gap-3">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search markets by title, ID, or category..."
               aria-label="Search pending markets"
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all outline-none ${
+              className={`w-full sm:max-w-md px-4 py-2.5 rounded-xl border text-sm transition-all outline-none ${
                 isDark
                   ? "bg-[#121815] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/50"
                   : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy placeholder:text-accent-navy/40 focus:border-emerald-500"
               }`}
             />
-          </div>
 
-          <div className="shrink-0">
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
@@ -254,6 +329,53 @@ export default function AdminMarketResolutionTable({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="flex rounded-xl p-1 bg-[#F4FBF7] dark:bg-[#121815] border border-emerald-500/10 dark:border-white/10 text-xs font-bold shrink-0">
+            <button
+              type="button"
+              onClick={() => setStatusFilter("ALL")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                statusFilter === "ALL"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+              }`}
+            >
+              All ({markets.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("PENDING")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                statusFilter === "PENDING"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+              }`}
+            >
+              Pending ({pendingCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("RESOLVED")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                statusFilter === "RESOLVED"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+              }`}
+            >
+              Resolved ({resolvedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter("CANCELLED")}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                statusFilter === "CANCELLED"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+              }`}
+            >
+              Cancelled ({cancelledCount})
+            </button>
           </div>
         </div>
 
@@ -279,7 +401,7 @@ export default function AdminMarketResolutionTable({
               {filteredMarkets.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-text-muted dark:text-[#A9B3AD]">
-                    No expired markets found pending resolution.
+                    No expired markets found matching the active filter.
                   </td>
                 </tr>
               ) : (
@@ -348,8 +470,8 @@ export default function AdminMarketResolutionTable({
                           Resolved: {market.resolvedOutcome}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold font-mono bg-slate-100 dark:bg-white/10 text-text-muted dark:text-[#A9B3AD] border border-border-subtle dark:border-white/10">
-                          Cancelled
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold font-mono bg-amber-500/10 text-warning-amber border border-amber-500/30">
+                          Cancelled & Refunded
                         </span>
                       )}
                     </td>
@@ -375,15 +497,19 @@ export default function AdminMarketResolutionTable({
                             type="button"
                             onClick={() => handleOpenResolutionModal(market, "CANCEL")}
                             aria-label={`Cancel and refund market ${market.id}`}
-                            className="px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono bg-slate-100 dark:bg-white/10 text-text-muted hover:bg-amber-500 hover:text-white border border-border-subtle dark:border-white/10 transition-all cursor-pointer"
+                            className="px-2.5 py-1.5 rounded-lg text-xs font-bold font-mono bg-amber-500/10 text-warning-amber hover:bg-warning-amber hover:text-white border border-amber-500/30 transition-all cursor-pointer"
                           >
                             Cancel & Refund
                           </button>
                         </div>
                       ) : (
-                        <span className="text-xs text-text-muted dark:text-[#A9B3AD] font-mono">
-                          Completed
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setDetailsModalMarket(market)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold font-mono border border-border-subtle dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all cursor-pointer"
+                        >
+                          View Details
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -402,7 +528,7 @@ export default function AdminMarketResolutionTable({
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         >
           <div
-            className={`w-full max-w-lg rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl ${
+            className={`w-full max-w-xl rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl ${
               isDark
                 ? "bg-[#0A0F0C] border-white/10 text-white"
                 : "bg-white border-emerald-500/20 text-accent-navy"
@@ -425,10 +551,14 @@ export default function AdminMarketResolutionTable({
                 </div>
                 <div>
                   <h3 id="resolution-dialog-title" className="text-lg font-bold leading-tight">
-                    Confirm Market Resolution
+                    {activeModal.outcome === "CANCEL"
+                      ? "Market Invalidation & Full Capital Refund"
+                      : `Confirm Market Resolution (${activeModal.outcome})`}
                   </h3>
                   <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
-                    Double confirmation required for blockchain settlement
+                    {activeModal.outcome === "CANCEL"
+                      ? "Proportionally refund 100% of all user bets without protocol fee deduction"
+                      : "Trigger smart contract payout distribution to winning share holders"}
                   </p>
                 </div>
               </div>
@@ -451,19 +581,25 @@ export default function AdminMarketResolutionTable({
                   isDark ? "bg-[#121815] border-white/10" : "bg-[#F4FBF7] border-emerald-500/10"
                 }`}
               >
-                <div className="text-xs font-mono uppercase text-text-muted dark:text-[#A9B3AD]">
+                <div className="text-[10px] font-mono uppercase font-bold text-text-muted dark:text-[#A9B3AD]">
                   Target Market
                 </div>
                 <div className="font-bold text-sm mt-1">{activeModal.market.title}</div>
+                {activeModal.market.resolutionCriteria && (
+                  <div className="text-xs text-text-muted dark:text-zinc-300 mt-2 p-2.5 rounded-lg bg-black/5 dark:bg-white/5 font-sans">
+                    <strong className="font-mono text-[10px] uppercase block mb-0.5 text-text-muted">Criteria:</strong>
+                    {activeModal.market.resolutionCriteria}
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-xs font-mono mt-3 pt-3 border-t border-border-subtle dark:border-white/10">
-                  <span>Pool: ${activeModal.market.totalPool.toLocaleString()}</span>
+                  <span>Total Collateral: <strong>${activeModal.market.totalPool.toLocaleString()}</strong></span>
                   <a
                     href={activeModal.market.resolutionSourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary-blue hover:underline flex items-center gap-1"
                   >
-                    <span>Verify Proof</span>
+                    <span>Oracle Proof URL</span>
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
@@ -471,36 +607,90 @@ export default function AdminMarketResolutionTable({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-border-subtle dark:border-white/10">
-                <span className="text-xs font-bold uppercase tracking-wider font-mono">
-                  Chosen Outcome:
-                </span>
-                <span
-                  className={`px-3 py-1 rounded-lg font-mono font-bold text-xs ${
-                    activeModal.outcome === "YES"
-                      ? "bg-yes-green-soft text-yes-green dark:bg-yes-green/20"
-                      : activeModal.outcome === "NO"
-                      ? "bg-no-red-soft text-no-red dark:bg-no-red/20"
-                      : "bg-amber-500/15 text-warning-amber"
-                  }`}
-                >
-                  {activeModal.outcome === "CANCEL" ? "CANCEL & REFUND" : activeModal.outcome}
-                </span>
-              </div>
+              {activeModal.outcome === "YES" && (
+                <div className="p-4 rounded-xl bg-yes-green-soft dark:bg-yes-green/10 border border-yes-green/30 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono font-bold text-yes-green">
+                    <span>Winning Outcome: YES</span>
+                    <span>YES Pool Share: {activeModal.market.yesPercentage}%</span>
+                  </div>
+                  <p className="text-xs text-accent-navy dark:text-zinc-200 leading-relaxed font-sans">
+                    All YES share token holders will be eligible to claim 100% of the collateral pool. NO share tokens become expired and non-redeemable ($0.00).
+                  </p>
+                </div>
+              )}
+
+              {activeModal.outcome === "NO" && (
+                <div className="p-4 rounded-xl bg-no-red-soft dark:bg-no-red/10 border border-no-red/30 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-mono font-bold text-no-red">
+                    <span>Winning Outcome: NO</span>
+                    <span>NO Pool Share: {activeModal.market.noPercentage}%</span>
+                  </div>
+                  <p className="text-xs text-accent-navy dark:text-zinc-200 leading-relaxed font-sans">
+                    All NO share token holders will be eligible to claim 100% of the collateral pool. YES share tokens become expired and non-redeemable ($0.00).
+                  </p>
+                </div>
+              )}
+
+              {activeModal.outcome === "CANCEL" && (
+                <div className="space-y-3.5">
+                  <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-warning-amber space-y-1.5">
+                    <div className="font-bold flex items-center gap-1.5 uppercase font-mono text-[11px]">
+                      <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <span>100% Capital Refund Policy</span>
+                    </div>
+                    <p className="leading-relaxed text-accent-navy dark:text-zinc-200 font-sans">
+                      All deposited capital will be returned to all YES and NO bettors in full. <strong>Zero protocol fees</strong> will be deducted from user refunds.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="cancellation-reason-select"
+                      className="block text-xs font-mono font-bold uppercase tracking-wider text-accent-navy dark:text-[#CBD5E1] mb-1.5"
+                    >
+                      Cancellation Reason Category <span className="text-no-red">*</span>
+                    </label>
+                    <select
+                      id="cancellation-reason-select"
+                      value={cancellationReason}
+                      onChange={(e) => setCancellationReason(e.target.value as CancellationReasonCategory)}
+                      className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all outline-none cursor-pointer ${
+                        isDark
+                          ? "bg-[#121815] border-white/10 text-white focus:border-emerald-500/50"
+                          : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy focus:border-emerald-500"
+                      }`}
+                    >
+                      {CANCELLATION_REASONS.map((r) => (
+                        <option key={r.code} value={r.code}>
+                          {r.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label
                   htmlFor="resolution-notes"
                   className="block text-xs font-mono font-bold uppercase tracking-wider text-accent-navy dark:text-[#CBD5E1] mb-1.5"
                 >
-                  Resolution Notes / Oracle Citation (Optional)
+                  {activeModal.outcome === "CANCEL"
+                    ? "Detailed Invalidation Justification *"
+                    : "Resolution Oracle Citation & Transaction Notes"}
                 </label>
                 <textarea
                   id="resolution-notes"
                   rows={2}
                   value={resolutionNotes}
                   onChange={(e) => setResolutionNotes(e.target.value)}
-                  placeholder="e.g., Verified via Chainlink data feed at timestamp..."
+                  placeholder={
+                    activeModal.outcome === "CANCEL"
+                      ? "Explain why this market outcome cannot be resolved unambiguously..."
+                      : "e.g., Verified via Chainlink data feed at block #19823412..."
+                  }
                   className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all outline-none resize-none ${
                     isDark
                       ? "bg-[#121815] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/50"
@@ -509,24 +699,35 @@ export default function AdminMarketResolutionTable({
                 />
               </div>
 
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-warning-amber flex items-start gap-2.5">
-                <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div className="leading-relaxed">
-                  <strong>Warning:</strong> Resolution triggers smart contract payouts and cannot be reversed once mined.
-                </div>
-              </div>
+              <div className="space-y-2 pt-1">
+                <label className="flex items-start gap-2.5 text-xs font-medium cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isVerifiedCheck}
+                    onChange={(e) => setIsVerifiedCheck(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded border-emerald-500 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <span>
+                    {activeModal.outcome === "CANCEL"
+                      ? "I confirm that all market participants will be refunded 100% without protocol fees."
+                      : "I confirm that I have verified the external oracle proof and approve final outcome distribution."}
+                  </span>
+                </label>
 
-              <label className="flex items-center gap-2.5 text-xs font-medium cursor-pointer pt-1">
-                <input
-                  type="checkbox"
-                  checked={isVerifiedCheck}
-                  onChange={(e) => setIsVerifiedCheck(e.target.checked)}
-                  className="w-4 h-4 rounded border-emerald-500 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                />
-                <span>I confirm that I have verified the oracle proof and approve final settlement.</span>
-              </label>
+                {activeModal.outcome === "CANCEL" && (
+                  <label className="flex items-start gap-2.5 text-xs font-medium cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={isIrreversibleCheck}
+                      onChange={(e) => setIsIrreversibleCheck(e.target.checked)}
+                      className="w-4 h-4 mt-0.5 rounded border-emerald-500 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    />
+                    <span>
+                      I understand that market cancellation is irreversible once executed on the Arbitrum blockchain.
+                    </span>
+                  </label>
+                )}
+              </div>
 
               {errorNotice && (
                 <div
@@ -572,11 +773,99 @@ export default function AdminMarketResolutionTable({
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
-                    <span>Executing Settlement...</span>
+                    <span>Executing On-Chain...</span>
                   </>
+                ) : activeModal.outcome === "CANCEL" ? (
+                  <span>Execute Market Invalidation & Refund</span>
                 ) : (
                   <span>Execute Settlement ({activeModal.outcome})</span>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {detailsModalMarket && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="details-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+        >
+          <div
+            className={`w-full max-w-lg rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl space-y-4 ${
+              isDark
+                ? "bg-[#0A0F0C] border-white/10 text-white"
+                : "bg-white border-emerald-500/20 text-accent-navy"
+            }`}
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-border-subtle dark:border-white/10">
+              <div>
+                <h3 id="details-dialog-title" className="text-lg font-bold">
+                  Resolution Record & Details
+                </h3>
+                <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
+                  Historical settlement record for market {detailsModalMarket.id}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDetailsModalMarket(null)}
+                className="text-text-muted hover:text-accent-navy dark:hover:text-white p-1 cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs font-mono">
+              <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10">
+                <div className="text-[10px] uppercase font-bold text-text-muted">Market Title</div>
+                <div className="font-bold text-sm text-accent-navy dark:text-white font-sans mt-0.5">
+                  {detailsModalMarket.title}
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold text-text-muted">Status:</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                    {detailsModalMarket.status === "CANCELLED" ? "CANCELLED & REFUNDED" : `RESOLVED [${detailsModalMarket.resolvedOutcome}]`}
+                  </span>
+                </div>
+                {detailsModalMarket.cancellationReason && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold text-text-muted">Reason:</span>
+                    <span className="font-bold text-warning-amber">{detailsModalMarket.cancellationReason}</span>
+                  </div>
+                )}
+                {detailsModalMarket.resolvedAt && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase font-bold text-text-muted">Settled At:</span>
+                    <span>{new Date(detailsModalMarket.resolvedAt).toUTCString()}</span>
+                  </div>
+                )}
+              </div>
+
+              {detailsModalMarket.resolutionNotes && (
+                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10">
+                  <div className="text-[10px] uppercase font-bold text-text-muted mb-1">Admin Resolution Notes:</div>
+                  <p className="font-sans text-xs text-text-muted dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                    {detailsModalMarket.resolutionNotes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setDetailsModalMarket(null)}
+                className="px-4 py-2.5 rounded-xl font-bold text-xs bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/20 transition-all cursor-pointer"
+              >
+                Close Details
               </button>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { describe, it, expect, vi } from "vitest";
 import { AdminMarketCreateForm } from "../components/AdminMarketCreateForm";
 
 describe("AdminMarketCreateForm Component", () => {
-  it("renders all form input fields and live card preview", () => {
+  it("renders all form input fields, AMM calculation, and live card preview", () => {
     render(<AdminMarketCreateForm />);
 
     expect(
@@ -21,9 +21,13 @@ describe("AdminMarketCreateForm Component", () => {
       screen.getByLabelText(/initial liquidity seed/i)
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText(/resolution oracle \/ source url/i)
+      screen.getByLabelText(/resolution oracle \/ proof url/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/resolution rules & criteria/i)
     ).toBeInTheDocument();
 
+    expect(screen.getByText(/automated market maker \(amm\) seed calculation/i)).toBeInTheDocument();
     expect(screen.getByTestId("live-market-preview")).toBeInTheDocument();
   });
 
@@ -45,12 +49,31 @@ describe("AdminMarketCreateForm Component", () => {
     expect(previewContainer).toHaveTextContent("TRENDING");
   });
 
+  it("displays inline validation errors when submitting with invalid fields", async () => {
+    render(<AdminMarketCreateForm />);
+
+    const submitBtn = screen.getByRole("button", {
+      name: /review & deploy market/i,
+    });
+    fireEvent.click(submitBtn);
+
+    expect(
+      screen.getByText(/market question\/title is required/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/please select a market deadline date and time/i)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/detailed resolution criteria and rules are required/i)
+    ).toBeInTheDocument();
+  });
+
   it("displays validation error when submitting with a past deadline date", async () => {
     render(<AdminMarketCreateForm />);
 
     const titleInput = screen.getByLabelText(/market question \/ title/i);
     fireEvent.change(titleInput, {
-      target: { value: "Will BTC reach $200k?" },
+      target: { value: "Will BTC reach $200k in 2026?" },
     });
 
     const endTimeInput = screen.getByLabelText(/deadline date & time/i);
@@ -58,17 +81,52 @@ describe("AdminMarketCreateForm Component", () => {
       target: { value: "2020-01-01T12:00" },
     });
 
+    const criteriaInput = screen.getByLabelText(/resolution rules & criteria/i);
+    fireEvent.change(criteriaInput, {
+      target: { value: "Resolves to YES if BTC trades above $200,000 on Coinbase before Dec 31." },
+    });
+
     const submitBtn = screen.getByRole("button", {
-      name: /publish market to blockchain/i,
+      name: /review & deploy market/i,
     });
     fireEvent.click(submitBtn);
 
     expect(
-      screen.getByText(/market deadline must be set in the future/i)
+      screen.getByText(/market deadline must be set at least 1 hour into the future/i)
     ).toBeInTheDocument();
   });
 
-  it("submits valid form data to onSubmitMarket callback", async () => {
+  it("validates oracle URL format when non-web URL is entered", () => {
+    render(<AdminMarketCreateForm />);
+
+    const titleInput = screen.getByLabelText(/market question \/ title/i);
+    fireEvent.change(titleInput, {
+      target: { value: "Will Ethereum gas stay low?" },
+    });
+
+    const futureDate = new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 16);
+    const endTimeInput = screen.getByLabelText(/deadline date & time/i);
+    fireEvent.change(endTimeInput, { target: { value: futureDate } });
+
+    const criteriaInput = screen.getByLabelText(/resolution rules & criteria/i);
+    fireEvent.change(criteriaInput, {
+      target: { value: "Resolves to YES if median gas is under 15 gwei across all major L2 rollups." },
+    });
+
+    const oracleInput = screen.getByLabelText(/resolution oracle \/ proof url/i);
+    fireEvent.change(oracleInput, { target: { value: "invalid-url-string" } });
+
+    const submitBtn = screen.getByRole("button", {
+      name: /review & deploy market/i,
+    });
+    fireEvent.click(submitBtn);
+
+    expect(
+      screen.getByText(/please provide a valid web url for the resolution oracle/i)
+    ).toBeInTheDocument();
+  });
+
+  it("opens review modal and submits valid form data to onSubmitMarket callback", async () => {
     const onSubmitMarket = vi.fn().mockResolvedValue(undefined);
     render(<AdminMarketCreateForm onSubmitMarket={onSubmitMarket} />);
 
@@ -83,15 +141,30 @@ describe("AdminMarketCreateForm Component", () => {
     const endTimeInput = screen.getByLabelText(/deadline date & time/i);
     fireEvent.change(endTimeInput, { target: { value: futureDate } });
 
-    const oracleInput = screen.getByLabelText(/resolution oracle \/ source url/i);
+    const oracleInput = screen.getByLabelText(/resolution oracle \/ proof url/i);
     fireEvent.change(oracleInput, {
       target: { value: "https://defillama.com" },
     });
 
-    const submitBtn = screen.getByRole("button", {
-      name: /publish market to blockchain/i,
+    const criteriaInput = screen.getByLabelText(/resolution rules & criteria/i);
+    fireEvent.change(criteriaInput, {
+      target: { value: "Resolves to YES if DefiLlama L2 TVL metric exceeds 100 Billion USD." },
     });
-    fireEvent.click(submitBtn);
+
+    const reviewBtn = screen.getByRole("button", {
+      name: /review & deploy market/i,
+    });
+    fireEvent.click(reviewBtn);
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /confirm prediction market deployment/i })
+    ).toBeInTheDocument();
+
+    const confirmDeployBtn = screen.getByRole("button", {
+      name: /confirm & deploy on-chain/i,
+    });
+    fireEvent.click(confirmDeployBtn);
 
     await waitFor(() => {
       expect(onSubmitMarket).toHaveBeenCalledTimes(1);
@@ -100,11 +173,25 @@ describe("AdminMarketCreateForm Component", () => {
         category: "CRYPTO",
         endTime: futureDate,
         resolutionSourceUrl: "https://defillama.com",
+        resolutionCriteria: "Resolves to YES if DefiLlama L2 TVL metric exceeds 100 Billion USD.",
         initialLiquidity: "0.50",
       });
       expect(
-        screen.getByText(/published successfully to testnet!/i)
+        screen.getByText(/successfully deployed and initialized on-chain!/i)
       ).toBeInTheDocument();
     });
+  });
+
+  it("resets form when clicking Clear Form button", () => {
+    render(<AdminMarketCreateForm />);
+
+    const titleInput = screen.getByLabelText(/market question \/ title/i);
+    fireEvent.change(titleInput, { target: { value: "Draft Market Title" } });
+    expect(titleInput).toHaveValue("Draft Market Title");
+
+    const clearBtn = screen.getByRole("button", { name: /clear form/i });
+    fireEvent.click(clearBtn);
+
+    expect(titleInput).toHaveValue("");
   });
 });
