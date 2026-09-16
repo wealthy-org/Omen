@@ -36,6 +36,7 @@ export type Market = {
   contract_market_id: number;
   title: string;
   description: string | null;
+  category: string;
   deadline: string;
   status: MarketStatus;
   total_pool_yes: number;
@@ -133,6 +134,7 @@ export type Database = {
           contract_market_id: number;
           title: string;
           description?: string | null;
+          category?: string;
           deadline: string;
           status?: MarketStatus;
           total_pool_yes?: number;
@@ -145,6 +147,7 @@ export type Database = {
           contract_market_id?: number;
           title?: string;
           description?: string | null;
+          category?: string;
           deadline?: string;
           status?: MarketStatus;
           total_pool_yes?: number;

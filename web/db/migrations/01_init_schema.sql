@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS markets (
   contract_market_id INTEGER UNIQUE NOT NULL,
   title TEXT NOT NULL,
   description TEXT,
+  category TEXT NOT NULL DEFAULT 'crypto',
   deadline TIMESTAMPTZ NOT NULL,
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'resolved_yes', 'resolved_no', 'cancelled')),
   total_pool_yes NUMERIC NOT NULL DEFAULT 0,
@@ -58,6 +59,7 @@ CREATE INDEX IF NOT EXISTS idx_points_events_wallet_address ON points_events(wal
 CREATE INDEX IF NOT EXISTS idx_points_events_quest_id ON points_events(quest_id);
 CREATE INDEX IF NOT EXISTS idx_markets_contract_market_id ON markets(contract_market_id);
 CREATE INDEX IF NOT EXISTS idx_markets_status ON markets(status);
+CREATE INDEX IF NOT EXISTS idx_markets_category ON markets(category);
 CREATE INDEX IF NOT EXISTS idx_bets_market_id ON bets(market_id);
 CREATE INDEX IF NOT EXISTS idx_bets_wallet_address ON bets(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_bets_tx_hash ON bets(tx_hash);

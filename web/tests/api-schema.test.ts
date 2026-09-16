@@ -68,6 +68,7 @@ describe("TICKET-23: Supabase Schema Migration", () => {
     expect(content).toContain("CREATE INDEX IF NOT EXISTS idx_points_events_quest_id ON points_events(quest_id);");
     expect(content).toContain("CREATE INDEX IF NOT EXISTS idx_markets_contract_market_id ON markets(contract_market_id);");
     expect(content).toContain("CREATE INDEX IF NOT EXISTS idx_markets_status ON markets(status);");
+    expect(content).toContain("CREATE INDEX IF NOT EXISTS idx_markets_category ON markets(category);");
     expect(content).toContain("CREATE INDEX IF NOT EXISTS idx_bets_market_id ON bets(market_id);");
     expect(content).toContain("CREATE INDEX IF NOT EXISTS idx_bets_wallet_address ON bets(wallet_address);");
     expect(content).toContain("CREATE INDEX IF NOT EXISTS idx_bets_tx_hash ON bets(tx_hash);");
