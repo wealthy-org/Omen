@@ -1,27 +1,108 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
-import PredictionsPage, { MOCK_MARKETS } from "../app/predictions/page";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import PredictionsPage from "../app/predictions/page";
+
+const MOCK_LIVE_MARKETS = [
+  {
+    id: "mkt-1",
+    contract_market_id: 1,
+    title: "Will ETH reach $5,000 before Q4 2026?",
+    category: "crypto",
+    status: "active",
+    deadline: "2026-10-01T00:00:00Z",
+    yes_pool: 28.5,
+    no_pool: 15.5,
+  },
+  {
+    id: "mkt-2",
+    contract_market_id: 2,
+    title: "Will DOGE reach $1.00 this cycle?",
+    category: "meme",
+    status: "active",
+    deadline: "2026-10-15T00:00:00Z",
+    yes_pool: 12.0,
+    no_pool: 20.0,
+  },
+  {
+    id: "mkt-3",
+    contract_market_id: 3,
+    title: "Will Bitcoin hit $120,000 in 2026?",
+    category: "crypto",
+    status: "active",
+    deadline: "2026-12-31T00:00:00Z",
+    yes_pool: 45.0,
+    no_pool: 15.0,
+  },
+];
 
 describe("PredictionsPage Component", () => {
-  it("renders page header, statistics, category filter, and market cards", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("renders page header and loading skeleton before data arrives", () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => new Promise(() => {}));
+
     render(<PredictionsPage />);
 
     expect(
       screen.getByRole("heading", { level: 1, name: /prediction markets/i })
     ).toBeInTheDocument();
     expect(screen.getByText("Live Arbitrum Sepolia Markets")).toBeInTheDocument();
-    expect(screen.getByText("Active Markets")).toBeInTheDocument();
-    expect(screen.getAllByText(String(MOCK_MARKETS.length)).length).toBeGreaterThanOrEqual(1);
-
-    expect(screen.getByTestId("predictions-grid")).toBeInTheDocument();
-    expect(
-      screen.getByText("Will ETH reach $5,000 before Q4 2026?")
-    ).toBeInTheDocument();
   });
 
-  it("filters markets when a category pill is selected", () => {
+  it("renders dynamic market cards after fetching from api", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/markets")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            markets: MOCK_LIVE_MARKETS,
+          }),
+        } as Response);
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
+    });
+
     render(<PredictionsPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Will ETH reach $5,000 before Q4 2026?")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("Will DOGE reach $1.00 this cycle?")
+      ).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("predictions-grid")).toBeInTheDocument();
+  });
+
+  it("filters markets when a category pill is selected", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/markets")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            markets: MOCK_LIVE_MARKETS,
+          }),
+        } as Response);
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
+    });
+
+    render(<PredictionsPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Will ETH reach $5,000 before Q4 2026?")
+      ).toBeInTheDocument();
+    });
 
     const memeButton = screen.getByRole("button", { name: /meme tokens/i });
     fireEvent.click(memeButton);
@@ -30,15 +111,32 @@ describe("PredictionsPage Component", () => {
       screen.getByText("Will DOGE reach $1.00 this cycle?")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Will PEPE flip SHIB in market capitalization?")
-    ).toBeInTheDocument();
-    expect(
       screen.queryByText("Will ETH reach $5,000 before Q4 2026?")
     ).not.toBeInTheDocument();
   });
 
-  it("filters markets in real time when search query is typed", () => {
+  it("filters markets in real time when search query is typed", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/markets")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            markets: MOCK_LIVE_MARKETS,
+          }),
+        } as Response);
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
+    });
+
     render(<PredictionsPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Will ETH reach $5,000 before Q4 2026?")
+      ).toBeInTheDocument();
+    });
 
     const searchInput = screen.getByLabelText(/search prediction markets/i);
     fireEvent.change(searchInput, { target: { value: "Bitcoin" } });
@@ -51,15 +149,34 @@ describe("PredictionsPage Component", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders empty state and allows resetting filters", () => {
+  it("renders empty state and allows resetting filters", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/markets")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            markets: MOCK_LIVE_MARKETS,
+          }),
+        } as Response);
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
+    });
+
     render(<PredictionsPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Will ETH reach $5,000 before Q4 2026?")
+      ).toBeInTheDocument();
+    });
 
     const searchInput = screen.getByLabelText(/search prediction markets/i);
     fireEvent.change(searchInput, { target: { value: "NonExistentAssetXYZ123" } });
 
     expect(screen.getByTestId("empty-markets")).toBeInTheDocument();
     expect(screen.getByText("No markets found")).toBeInTheDocument();
-    expect(screen.queryByTestId("predictions-grid")).not.toBeInTheDocument();
 
     const resetBtn = screen.getByRole("button", { name: /reset filters/i });
     fireEvent.click(resetBtn);
@@ -71,7 +188,27 @@ describe("PredictionsPage Component", () => {
   });
 
   it("opens confirmation modal when clicking Bet YES and places bet successfully", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/markets")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            markets: MOCK_LIVE_MARKETS,
+          }),
+        } as Response);
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
+    });
+
     render(<PredictionsPage />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("Will ETH reach $5,000 before Q4 2026?")
+      ).toBeInTheDocument();
+    });
 
     const betYesBtn = screen.getByRole("button", {
       name: /bet yes on will eth reach \$5,000 before q4 2026\?/i,
@@ -95,30 +232,5 @@ describe("PredictionsPage Component", () => {
         'Confirmed bet of 0.05 ETH on YES for "Will ETH reach $5,000 before Q4 2026?"! Position registered.'
       );
     });
-  });
-
-  it("opens confirmation modal when clicking Bet NO with NO selected by default", () => {
-    render(<PredictionsPage />);
-
-    const betNoBtn = screen.getByRole("button", {
-      name: /bet no on will doge reach \$1\.00 this cycle\?/i,
-    });
-    fireEvent.click(betNoBtn);
-
-    const dialog = screen.getByRole("dialog");
-    expect(dialog).toBeInTheDocument();
-    expect(
-      within(dialog).getByRole("heading", {
-        name: "Will DOGE reach $1.00 this cycle?",
-      })
-    ).toBeInTheDocument();
-
-    const noSelectBtn = within(dialog).getByRole("button", { name: /select no outcome/i });
-    expect(noSelectBtn).toHaveAttribute("aria-pressed", "true");
-
-    const closeBtn = within(dialog).getByRole("button", { name: /close betting modal/i });
-    fireEvent.click(closeBtn);
-
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

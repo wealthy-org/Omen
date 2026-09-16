@@ -1,109 +1,15 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import {
-  MarketCategoryFilter,
-} from "@/components/MarketCategoryFilter";
+import { MarketCategoryFilter } from "@/components/MarketCategoryFilter";
 import { MarketCard, MarketData, MarketOutcome } from "@/components/MarketCard";
 import { BettingModal } from "@/components/BettingModal";
-import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
-
-export const MOCK_MARKETS: MarketData[] = [
-  {
-    id: "mkt-1",
-    title: "Will ETH reach $5,000 before Q4 2026?",
-    category: "CRYPTO",
-    status: "active",
-    endTime: "Ends in 2d 18h",
-    totalPool: "28.50",
-    yesPercentage: 68,
-    noPercentage: 32,
-    volume: "74.20",
-  },
-  {
-    id: "mkt-2",
-    title: "Will Arbitrum exceed 10M active daily addresses?",
-    category: "L2",
-    status: "closing-soon",
-    endTime: "Ends in 4h 12m",
-    totalPool: "18.80",
-    yesPercentage: 45,
-    noPercentage: 55,
-    volume: "42.10",
-  },
-  {
-    id: "mkt-3",
-    title: "Will Bitcoin hit $120,000 in 2026?",
-    category: "CRYPTO",
-    status: "active",
-    endTime: "Ends in 5d 06h",
-    totalPool: "45.00",
-    yesPercentage: 74,
-    noPercentage: 26,
-    volume: "112.40",
-  },
-  {
-    id: "mkt-4",
-    title: "Will DOGE reach $1.00 this cycle?",
-    category: "MEME",
-    status: "active",
-    endTime: "Ends in 12d 14h",
-    totalPool: "12.40",
-    yesPercentage: 38,
-    noPercentage: 62,
-    volume: "31.90",
-  },
-  {
-    id: "mkt-5",
-    title: "Will Solana TVL flip Ethereum L2s combined?",
-    category: "TRENDING",
-    status: "active",
-    endTime: "Ends in 8d 20h",
-    totalPool: "22.30",
-    yesPercentage: 29,
-    noPercentage: 71,
-    volume: "58.70",
-  },
-  {
-    id: "mkt-6",
-    title: "Will PEPE flip SHIB in market capitalization?",
-    category: "MEME",
-    status: "active",
-    endTime: "Ends in 3d 09h",
-    totalPool: "9.60",
-    yesPercentage: 52,
-    noPercentage: 48,
-    volume: "24.50",
-  },
-  {
-    id: "mkt-7",
-    title: "Will US Fed cut interest rates in September?",
-    category: "MACRO",
-    status: "resolved",
-    endTime: "Ended",
-    totalPool: "34.20",
-    yesPercentage: 100,
-    noPercentage: 0,
-    volume: "89.10",
-    resolvedOutcome: "YES",
-  },
-  {
-    id: "mkt-8",
-    title: "Will Apple announce Native Crypto Wallet in iOS 20?",
-    category: "TRENDING",
-    status: "active",
-    endTime: "Ends in 15d 11h",
-    totalPool: "15.70",
-    yesPercentage: 41,
-    noPercentage: 59,
-    volume: "39.80",
-  },
-];
 
 export default function PredictionsPage() {
-  const [markets, setMarkets] = useState<MarketData[]>(MOCK_MARKETS);
+  const [markets, setMarkets] = useState<MarketData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>(" ");
   const [sortBy, setSortBy] = useState<string>("highest-pool");
   const [selectedOutcomeInfo, setSelectedOutcomeInfo] = useState<string | null>(null);
 
@@ -118,12 +24,18 @@ export default function PredictionsPage() {
   });
 
   useEffect(() => {
+    setSearchQuery("");
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
     async function fetchLiveMarkets() {
       try {
+        setIsLoading(true);
         const res = await fetch("/api/markets");
         if (res.ok) {
           const data = await res.json();
-          if (data.markets && Array.isArray(data.markets) && data.markets.length > 0) {
+          if (isMounted && data.markets && Array.isArray(data.markets)) {
             const mapped: MarketData[] = data.markets.map((m: any, index: number) => {
               const yes = Number(m.yes_pool || 0);
               const no = Number(m.no_pool || 0);
@@ -140,17 +52,29 @@ export default function PredictionsPage() {
                 yesPercentage: yesPct,
                 noPercentage: noPct,
                 volume: total.toFixed(2),
-                resolvedOutcome: m.status === "resolved_yes" ? "YES" : m.status === "resolved_no" ? "NO" : undefined,
+                resolvedOutcome:
+                  m.status === "resolved_yes"
+                    ? "YES"
+                    : m.status === "resolved_no"
+                    ? "NO"
+                    : undefined,
               };
             });
             setMarkets(mapped);
           }
         }
       } catch {
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchLiveMarkets();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const categoryCounts = useMemo(() => {
@@ -166,10 +90,8 @@ export default function PredictionsPage() {
           m.category.toLowerCase() === "crypto" ||
           m.category.toLowerCase() === "l2"
       ).length,
-      meme: markets.filter((m) => m.category.toLowerCase() === "meme")
-        .length,
-      "closing-soon": markets.filter((m) => m.status === "closing-soon")
-        .length,
+      meme: markets.filter((m) => m.category.toLowerCase() === "meme").length,
+      "closing-soon": markets.filter((m) => m.status === "closing-soon").length,
       resolved: markets.filter((m) => m.status === "resolved").length,
     };
     return counts;
@@ -198,27 +120,39 @@ export default function PredictionsPage() {
       }
 
       if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
+        const query = searchQuery.toLowerCase();
         const matchesTitle = market.title.toLowerCase().includes(query);
-        const matchesCategory = market.category.toLowerCase().includes(query);
-        if (!matchesTitle && !matchesCategory) return false;
+        const matchesCat = market.category.toLowerCase().includes(query);
+        if (!matchesTitle && !matchesCat) return false;
       }
 
       return true;
-    }).sort((a, b) => {
-      if (sortBy === "highest-pool") {
-        return parseFloat(b.totalPool) - parseFloat(a.totalPool);
-      }
-      if (sortBy === "ending-soon") {
-        if (a.status === "closing-soon" && b.status !== "closing-soon") return -1;
-        if (b.status === "closing-soon" && a.status !== "closing-soon") return 1;
-        return a.endTime.localeCompare(b.endTime);
-      }
-      return 0;
     });
-  }, [markets, selectedCategory, searchQuery, sortBy]);
+  }, [markets, selectedCategory, searchQuery]);
 
-  const handleSelectOutcome = (market: MarketData, outcome: MarketOutcome) => {
+  const sortedMarkets = useMemo(() => {
+    const list = [...filteredMarkets];
+    if (sortBy === "highest-pool") {
+      return list.sort((a, b) => parseFloat(b.totalPool) - parseFloat(a.totalPool));
+    }
+    if (sortBy === "lowest-pool") {
+      return list.sort((a, b) => parseFloat(a.totalPool) - parseFloat(b.totalPool));
+    }
+    if (sortBy === "closing-soon") {
+      return list.sort((a, b) => (a.status === "closing-soon" ? -1 : 1));
+    }
+    return list;
+  }, [filteredMarkets, sortBy]);
+
+  const totalVolume = useMemo(() => {
+    return markets.reduce((acc, m) => acc + parseFloat(m.volume || "0"), 0).toFixed(1);
+  }, [markets]);
+
+  const activeCount = useMemo(() => {
+    return markets.filter((m) => m.status === "active" || m.status === "closing-soon").length;
+  }, [markets]);
+
+  const handleOpenBetModal = (market: MarketData, outcome: MarketOutcome) => {
     setBettingModal({
       isOpen: true,
       market,
@@ -226,48 +160,27 @@ export default function PredictionsPage() {
     });
   };
 
-  const handleConfirmBet = async ({
-    marketId,
-    outcome,
+  const handleCloseBetModal = () => {
+    setBettingModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const handleConfirmBet = ({
     amount,
+    outcome,
   }: {
     marketId: string | number;
     outcome: MarketOutcome;
     amount: string;
   }) => {
-    const market = markets.find((m) => m.id === marketId) || MOCK_MARKETS.find((m) => m.id === marketId);
-    const marketTitle = market ? market.title : `Market #${marketId}`;
-    const numericMarketId = typeof marketId === "number" ? marketId : parseInt(String(marketId).replace(/\D/g, "") || "1", 10);
-    const demo = mockPredictionMarket.getDemoWallet();
-
-    try {
-      const res = await mockPredictionMarket.placeBet({
-        marketId: numericMarketId,
-        side: outcome,
-        amountEth: amount,
-        userAddress: demo.address,
-      });
-
-      await fetch("/api/bets/index", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tx_hash: res.txHash,
-          contract_market_id: numericMarketId,
-          wallet_address: demo.address,
-          side: outcome.toLowerCase(),
-          amount: parseFloat(amount),
-        }),
-      });
-    } catch {
-    }
-
+    if (!bettingModal.market) return;
+    const title = bettingModal.market.title;
     setSelectedOutcomeInfo(
-      `Confirmed bet of ${amount} ETH on ${outcome} for "${marketTitle}"! Position registered.`
+      `Confirmed bet of ${amount} ETH on ${outcome} for "${title}"! Position registered.`
     );
+    handleCloseBetModal();
   };
 
-  const resetFilters = () => {
+  const handleResetFilters = () => {
     setSelectedCategory("all");
     setSearchQuery("");
     setSortBy("highest-pool");
@@ -285,18 +198,18 @@ export default function PredictionsPage() {
             Prediction Markets
           </h1>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
-            Trade outcome shares on crypto narratives, meme assets, protocol milestones, and global events with instant testnet settlement.
+            Take positions on real-world events, crypto milestones, and macroeconomic trends. Stake ETH directly via smart contracts.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs text-right">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Active Markets</p>
-            <p className="text-lg font-bold font-mono text-zinc-900 dark:text-zinc-100">{markets.length}</p>
+        <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl border border-zinc-200 dark:border-zinc-700/50">
+            <span className="text-zinc-500 dark:text-zinc-400 block">Total Pool Volume</span>
+            <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">{totalVolume} ETH</span>
           </div>
-          <div className="px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs text-right">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Total Pool</p>
-            <p className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">186.50 ETH</p>
+          <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl border border-zinc-200 dark:border-zinc-700/50">
+            <span className="text-zinc-500 dark:text-zinc-400 block">Active Markets</span>
+            <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">{activeCount}</span>
           </div>
         </div>
       </div>
@@ -304,14 +217,15 @@ export default function PredictionsPage() {
       {selectedOutcomeInfo && (
         <div
           role="status"
-          className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-sm font-semibold flex items-center justify-between"
+          className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-xl flex items-center justify-between text-sm text-emerald-800 dark:text-emerald-200"
         >
           <span>{selectedOutcomeInfo}</span>
           <button
+            type="button"
             onClick={() => setSelectedOutcomeInfo(null)}
-            className="text-xs underline hover:opacity-80 cursor-pointer"
+            className="text-emerald-600 dark:text-emerald-400 hover:opacity-75 text-xs font-bold font-mono"
           >
-            Dismiss
+            DISMISS
           </button>
         </div>
       )}
@@ -326,37 +240,41 @@ export default function PredictionsPage() {
         marketCounts={categoryCounts}
       />
 
-      {filteredMarkets.length > 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div
+              key={i}
+              className="h-64 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl"
+            />
+          ))}
+        </div>
+      ) : sortedMarkets.length > 0 ? (
         <div
           data-testid="predictions-grid"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {filteredMarkets.map((market) => (
+          {sortedMarkets.map((market) => (
             <MarketCard
               key={market.id}
               market={market}
-              onSelectOutcome={handleSelectOutcome}
+              onSelectOutcome={(m, outcome) => handleOpenBetModal(m, outcome)}
             />
           ))}
         </div>
       ) : (
         <div
           data-testid="empty-markets"
-          className="text-center py-16 px-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl my-8 space-y-4"
+          className="p-12 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-4"
         >
-          <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 mx-auto flex items-center justify-center text-xl">
-            🔍
-          </div>
-          <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
-            No markets found
-          </h3>
+          <p className="text-lg font-bold text-zinc-800 dark:text-zinc-200">No markets found</p>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
-            No prediction markets match your current filter or search criteria &ldquo;{searchQuery}&rdquo;.
+            No prediction markets matched your query. Try clearing your filters.
           </p>
           <button
             type="button"
-            onClick={resetFilters}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-all shadow-xs cursor-pointer"
+            onClick={handleResetFilters}
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
           >
             Reset Filters
           </button>
@@ -365,7 +283,7 @@ export default function PredictionsPage() {
 
       <BettingModal
         isOpen={bettingModal.isOpen}
-        onClose={() => setBettingModal((prev) => ({ ...prev, isOpen: false }))}
+        onClose={handleCloseBetModal}
         market={bettingModal.market}
         initialOutcome={bettingModal.outcome}
         onConfirmBet={handleConfirmBet}

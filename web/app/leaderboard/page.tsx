@@ -5,71 +5,87 @@ import { useTheme } from "@/components/ThemeProvider";
 import LeaderboardTable, { LeaderboardEntry } from "@/components/LeaderboardTable";
 import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
 
-export const FULL_LEADERBOARD_DATA: LeaderboardEntry[] = [
-  { rank: 1, address: "0x71C8364f3B3979B6396c5678440A4418652D875F", ensName: "oracle-king.eth", streakDays: 24, totalPoints: 128500, multiplier: "3.0x", winRate: "82%" },
-  { rank: 2, address: "0x3A945b630B72d8e6E1fE46a297E59b20757Ebb30", ensName: "arbitrum-whale.eth", streakDays: 21, totalPoints: 94200, multiplier: "3.0x", winRate: "78%" },
-  { rank: 3, address: "0x98Fc4E2551e737B244243684B98818c3B1280B3A", ensName: "satoshi-prophet.eth", streakDays: 19, totalPoints: 81400, multiplier: "2.5x", winRate: "75%" },
-  { rank: 4, address: "0x1234567890abcdef1234567890abcdef12345678", ensName: "omen-hunter.eth", streakDays: 14, totalPoints: 52300, multiplier: "2.0x", winRate: "71%" },
-  { rank: 5, address: "0x55B3901a7D2364c6792E5B50A11F68eF62810931", streakDays: 12, totalPoints: 44100, multiplier: "2.0x", winRate: "69%" },
-  { rank: 6, address: "0x89D24C15a20120F638706341f23E451965A20B78", streakDays: 11, totalPoints: 39800, multiplier: "1.8x", winRate: "67%" },
-  { rank: 7, address: "0x23E481029F741938562B286E451296B07412A359", streakDays: 9, totalPoints: 34200, multiplier: "1.5x", winRate: "65%" },
-  { rank: 8, address: "0x67A9128364109384512B74239856129486A20B53", streakDays: 8, totalPoints: 29500, multiplier: "1.5x", winRate: "64%" },
-  { rank: 9, address: "0x44C19283561029384512B74239856129486A20F1", streakDays: 7, totalPoints: 26100, multiplier: "1.5x", winRate: "62%" },
-  { rank: 10, address: "0x90B38192641029384512B74239856129486A20E2", streakDays: 6, totalPoints: 22400, multiplier: "1.2x", winRate: "60%" },
-  { rank: 11, address: "0x11A38192641029384512B74239856129486A2011", streakDays: 5, totalPoints: 19800, multiplier: "1.2x", winRate: "59%" },
-  { rank: 12, address: "0x22B38192641029384512B74239856129486A2022", streakDays: 4, totalPoints: 17300, multiplier: "1.0x", winRate: "58%" },
-];
-
-export const CURRENT_USER = "0x1234567890abcdef1234567890abcdef12345678";
+export interface CurrentUserProfile {
+  rank: number;
+  totalPoints: number;
+  streakDays?: number;
+  ensName?: string;
+}
 
 export default function LeaderboardPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [entries, setEntries] = useState<LeaderboardEntry[]>(FULL_LEADERBOARD_DATA);
-  const [userRank, setUserRank] = useState<number>(4);
-  const [userPoints, setUserPoints] = useState<number>(52300);
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<CurrentUserProfile | null>(null);
+
+  const demo = mockPredictionMarket.getDemoWallet();
 
   useEffect(() => {
+    let isMounted = true;
     async function fetchLeaderboard() {
-      const demo = mockPredictionMarket.getDemoWallet();
       try {
+        setIsLoading(true);
         const res = await fetch(`/api/leaderboard/points?wallet_address=${demo.address}&limit=50&offset=0`);
         if (res.ok) {
           const data = await res.json();
-          if (data.leaderboard && Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
-            const mapped: LeaderboardEntry[] = data.leaderboard.map((item: any) => ({
-              rank: item.rank,
-              address: item.wallet_address,
-              ensName: item.ens_name,
-              streakDays: item.streak_days || 1,
-              totalPoints: Number(item.total_points || 0),
-              multiplier: `${(1 + Math.min(Number(item.streak_days || 1) * 0.1, 2.0)).toFixed(1)}x`,
-              winRate: item.win_rate ? `${item.win_rate}%` : "65%",
-            }));
-            setEntries(mapped);
-          }
-          if (data.currentUserRank) {
-            setUserRank(data.currentUserRank.rank || 4);
-            setUserPoints(data.currentUserRank.totalPoints || 52300);
+          if (isMounted) {
+            if (data.leaderboard && Array.isArray(data.leaderboard)) {
+              const mapped: LeaderboardEntry[] = data.leaderboard.map((item: any) => ({
+                rank: item.rank,
+                address: item.wallet_address,
+                ensName: item.ens_name,
+                streakDays: item.streak_days || 1,
+                totalPoints: Number(item.total_points || 0),
+                multiplier: `${(1 + Math.min(Number(item.streak_days || 1) * 0.1, 2.0)).toFixed(1)}x`,
+                winRate: item.win_rate ? `${item.win_rate}%` : "65%",
+              }));
+              setEntries(mapped);
+            }
+            if (data.currentUserRank) {
+              setUserProfile({
+                rank: data.currentUserRank.rank,
+                totalPoints: data.currentUserRank.totalPoints,
+                streakDays: data.currentUserRank.streakDays,
+                ensName: data.currentUserRank.ensName,
+              });
+            }
           }
         }
       } catch {
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchLeaderboard();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [demo.address]);
 
   const filteredEntries = entries.filter((entry) => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
     return (
       entry.address.toLowerCase().includes(query) ||
-      (entry.ensName && entry.ensName.toLowerCase().includes(query))
+      Boolean(entry.ensName && entry.ensName.toLowerCase().includes(query))
     );
   });
+
+  const userRank = userProfile?.rank ?? (entries.findIndex((e) => e.address.toLowerCase() === demo.address.toLowerCase()) + 1 || 1);
+  const userPoints = userProfile?.totalPoints ?? 0;
+  const userStreak = userProfile?.streakDays ?? 1;
+  const userMultiplier = `${(1 + Math.min(userStreak * 0.1, 2.0)).toFixed(1)}x`;
+
+  const topThreeTarget = entries.find((e) => e.rank === 3);
+  const nextTarget = entries.find((e) => e.rank === userRank - 1);
+  const gapTarget = nextTarget || topThreeTarget;
+  const pointsGap = gapTarget ? Math.max(0, gapTarget.totalPoints - userPoints) : 0;
 
   return (
     <div className="w-full flex flex-col gap-8 pb-16 animate-in fade-in duration-300">
@@ -100,14 +116,16 @@ export default function LeaderboardPage() {
               Your Current Rank
             </span>
             <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-primary-blue-soft text-primary-blue dark:bg-primary-blue/15 dark:text-primary-blue border border-primary-blue/20">
-              Top 5%
+              {userRank <= 3 ? "Top 1%" : userRank <= 10 ? "Top 5%" : "Active Trader"}
             </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono mt-2 text-accent-navy dark:text-white flex items-center gap-2">
             <span>#{userRank}</span>
-            <span className="text-sm font-semibold text-text-muted dark:text-[#A9B3AD] font-sans">
-              (omen-hunter.eth)
-            </span>
+            {userProfile?.ensName && (
+              <span className="text-sm font-semibold text-text-muted dark:text-[#A9B3AD] font-sans">
+                ({userProfile.ensName})
+              </span>
+            )}
           </div>
           <p className="text-xs text-text-muted dark:text-[#A9B3AD] mt-2">
             Higher rank grants larger share in Season 1 token airdrop.
@@ -126,14 +144,14 @@ export default function LeaderboardPage() {
               Your Total Points
             </span>
             <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-yes-green-soft text-yes-green dark:bg-yes-green/10 border border-yes-green/20">
-              2.0x Multiplier
+              {userMultiplier} Multiplier
             </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono mt-2 text-primary-blue">
             {userPoints.toLocaleString()} <span className="text-lg font-bold">PTS</span>
           </div>
           <p className="text-xs text-text-muted dark:text-[#A9B3AD] mt-2">
-            14 consecutive streak days maintaining 2.0x boost.
+            {userStreak} consecutive streak days maintaining boost.
           </p>
         </div>
 
@@ -149,14 +167,16 @@ export default function LeaderboardPage() {
               Gap to Next Tier
             </span>
             <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-warning-soft text-warning-amber dark:bg-amber-500/15 border border-amber-500/20">
-              🥉 Bronze Podium
+              {gapTarget ? `#${gapTarget.rank} Target` : "Top Leader"}
             </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono mt-2 text-warning-amber">
-            +29,100 <span className="text-lg font-bold">PTS</span>
+            +{pointsGap.toLocaleString()} <span className="text-lg font-bold">PTS</span>
           </div>
           <p className="text-xs text-text-muted dark:text-[#A9B3AD] mt-2">
-            Needed to overtake #3 satoshi-prophet.eth (81,400 PTS).
+            {gapTarget
+              ? `Needed to overtake #${gapTarget.rank} ${gapTarget.ensName || gapTarget.address.slice(0, 6)} (${gapTarget.totalPoints.toLocaleString()} PTS).`
+              : "You are currently leading the global leaderboard!"}
           </p>
         </div>
       </div>
@@ -179,34 +199,40 @@ export default function LeaderboardPage() {
               placeholder="Search by ENS name or 0x... address"
               className={`w-full pl-10 pr-10 py-2.5 rounded-xl border text-xs sm:text-sm font-mono transition-all outline-none ${
                 isDark
-                  ? "bg-[#0A0F0C] border-white/10 text-white placeholder:text-[#A9B3AD]/50 focus:border-primary-blue"
-                  : "bg-white border-border-subtle text-accent-navy placeholder:text-text-muted/60 focus:border-primary-blue shadow-xs"
+                  ? "bg-[#0A0F0C] border-white/10 text-white placeholder:text-text-muted/60 focus:border-primary-blue/50"
+                  : "bg-white border-border-subtle text-accent-navy placeholder:text-text-muted/60 focus:border-primary-blue/50"
               }`}
             />
             {searchQuery && (
               <button
                 type="button"
+                aria-label="Clear Search"
                 onClick={() => setSearchQuery("")}
-                aria-label="Clear search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-accent-navy dark:hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-text-muted hover:text-accent-navy dark:hover:text-white"
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                ✕
               </button>
             )}
           </div>
-
-          <div className="text-xs font-mono font-medium text-text-muted dark:text-[#A9B3AD]">
-            Displaying {filteredEntries.length} ranked traders
+          <div className="text-xs font-mono text-text-muted dark:text-[#A9B3AD]">
+            Showing {filteredEntries.length} of {entries.length} participants
           </div>
         </div>
 
-        <LeaderboardTable
-          entries={filteredEntries}
-          currentUserAddress={CURRENT_USER}
-          pageSize={10}
-        />
+        {isLoading ? (
+          <div className="p-8 rounded-2xl border bg-white/5 border-white/10 animate-pulse space-y-4">
+            <div className="h-6 w-1/4 bg-white/10 rounded" />
+            <div className="h-10 w-full bg-white/5 rounded" />
+            <div className="h-10 w-full bg-white/5 rounded" />
+            <div className="h-10 w-full bg-white/5 rounded" />
+          </div>
+        ) : (
+          <LeaderboardTable
+            entries={filteredEntries}
+            currentUserAddress={demo.address}
+            pageSize={10}
+          />
+        )}
       </div>
     </div>
   );

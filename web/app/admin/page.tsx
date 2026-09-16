@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useTheme } from "../../components/ThemeProvider";
 import { AdminMarketCreateForm, AdminMarketFormData } from "../../components/AdminMarketCreateForm";
 import AdminQuestManagementForm, { AdminQuestItem } from "../../components/AdminQuestManagementForm";
-import AdminMarketResolutionTable, { ResolutionOutcome, CancellationReasonCategory } from "../../components/AdminMarketResolutionTable";
+import AdminMarketResolutionTable, {
+  ResolvableMarketItem,
+  ResolutionOutcome,
+  CancellationReasonCategory,
+} from "../../components/AdminMarketResolutionTable";
 import AdminLoginForm from "../../components/AdminLoginForm";
 
 export type AdminTab = "create-market" | "manage-quests" | "resolve-markets";
@@ -32,37 +36,90 @@ export default function AdminDashboardPage({
   );
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
-  const [totalMarketsCreated, setTotalMarketsCreated] = useState<number>(18);
-  const [activeQuestsCount, setActiveQuestsCount] = useState<number>(4);
-  const [pendingResolutionsCount, setPendingResolutionsCount] = useState<number>(3);
+  const [totalMarketsCreated, setTotalMarketsCreated] = useState<number>(0);
+  const [activeQuestsCount, setActiveQuestsCount] = useState<number>(0);
+  const [pendingResolutionsCount, setPendingResolutionsCount] = useState<number>(0);
   const [globalNotice, setGlobalNotice] = useState<{ message: string; type: "success" | "info" } | null>(null);
+
+  const [resolvableMarkets, setResolvableMarkets] = useState<ResolvableMarketItem[]>([]);
+  const [adminQuests, setAdminQuests] = useState<AdminQuestItem[]>([]);
 
   const isAuthorized =
     Boolean(connectedAddress) &&
     AUTHORIZED_ADMIN_ADDRESSES.includes(connectedAddress?.toLowerCase() || "");
 
   useEffect(() => {
+    let isMounted = true;
     async function fetchAdminMetrics() {
       try {
         const [marketsRes, questsRes] = await Promise.all([
           fetch("/api/markets"),
           fetch("/api/admin/quests"),
         ]);
+
         if (marketsRes.ok) {
           const mData = await marketsRes.json();
-          if (mData.markets && Array.isArray(mData.markets) && mData.markets.length > 0) {
+          if (isMounted && mData.markets && Array.isArray(mData.markets)) {
             setTotalMarketsCreated(mData.markets.length);
             const pending = mData.markets.filter(
               (m: any) => m.status === "active" && m.deadline && new Date(m.deadline) <= new Date()
-            ).length;
-            if (pending > 0) setPendingResolutionsCount(pending);
+            );
+            setPendingResolutionsCount(pending.length);
+
+            const mappedMarkets: ResolvableMarketItem[] = mData.markets.map((m: any) => {
+              const yes = Number(m.yes_pool || 0);
+              const no = Number(m.no_pool || 0);
+              const total = yes + no;
+              const yesPct = total > 0 ? Math.round((yes / total) * 100) : 50;
+              const noPct = 100 - yesPct;
+              return {
+                id: m.id || `market-${m.contract_market_id}`,
+                title: m.title,
+                category: (m.category || "CRYPTO").toUpperCase(),
+                totalPool: total,
+                volume: total,
+                yesPercentage: yesPct,
+                noPercentage: noPct,
+                endTime: m.deadline || new Date().toISOString(),
+                resolutionSourceUrl: m.resolution_source || "https://omen.market",
+                resolutionCriteria: m.description,
+                status:
+                  m.status === "active"
+                    ? "PENDING_RESOLUTION"
+                    : m.status === "cancelled"
+                    ? "CANCELLED"
+                    : "RESOLVED",
+                resolvedOutcome:
+                  m.status === "resolved_yes"
+                    ? "YES"
+                    : m.status === "resolved_no"
+                    ? "NO"
+                    : undefined,
+              };
+            });
+            setResolvableMarkets(mappedMarkets);
           }
         }
+
         if (questsRes.ok) {
           const qData = await questsRes.json();
-          if (qData.quests && Array.isArray(qData.quests) && qData.quests.length > 0) {
+          if (isMounted && qData.quests && Array.isArray(qData.quests)) {
             const active = qData.quests.filter((q: any) => q.is_active).length;
             setActiveQuestsCount(active);
+
+            const mappedQuests: AdminQuestItem[] = qData.quests.map((q: any) => ({
+              id: q.id,
+              title: q.title,
+              description: q.description || "",
+              category: (q.category || "ONBOARDING").toUpperCase() as any,
+              points: Number(q.points_reward || 100),
+              recurrence: (q.recurrence || "ONE_TIME") as any,
+              actionUrl: q.action_url,
+              isActive: Boolean(q.is_active),
+              completionsCount: Number(q.completions_count || 0),
+              createdAt: q.created_at,
+            }));
+            setAdminQuests(mappedQuests);
           }
         }
       } catch {
@@ -72,6 +129,10 @@ export default function AdminDashboardPage({
     if (isAuthorized) {
       fetchAdminMetrics();
     }
+
+    return () => {
+      isMounted = false;
+    };
   }, [isAuthorized]);
 
   const handleDisconnect = () => {
@@ -91,6 +152,7 @@ export default function AdminDashboardPage({
     if (quest.isActive) {
       setActiveQuestsCount((prev) => prev + 1);
     }
+    setAdminQuests((prev) => [quest, ...prev]);
     setGlobalNotice({
       message: `Quest "${quest.title}" created with +${quest.points} PTS reward.`,
       type: "success",
@@ -99,6 +161,9 @@ export default function AdminDashboardPage({
 
   const handleQuestToggle = (_id: string, active: boolean) => {
     setActiveQuestsCount((prev) => (active ? prev + 1 : Math.max(0, prev - 1)));
+    setAdminQuests((prev) =>
+      prev.map((q) => (q.id === _id ? { ...q, isActive: active } : q))
+    );
   };
 
   const handleMarketResolved = (
@@ -108,6 +173,17 @@ export default function AdminDashboardPage({
     _cancellationReason?: CancellationReasonCategory
   ) => {
     setPendingResolutionsCount((prev) => Math.max(0, prev - 1));
+    setResolvableMarkets((prev) =>
+      prev.map((m) =>
+        m.id === marketId
+          ? {
+              ...m,
+              status: outcome === "CANCEL" ? "CANCELLED" : "RESOLVED",
+              resolvedOutcome: outcome,
+            }
+          : m
+      )
+    );
     setGlobalNotice({
       message: `Market ${marketId} settled as [${outcome}]. Collateral and payouts updated.`,
       type: "success",
@@ -148,25 +224,24 @@ export default function AdminDashboardPage({
 
         <div className="flex items-center gap-3">
           <div
-            className={`px-4 py-2.5 rounded-xl border text-xs font-mono ${
-              isDark ? "bg-[#121815] border-white/10" : "bg-[#F4FBF7] border-emerald-500/10"
+            className={`px-3 py-1.5 rounded-xl border text-xs font-mono flex items-center gap-2 ${
+              isDark ? "bg-white/5 border-white/10 text-text-muted" : "bg-white border-border-subtle text-accent-navy"
             }`}
           >
-            <div className="text-[10px] text-text-muted uppercase">Admin Account</div>
-            <div className="font-bold text-emerald-600 dark:text-emerald-400 truncate max-w-[140px] sm:max-w-[180px]">
-              {connectedAddress}
-            </div>
+            <span className="w-2 h-2 rounded-full bg-yes-green" />
+            <span>{connectedAddress ? `${connectedAddress.slice(0, 6)}...${connectedAddress.slice(-4)}` : "0xAdmin"}</span>
           </div>
           <button
             type="button"
             onClick={handleDisconnect}
-            aria-label="Disconnect admin session"
-            className="p-2.5 rounded-xl border border-border-subtle dark:border-white/10 text-text-muted hover:text-no-red hover:border-no-red/30 transition-all cursor-pointer"
-            title="Disconnect Admin"
+            aria-label="Disconnect Admin Session"
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+              isDark
+                ? "border-no-red/30 text-no-red hover:bg-no-red/10"
+                : "border-no-red/40 text-no-red hover:bg-rose-50"
+            }`}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
+            Disconnect
           </button>
         </div>
       </header>
@@ -174,20 +249,22 @@ export default function AdminDashboardPage({
       {globalNotice && (
         <div
           role="status"
-          className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-300 text-sm flex items-center justify-between gap-3 shadow-xs"
+          className={`p-4 rounded-xl border flex items-center justify-between text-xs sm:text-sm ${
+            globalNotice.type === "success"
+              ? "bg-yes-green-soft dark:bg-yes-green/10 border-yes-green/30 text-yes-green"
+              : "bg-primary-blue-soft dark:bg-primary-blue/10 border-primary-blue/30 text-primary-blue"
+          }`}
         >
-          <div className="flex items-center gap-2 font-medium">
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>{globalNotice.message}</span>
+          <div className="flex items-center gap-2">
+            <span>✨</span>
+            <span className="font-semibold">{globalNotice.message}</span>
           </div>
           <button
             type="button"
             onClick={() => setGlobalNotice(null)}
-            className="text-xs font-mono font-bold hover:underline cursor-pointer"
+            className="text-xs font-bold font-mono opacity-80 hover:opacity-100"
           >
-            Dismiss
+            DISMISS
           </button>
         </div>
       )}
@@ -198,45 +275,45 @@ export default function AdminDashboardPage({
       >
         <div
           className={`p-5 rounded-2xl border transition-all ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10"
+            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
           }`}
         >
-          <div className="text-xs font-mono font-bold uppercase text-text-muted dark:text-[#A9B3AD]">
+          <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
             Total Markets Created
           </div>
-          <div className="text-2xl font-mono font-black text-accent-navy dark:text-white mt-2">
+          <div className="text-2xl sm:text-3xl font-black font-mono mt-1 text-accent-navy dark:text-white">
             {totalMarketsCreated}
           </div>
-          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
-            Active on Arbitrum Sepolia
+          <div className="text-[11px] text-yes-green mt-1 font-medium">
+            Arbitrum Sepolia Non-Custodial Pools
           </div>
         </div>
 
         <div
           className={`p-5 rounded-2xl border transition-all ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10"
+            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
           }`}
         >
-          <div className="text-xs font-mono font-bold uppercase text-text-muted dark:text-[#A9B3AD]">
+          <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
             Configured Quests
           </div>
-          <div className="text-2xl font-mono font-black text-primary-blue mt-2">
+          <div className="text-2xl sm:text-3xl font-black font-mono mt-1 text-primary-blue">
             {activeQuestsCount} Active
           </div>
-          <div className="text-[11px] text-text-muted dark:text-[#A9B3AD] mt-1">
-            Live gamification tasks
+          <div className="text-[11px] text-text-muted dark:text-[#A9B3AD] mt-1 font-medium">
+            Gamification XP distribution rules
           </div>
         </div>
 
         <div
           className={`p-5 rounded-2xl border transition-all ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10"
+            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
           }`}
         >
-          <div className="text-xs font-mono font-bold uppercase text-text-muted dark:text-[#A9B3AD]">
+          <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
             Pending Resolutions
           </div>
-          <div className="text-2xl font-mono font-black text-warning-amber mt-2">
+          <div className="text-2xl sm:text-3xl font-black font-mono mt-1 text-warning-amber">
             {pendingResolutionsCount} Expired
           </div>
           <div className="text-[11px] text-warning-amber mt-1 font-medium">
@@ -306,12 +383,16 @@ export default function AdminDashboardPage({
         )}
         {activeTab === "manage-quests" && (
           <AdminQuestManagementForm
+            initialQuests={adminQuests}
             onCreateQuest={handleQuestCreated}
             onToggleQuestStatus={handleQuestToggle}
           />
         )}
         {activeTab === "resolve-markets" && (
-          <AdminMarketResolutionTable onResolveMarket={handleMarketResolved} />
+          <AdminMarketResolutionTable
+            initialMarkets={resolvableMarkets}
+            onResolveMarket={handleMarketResolved}
+          />
         )}
       </main>
     </div>

@@ -27,72 +27,8 @@ export interface AdminQuestManagementFormProps {
   className?: string;
 }
 
-// TODO(TICKET-53): Connect AdminQuestManagementForm to backend API (POST /api/admin/quests, PATCH /api/admin/quests/[id]) to persist quests in Supabase
-const DEFAULT_QUESTS: AdminQuestItem[] = [
-  {
-    id: "quest-1",
-    title: "Connect Web3 Wallet",
-    description: "Connect your Web3 crypto wallet to Omen prediction platform",
-    category: "ONBOARDING",
-    points: 100,
-    recurrence: "ONE_TIME",
-    actionUrl: "https://omen.market",
-    isActive: true,
-    completionsCount: 1420,
-    createdAt: "2026-03-01",
-  },
-  {
-    id: "quest-2",
-    title: "Follow Omen on X (Twitter)",
-    description: "Follow official @OmenMarket account on X to receive platform alpha",
-    category: "SOCIAL",
-    points: 150,
-    recurrence: "ONE_TIME",
-    actionUrl: "https://twitter.com/omenmarket",
-    isActive: true,
-    completionsCount: 890,
-    createdAt: "2026-03-02",
-  },
-  {
-    id: "quest-3",
-    title: "Place Your First Prediction",
-    description: "Stake at least 10 USDT on any active prediction market outcome",
-    category: "ON-CHAIN",
-    points: 300,
-    recurrence: "ONE_TIME",
-    actionUrl: "https://omen.market/predictions",
-    isActive: true,
-    completionsCount: 650,
-    createdAt: "2026-03-05",
-  },
-  {
-    id: "quest-4",
-    title: "Daily Platform Check-in",
-    description: "Claim your daily check-in reward to maintain streak and gain XP multipliers",
-    category: "DAILY",
-    points: 50,
-    recurrence: "DAILY",
-    actionUrl: "https://omen.market/quests",
-    isActive: true,
-    completionsCount: 2840,
-    createdAt: "2026-03-06",
-  },
-  {
-    id: "quest-5",
-    title: "Join Discord Community",
-    description: "Join the verified community server and introduce yourself in #general",
-    category: "SOCIAL",
-    points: 120,
-    recurrence: "ONE_TIME",
-    actionUrl: "https://discord.gg/omen",
-    isActive: false,
-    completionsCount: 210,
-    createdAt: "2026-03-07",
-  },
-];
-
 export default function AdminQuestManagementForm({
-  initialQuests = DEFAULT_QUESTS,
+  initialQuests = [],
   onCreateQuest,
   onToggleQuestStatus,
   onDeleteQuest,

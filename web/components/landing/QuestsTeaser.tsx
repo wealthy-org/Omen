@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTheme } from "../ThemeProvider";
 
@@ -7,45 +8,79 @@ export interface QuestsTeaserProps {
   theme?: "dark" | "light";
 }
 
+interface TeaserQuest {
+  title: string;
+  category: string;
+  reward: string;
+  progress: string;
+}
+
 export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
   const contextTheme = useTheme();
   const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
 
-  const DAYS = [
-    { day: "D1", points: "+50", status: "completed", isMilestone: false },
-    { day: "D2", points: "+50", status: "completed", isMilestone: false },
-    { day: "D3", points: "+100", status: "completed", multiplier: "1.5x", isMilestone: true },
-    { day: "D4", points: "+50", status: "today", isMilestone: false },
-    { day: "D5", points: "+75", status: "locked", isMilestone: false },
-    { day: "D6", points: "+100", status: "locked", multiplier: "2.0x", isMilestone: false },
-    { day: "D7", points: "+300", status: "locked", multiplier: "3.0x", isMilestone: true },
-  ];
-
-  const ACTIVE_QUESTS = [
+  const [quests, setQuests] = useState<TeaserQuest[]>([
     {
       title: "Connect Web3 Wallet",
       category: "Onboarding",
       reward: "+100 PTS",
-      status: "Available",
       progress: "0/1",
-      pct: 0,
     },
     {
       title: "Place First Binary Bet (≥ 0.01 ETH)",
-      category: "Betting",
+      category: "On-Chain",
       reward: "+250 PTS",
-      status: "Available",
       progress: "0/1",
-      pct: 0,
     },
     {
-      title: "Maintain 3-Day Check-in Streak",
-      category: "Streak",
-      reward: "+150 PTS",
-      status: "In Progress",
-      progress: "2/3",
-      pct: 66,
+      title: "Daily Check-in Streak",
+      category: "Daily",
+      reward: "+50 PTS",
+      progress: "1/1",
     },
+  ]);
+  const [streakCount, setStreakCount] = useState(3);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchQuestsTeaser() {
+      try {
+        const res = await fetch("/api/quests");
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            if (data.quests && Array.isArray(data.quests) && data.quests.length > 0) {
+              const mapped: TeaserQuest[] = data.quests.slice(0, 3).map((q: any) => ({
+                title: q.title,
+                category: (q.category || "DAILY").toUpperCase(),
+                reward: `+${q.points_reward || 100} PTS`,
+                progress: q.is_completed ? "1/1" : "0/1",
+              }));
+              setQuests(mapped);
+            }
+            if (data.userProfile && data.userProfile.streak_count !== undefined) {
+              setStreakCount(Number(data.userProfile.streak_count));
+            }
+          }
+        }
+      } catch {
+      }
+    }
+
+    fetchQuestsTeaser();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const DAYS = [
+    { day: "D1", points: "+50", status: streakCount >= 1 ? "completed" : "locked", isMilestone: false },
+    { day: "D2", points: "+50", status: streakCount >= 2 ? "completed" : "locked", isMilestone: false },
+    { day: "D3", points: "+100", status: streakCount >= 3 ? "completed" : streakCount === 2 ? "today" : "locked", multiplier: "1.5x", isMilestone: true },
+    { day: "D4", points: "+50", status: streakCount >= 4 ? "completed" : streakCount === 3 ? "today" : "locked", isMilestone: false },
+    { day: "D5", points: "+75", status: streakCount >= 5 ? "completed" : streakCount === 4 ? "today" : "locked", isMilestone: false },
+    { day: "D6", points: "+100", status: streakCount >= 6 ? "completed" : streakCount === 5 ? "today" : "locked", multiplier: "2.0x", isMilestone: false },
+    { day: "D7", points: "+300", status: streakCount >= 7 ? "completed" : streakCount === 6 ? "today" : "locked", multiplier: "3.0x", isMilestone: true },
   ];
 
   return (
@@ -163,7 +198,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
                 </span>
               </div>
               <div className={`text-lg font-black tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
-                🔥 3-Day Consecutive Streak
+                🔥 {streakCount}-Day Consecutive Streak
               </div>
               <p className={`text-xs mt-2 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
                 You are earning with a <strong>1.5x Point Multiplier</strong>. Check in tomorrow to keep your bonus active!
@@ -188,7 +223,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
           </div>
 
           <div className="divide-y divide-emerald-500/10 border border-emerald-500/10 rounded-2xl overflow-hidden">
-            {ACTIVE_QUESTS.map((quest) => (
+            {quests.map((quest) => (
               <div
                 key={quest.title}
                 className={`p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors ${

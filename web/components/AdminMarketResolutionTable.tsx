@@ -68,50 +68,8 @@ export const CANCELLATION_REASONS: {
   },
 ];
 
-const DEFAULT_RESOLVABLE_MARKETS: ResolvableMarketItem[] = [
-  {
-    id: "market-101",
-    title: "Will Ethereum Dencun Upgrade reduce L2 gas fees by >80%?",
-    category: "CRYPTO",
-    totalPool: 125000,
-    volume: 340000,
-    yesPercentage: 88,
-    noPercentage: 12,
-    endTime: "2026-03-10T12:00:00Z",
-    resolutionSourceUrl: "https://l2fees.info",
-    resolutionCriteria: "Resolves to YES if median L2 transaction gas costs drop by >= 80% within 14 days post-Dencun.",
-    status: "PENDING_RESOLUTION",
-  },
-  {
-    id: "market-102",
-    title: "Will SpaceX Starship complete a full orbital landing test?",
-    category: "TECH",
-    totalPool: 85000,
-    volume: 195000,
-    yesPercentage: 45,
-    noPercentage: 55,
-    endTime: "2026-03-12T18:30:00Z",
-    resolutionSourceUrl: "https://spacex.com/launches",
-    resolutionCriteria: "Resolves to YES if SpaceX officially confirms successful Starship booster soft ocean splashdown or tower catch.",
-    status: "PENDING_RESOLUTION",
-  },
-  {
-    id: "market-103",
-    title: "Will Arbitrum DAO approve the Gaming Catalyst grant proposal?",
-    category: "CRYPTO",
-    totalPool: 64000,
-    volume: 112000,
-    yesPercentage: 72,
-    noPercentage: 28,
-    endTime: "2026-03-14T00:00:00Z",
-    resolutionSourceUrl: "https://snapshot.org/#/arbitrumfoundation.eth",
-    resolutionCriteria: "Resolves to YES if the Snapshot and Tally on-chain governance votes surpass quorum and pass before deadline.",
-    status: "PENDING_RESOLUTION",
-  },
-];
-
 export default function AdminMarketResolutionTable({
-  initialMarkets = DEFAULT_RESOLVABLE_MARKETS,
+  initialMarkets = [],
   onResolveMarket,
   className = "",
 }: AdminMarketResolutionTableProps) {

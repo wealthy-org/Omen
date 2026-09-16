@@ -6,7 +6,7 @@ import DailyCheckinWidget from "@/components/DailyCheckinWidget";
 import QuestCard, { QuestCategory, QuestStatus } from "@/components/QuestCard";
 import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
 
-interface QuestItem {
+export interface QuestItem {
   id: string;
   title: string;
   description: string;
@@ -17,120 +17,59 @@ interface QuestItem {
   actionUrl?: string;
 }
 
-const INITIAL_QUESTS: QuestItem[] = [
-  {
-    id: "quest-onboarding-1",
-    title: "Connect Web3 Wallet",
-    description: "Connect your Phantom EVM wallet to initialize your Omen account and receive your starter bonus.",
-    category: "ONBOARDING",
-    points: 100,
-    status: "COMPLETED",
-    actionLabel: "Connect Wallet",
-  },
-  {
-    id: "quest-onboarding-2",
-    title: "Request Arbitrum Sepolia Testnet ETH",
-    description: "Claim faucet testnet tokens to fund your binary prediction positions.",
-    category: "ONBOARDING",
-    points: 150,
-    status: "AVAILABLE",
-    actionLabel: "Claim Faucet",
-    actionUrl: "https://faucets.chain.link/arbitrum-sepolia",
-  },
-  {
-    id: "quest-social-1",
-    title: "Follow @OmenPredict on X",
-    description: "Follow the official Omen protocol channel on X to get instant resolution updates.",
-    category: "SOCIAL",
-    points: 200,
-    status: "AVAILABLE",
-    actionLabel: "Follow on X",
-    actionUrl: "https://x.com",
-  },
-  {
-    id: "quest-social-2",
-    title: "Join Official Discord Community",
-    description: "Verify your Discord membership to access alpha channels and trader discussion rooms.",
-    category: "SOCIAL",
-    points: 250,
-    status: "AVAILABLE",
-    actionLabel: "Join Discord",
-    actionUrl: "https://discord.com",
-  },
-  {
-    id: "quest-onchain-1",
-    title: "Place Your First Market Prediction",
-    description: "Execute a YES or NO prediction slip of at least 0.01 ETH on any active prediction market.",
-    category: "ON-CHAIN",
-    points: 500,
-    status: "AVAILABLE",
-    actionLabel: "Explore Markets",
-  },
-  {
-    id: "quest-onchain-2",
-    title: "Achieve First Winning Settlement Claim",
-    description: "Successfully claim payout rewards from a resolved winning prediction pool.",
-    category: "ON-CHAIN",
-    points: 750,
-    status: "AVAILABLE",
-    actionLabel: "View Settlements",
-  },
-  {
-    id: "quest-daily-1",
-    title: "Complete Daily Check-in Streak",
-    description: "Claim your consecutive daily check-in to preserve your multiplier momentum.",
-    category: "DAILY",
-    points: 50,
-    status: "COMPLETED",
-    actionLabel: "Check In",
-  },
-  {
-    id: "quest-daily-2",
-    title: "Share Market Analysis on Social",
-    description: "Share any live market probability chart with the tag #OmenPredict.",
-    category: "DAILY",
-    points: 100,
-    status: "AVAILABLE",
-    actionLabel: "Share Prediction",
-  },
-];
-
-type FilterCategory = "ALL" | QuestCategory;
+export type FilterCategory = "ALL" | QuestCategory;
 
 export default function QuestsPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [quests, setQuests] = useState<QuestItem[]>(INITIAL_QUESTS);
+  const [quests, setQuests] = useState<QuestItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("ALL");
-  const [totalPoints, setTotalPoints] = useState(2450);
+  const [totalPoints, setTotalPoints] = useState(0);
+  const [streakCount, setStreakCount] = useState(0);
 
   useEffect(() => {
+    let isMounted = true;
     async function fetchLiveQuests() {
       const demo = mockPredictionMarket.getDemoWallet();
       try {
+        setIsLoading(true);
         const res = await fetch(`/api/quests?wallet_address=${demo.address}`);
         if (res.ok) {
           const data = await res.json();
-          if (data.quests && Array.isArray(data.quests) && data.quests.length > 0) {
-            const mapped: QuestItem[] = data.quests.map((q: any) => ({
-              id: q.id,
-              title: q.title,
-              description: q.description || "",
-              category: (q.category || "DAILY").toUpperCase() as QuestCategory,
-              points: Number(q.points_reward || 100),
-              status: q.is_completed ? "COMPLETED" : "AVAILABLE",
-              actionLabel: q.is_completed ? "Completed" : "Complete Quest",
-              actionUrl: q.action_url,
-            }));
-            setQuests(mapped);
+          if (isMounted) {
+            if (data.quests && Array.isArray(data.quests)) {
+              const mapped: QuestItem[] = data.quests.map((q: any) => ({
+                id: q.id,
+                title: q.title,
+                description: q.description || "",
+                category: (q.category || "DAILY").toUpperCase() as QuestCategory,
+                points: Number(q.points_reward || 100),
+                status: q.is_completed ? "COMPLETED" : "AVAILABLE",
+                actionLabel: q.is_completed ? "Completed" : "Complete Quest",
+                actionUrl: q.action_url,
+              }));
+              setQuests(mapped);
+            }
+            if (data.userProfile) {
+              setTotalPoints(Number(data.userProfile.total_points || 0));
+              setStreakCount(Number(data.userProfile.streak_count || 0));
+            }
           }
         }
       } catch {
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchLiveQuests();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleQuestAction = async (questId: string) => {
@@ -157,6 +96,7 @@ export default function QuestsPage() {
   const handleDailyCheckIn = async (_day: number, points: number) => {
     const demo = mockPredictionMarket.getDemoWallet();
     setTotalPoints((prev) => prev + points);
+    setStreakCount((prev) => prev + 1);
 
     try {
       await fetch("/api/checkin", {
@@ -182,6 +122,19 @@ export default function QuestsPage() {
     { label: "On-Chain", value: "ON-CHAIN" },
     { label: "Daily", value: "DAILY" },
   ];
+
+  const tierLabel =
+    totalPoints >= 5000
+      ? "Tier III • Gold Legend"
+      : totalPoints >= 1000
+      ? "Tier II • Silver Hunter"
+      : "Tier I • Bronze Initiate";
+
+  const tierMultiplier =
+    totalPoints >= 5000 ? "2.0x Multiplier Boost" : totalPoints >= 1000 ? "1.5x Multiplier Boost" : "1.0x Multiplier";
+
+  const airdropRank =
+    totalPoints >= 5000 ? "Top 3%" : totalPoints >= 2000 ? "Top 8%" : totalPoints >= 500 ? "Top 25%" : "Top 50%";
 
   return (
     <div className="w-full flex flex-col gap-8 pb-16 animate-in fade-in duration-300">
@@ -216,10 +169,10 @@ export default function QuestsPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-3">
               <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-white dark:bg-white/10 border border-border-subtle dark:border-white/10 text-accent-navy dark:text-white">
-                Tier II • Silver Hunter
+                {tierLabel}
               </span>
               <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-yes-green-soft dark:bg-yes-green/10 border border-yes-green/20 text-yes-green">
-                1.5x Multiplier Boost
+                {tierMultiplier}
               </span>
             </div>
           </div>
@@ -235,21 +188,24 @@ export default function QuestsPage() {
             <div className={`p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Active Streak</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-warning-amber">
-                3 Days
+                {streakCount} Days
               </div>
             </div>
 
             <div className={`col-span-2 sm:col-span-1 p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Airdrop Rank</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-yes-green">
-                Top 8%
+                {airdropRank}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <DailyCheckinWidget onCheckIn={handleDailyCheckIn} />
+      <DailyCheckinWidget
+        currentStreak={streakCount}
+        onCheckIn={handleDailyCheckIn}
+      />
 
       <section className="flex flex-col gap-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -301,7 +257,18 @@ export default function QuestsPage() {
           </div>
         </div>
 
-        {filteredQuests.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col gap-3.5 animate-pulse">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className={`p-6 rounded-2xl border ${
+                  isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-border-subtle"
+                } h-28`}
+              />
+            ))}
+          </div>
+        ) : filteredQuests.length === 0 ? (
           <div
             className={`p-10 rounded-2xl border text-center ${
               isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-border-subtle"
