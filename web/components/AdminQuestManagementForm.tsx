@@ -27,6 +27,7 @@ export interface AdminQuestManagementFormProps {
   className?: string;
 }
 
+// TODO(TICKET-53): Connect AdminQuestManagementForm to backend API (POST /api/admin/quests, PATCH /api/admin/quests/[id]) to persist quests in Supabase
 const DEFAULT_QUESTS: AdminQuestItem[] = [
   {
     id: "quest-1",
@@ -198,6 +199,21 @@ export default function AdminQuestManagementForm({
 
       if (onCreateQuest) {
         await onCreateQuest(newQuest);
+      } else {
+        try {
+          await fetch("/api/admin/quests", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: newQuest.title,
+              description: newQuest.description,
+              category: newQuest.category,
+              points_reward: newQuest.points,
+              action_url: newQuest.actionUrl,
+            }),
+          });
+        } catch {
+        }
       }
 
       setQuests((prev) => [newQuest, ...prev]);
@@ -223,6 +239,15 @@ export default function AdminQuestManagementForm({
     try {
       if (onToggleQuestStatus) {
         await onToggleQuestStatus(id, newActiveState);
+      } else {
+        try {
+          await fetch(`/api/admin/quests/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ is_active: newActiveState }),
+          });
+        } catch {
+        }
       }
 
       setQuests((prev) =>
@@ -242,6 +267,13 @@ export default function AdminQuestManagementForm({
     try {
       if (onDeleteQuest) {
         await onDeleteQuest(deleteModalQuest.id);
+      } else {
+        try {
+          await fetch(`/api/admin/quests/${deleteModalQuest.id}`, {
+            method: "DELETE",
+          });
+        } catch {
+        }
       }
 
       setQuests((prev) => prev.filter((q) => q.id !== deleteModalQuest.id));

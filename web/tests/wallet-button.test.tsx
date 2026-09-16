@@ -23,7 +23,13 @@ describe("ConnectWalletButton Component", () => {
     vi.useFakeTimers();
     const onConnectMock = vi.fn();
 
-    render(<ConnectWalletButton onConnect={onConnectMock} />);
+    render(
+      <ConnectWalletButton
+        onConnect={onConnectMock}
+        initialAddress="0x1234567890abcdef1234567890abcdef12345678"
+        initialBalance="0.45 ETH"
+      />
+    );
 
     const button = screen.getByRole("button", { name: /connect wallet/i });
     fireEvent.click(button);

@@ -4,6 +4,9 @@ export const PREDICTION_MARKET_ADDRESS =
 
 export const ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
 
+export const USE_MOCK_CONTRACT =
+  process.env.NEXT_PUBLIC_USE_MOCK_CONTRACT !== "false";
+
 export const PREDICTION_MARKET_ABI = [
   {
     "inputs": [

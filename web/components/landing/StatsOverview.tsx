@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useTheme } from "../ThemeProvider";
 
@@ -10,6 +11,33 @@ export interface StatsOverviewProps {
 export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) {
   const contextTheme = useTheme();
   const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
+
+  const [stats, setStats] = useState({
+    totalTvl: "148.50 ETH",
+    activeMarkets: "24 Markets",
+    pointsDistributed: "1,420,000 PTS",
+    activeWallets: "4,120 Wallets",
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    fetch("/api/stats/overview")
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data?.success && data?.stats) {
+          setStats({
+            totalTvl: `${data.stats.total_tvl_eth} ETH`,
+            activeMarkets: `${data.stats.active_markets} Markets`,
+            pointsDistributed: `${Number(data.stats.total_points).toLocaleString()} PTS`,
+            activeWallets: `${Number(data.stats.active_wallets).toLocaleString()} Wallets`,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <section className="w-full my-4 sm:my-6">
@@ -43,7 +71,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
                 isDark ? "text-white group-hover:text-[#34D399]" : "text-[#0B1F16] group-hover:text-[#0E7A4E]"
               }`}
             >
-              148.50 ETH
+              {stats.totalTvl}
             </div>
           </div>
 
@@ -88,7 +116,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
                 isDark ? "text-white group-hover:text-[#34D399]" : "text-[#0B1F16] group-hover:text-[#0E7A4E]"
               }`}
             >
-              24 Markets
+              {stats.activeMarkets}
             </div>
           </div>
 
@@ -131,7 +159,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
                 isDark ? "text-white group-hover:text-[#34D399]" : "text-[#0B1F16] group-hover:text-[#0E7A4E]"
               }`}
             >
-              1,420,000 PTS
+              {stats.pointsDistributed}
             </div>
           </div>
 
@@ -173,7 +201,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
                 isDark ? "text-white group-hover:text-[#34D399]" : "text-[#0B1F16] group-hover:text-[#0E7A4E]"
               }`}
             >
-              4,120 Wallets
+              {stats.activeWallets}
             </div>
           </div>
 

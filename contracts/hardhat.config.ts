@@ -4,6 +4,21 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
+const getAccounts = () => {
+  if (process.env.PRIVATE_KEY) {
+    return [process.env.PRIVATE_KEY];
+  }
+  if (process.env.MNEMONIC) {
+    return {
+      mnemonic: process.env.MNEMONIC.trim(),
+      path: "m/44'/60'/0'/0",
+      initialIndex: 0,
+      count: 10,
+    };
+  }
+  return [];
+};
+
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.20",
@@ -17,9 +32,9 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {},
     arbitrumSepolia: {
-      url: process.env.SEPOLIA_RPC_URL || "https://sepolia-rollup.arbitrum.io/rpc",
+      url: process.env.ARBITRUM_SEPOLIA_RPC_URL || process.env.SEPOLIA_RPC_URL || "https://sepolia-rollup.arbitrum.io/rpc",
       chainId: 421614,
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      accounts: getAccounts(),
     },
   },
   paths: {

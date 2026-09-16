@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "./ThemeProvider";
+import { mockPredictionMarket } from "../lib/mockPredictionMarket";
 
 export interface ConnectWalletButtonProps {
   initialStatus?: "disconnected" | "connecting" | "connected";
@@ -14,8 +15,8 @@ export interface ConnectWalletButtonProps {
 
 export default function ConnectWalletButton({
   initialStatus = "disconnected",
-  initialAddress = "0x1234567890abcdef1234567890abcdef12345678",
-  initialBalance = "0.45 ETH",
+  initialAddress,
+  initialBalance,
   className = "",
   onConnect,
   onDisconnect,
@@ -23,9 +24,13 @@ export default function ConnectWalletButton({
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  const defaultDemo = mockPredictionMarket.getDemoWallet();
+  const activeAddress = initialAddress !== undefined ? initialAddress : defaultDemo.address;
+  const activeBalance = initialBalance !== undefined ? initialBalance : defaultDemo.formattedBalance;
+
   const [status, setStatus] = useState<"disconnected" | "connecting" | "connected">(initialStatus);
-  const [address, setAddress] = useState(initialAddress);
-  const [balance, setBalance] = useState(initialBalance);
+  const [address, setAddress] = useState(activeAddress);
+  const [balance, setBalance] = useState(activeBalance);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -36,11 +41,15 @@ export default function ConnectWalletButton({
   }, [initialStatus]);
 
   useEffect(() => {
-    setAddress(initialAddress);
+    if (initialAddress !== undefined) {
+      setAddress(initialAddress);
+    }
   }, [initialAddress]);
 
   useEffect(() => {
-    setBalance(initialBalance);
+    if (initialBalance !== undefined) {
+      setBalance(initialBalance);
+    }
   }, [initialBalance]);
 
   useEffect(() => {
@@ -59,14 +68,33 @@ export default function ConnectWalletButton({
     };
   }, [isDropdownOpen]);
 
+  const syncWalletToDatabase = async (walletAddr: string) => {
+    try {
+      await fetch("/api/wallet/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet_address: walletAddr }),
+      });
+    } catch {
+    }
+  };
+
   const handleConnect = () => {
     setStatus("connecting");
     if (onConnect) {
       onConnect();
     }
+
     const timer = setTimeout(() => {
+      const demo = mockPredictionMarket.getDemoWallet();
+      const finalAddr = initialAddress !== undefined ? initialAddress : demo.address;
+      const finalBal = initialBalance !== undefined ? initialBalance : demo.formattedBalance;
+      setAddress(finalAddr);
+      setBalance(finalBal);
       setStatus("connected");
+      syncWalletToDatabase(finalAddr);
     }, 600);
+
     return () => clearTimeout(timer);
   };
 
@@ -177,12 +205,18 @@ export default function ConnectWalletButton({
           <div
             role="menu"
             aria-label="Wallet options"
-            className={`absolute right-0 top-full mt-2 w-52 rounded-xl shadow-xl py-1.5 z-50 border backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150 ${
+            className={`absolute right-0 top-full mt-2 w-56 rounded-xl shadow-xl py-1.5 z-50 border backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150 ${
               isDark
                 ? "bg-[#0A0F0C]/95 border-white/10 text-white shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
                 : "bg-white/95 border-emerald-500/10 text-[#0B1F16] shadow-[0_8px_30px_rgba(14,122,78,0.1)]"
             }`}
           >
+            <div className="px-3.5 py-1.5 mb-1 border-b border-white/5">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400">
+                Demo Wallet (Mock Mode)
+              </span>
+            </div>
+
             <button
               type="button"
               role="menuitem"

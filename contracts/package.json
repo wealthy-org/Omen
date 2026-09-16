@@ -5,7 +5,8 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "deploy:arbitrum-sepolia": "hardhat run scripts/deploy.ts --network arbitrumSepolia"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.0",
