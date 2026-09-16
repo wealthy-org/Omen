@@ -17,14 +17,15 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("omen-theme") as Theme | null;
-    if (saved === "dark" || saved === "light") {
-      setTheme(saved);
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("omen-theme") as Theme | null;
+      if (saved === "dark" || saved === "light") {
+        return saved;
+      }
     }
-  }, []);
+    return "dark";
+  });
 
   const handleSetTheme = (newTheme: Theme) => {
     setTheme(newTheme);

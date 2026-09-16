@@ -1,67 +1,82 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 
+const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+const ONE_HOUR_MS = 1000 * 60 * 60;
+const TWENTY_FOUR_HOURS_MS = 24 * ONE_HOUR_MS;
+const FORTY_EIGHT_HOURS_MS = 48 * ONE_HOUR_MS;
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { wallet_address } = body;
-
-    if (!wallet_address || typeof wallet_address !== "string") {
-      return NextResponse.json({ error: "Missing required wallet_address" }, { status: 400 });
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body.wallet_address !== "string") {
+      return NextResponse.json(
+        { error: "wallet_address is required and must be a string" },
+        { status: 400 }
+      );
     }
 
-    const normalizedAddress = wallet_address.toLowerCase();
-    if (!/^0x[a-fA-F0-9]{40}$/.test(normalizedAddress)) {
-      return NextResponse.json({ error: "Invalid EVM wallet address format" }, { status: 400 });
+    const rawAddress = body.wallet_address.trim();
+    if (!EVM_ADDRESS_REGEX.test(rawAddress)) {
+      return NextResponse.json(
+        { error: "Invalid EVM wallet address format" },
+        { status: 400 }
+      );
     }
 
+    const normalizedAddress = rawAddress.toLowerCase();
     const supabase = getSupabaseAdminClient();
-    const { data: user, error: userError } = await supabase
+
+    const { data: user, error: fetchError } = await supabase
       .from("users")
-      .select("*")
+      .select("id, wallet_address, total_points, streak_count, last_checkin_at")
       .eq("wallet_address", normalizedAddress)
       .maybeSingle();
 
-    if (userError) {
-      return NextResponse.json({ error: userError.message }, { status: 500 });
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
     }
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "User not found. Connect wallet first." },
+        { status: 404 }
+      );
     }
 
-    const now = new Date();
-    let currentStreak = 1;
-    let earnedPoints = 100;
+    const now = Date.now();
+    let newStreak = 1;
 
     if (user.last_checkin_at) {
-      const lastCheckin = new Date(user.last_checkin_at);
-      const diffHours = (now.getTime() - lastCheckin.getTime()) / (1000 * 60 * 60);
+      const lastCheckinTime = new Date(user.last_checkin_at).getTime();
+      const deltaMs = now - lastCheckinTime;
 
-      if (diffHours < 24) {
-        const remainingHours = Math.ceil(24 - diffHours);
+      if (deltaMs < TWENTY_FOUR_HOURS_MS) {
+        const remainingSeconds = Math.ceil((TWENTY_FOUR_HOURS_MS - deltaMs) / 1000);
         return NextResponse.json(
-          { error: `Check-in on cooldown. Please wait ${remainingHours} hours.` },
+          {
+            error: "Check-in cooldown active. Please try again after 24 hours.",
+            remaining_seconds: remainingSeconds,
+          },
           { status: 400 }
         );
-      }
-
-      if (diffHours <= 48) {
-        currentStreak = (user.streak_count || 1) + 1;
+      } else if (deltaMs <= FORTY_EIGHT_HOURS_MS) {
+        newStreak = (user.streak_count || 0) + 1;
       } else {
-        currentStreak = 1;
+        newStreak = 1;
       }
     }
 
-    earnedPoints = Math.round(100 * (1 + (currentStreak - 1) * 0.25));
-    const newTotalPoints = Number(user.total_points || 0) + earnedPoints;
+    const pointsEarned = Math.round(100 * (1 + (newStreak - 1) * 0.25));
+    const updatedTotalPoints = Number(user.total_points) + pointsEarned;
+    const nowIso = new Date(now).toISOString();
 
     const { error: updateError } = await supabase
       .from("users")
       .update({
-        total_points: newTotalPoints,
-        last_checkin_at: now.toISOString(),
-        streak_count: currentStreak,
+        total_points: updatedTotalPoints,
+        streak_count: newStreak,
+        last_checkin_at: nowIso,
       })
       .eq("wallet_address", normalizedAddress);
 
@@ -69,21 +84,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    await supabase.from("points_events").insert({
-      wallet_address: normalizedAddress,
-      quest_id: null,
-      source: "daily_checkin",
-      points: earnedPoints,
-    });
+    const { error: eventError } = await supabase
+      .from("points_events")
+      .insert({
+        wallet_address: normalizedAddress,
+        quest_id: null,
+        source: "daily_checkin",
+        points: pointsEarned,
+        created_at: nowIso,
+      });
+
+    if (eventError) {
+      return NextResponse.json({ error: eventError.message }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
-      earned_points: earnedPoints,
-      total_points: newTotalPoints,
-      streak_count: currentStreak,
-      last_checkin_at: now.toISOString(),
+      points_earned: pointsEarned,
+      streak_count: newStreak,
+      total_points: updatedTotalPoints,
+      last_checkin_at: nowIso,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err?.message || "Internal server error" }, { status: 500 });
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : "Internal Server Error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

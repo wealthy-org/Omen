@@ -64,7 +64,6 @@ CREATE INDEX IF NOT EXISTS idx_bets_market_id ON bets(market_id);
 CREATE INDEX IF NOT EXISTS idx_bets_wallet_address ON bets(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_bets_tx_hash ON bets(tx_hash);
 
--- 8. Row Level Security (RLS) & Public Read Policies
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE points_events ENABLE ROW LEVEL SECURITY;

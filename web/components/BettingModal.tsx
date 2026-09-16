@@ -33,11 +33,14 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [prevInitialOutcome, setPrevInitialOutcome] = useState(initialOutcome);
+
+  if (initialOutcome !== prevInitialOutcome) {
+    setPrevInitialOutcome(initialOutcome);
     if (initialOutcome) {
       setSelectedOutcome(initialOutcome);
     }
-  }, [initialOutcome]);
+  }
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

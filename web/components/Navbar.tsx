@@ -32,12 +32,15 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
   const [isWrongNetworkState, setIsWrongNetworkState] = useState(isWrongNetwork);
   const [isNetworkModalOpen, setIsNetworkModalOpen] = useState(isWrongNetwork);
 
-  useEffect(() => {
+  const [prevIsWrongNetwork, setPrevIsWrongNetwork] = useState(isWrongNetwork);
+
+  if (isWrongNetwork !== prevIsWrongNetwork) {
+    setPrevIsWrongNetwork(isWrongNetwork);
     setIsWrongNetworkState(isWrongNetwork);
     if (isWrongNetwork) {
       setIsNetworkModalOpen(true);
     }
-  }, [isWrongNetwork]);
+  }
 
   useEffect(() => {
     const handleScroll = () => {
