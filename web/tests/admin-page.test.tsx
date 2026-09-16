@@ -1,0 +1,113 @@
+import React from "react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import AdminDashboardPage from "../app/admin/page";
+
+describe("AdminDashboardPage Component", () => {
+  it("renders Access Denied screen when wallet is unauthorized or not connected", () => {
+    render(<AdminDashboardPage initialConnectedAddress="" />);
+
+    expect(screen.getByRole("alert", { name: /access denied screen/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /access denied/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(/administrator wallet authorization is required/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/no web3 wallet currently connected/i)).toBeInTheDocument();
+  });
+
+  it("renders Access Denied screen with unauthorized wallet address", () => {
+    render(
+      <AdminDashboardPage initialConnectedAddress="0x8888888888888888888888888888888888888888" />
+    );
+
+    expect(screen.getByRole("heading", { name: /access denied/i })).toBeInTheDocument();
+    expect(
+      screen.getByText("0x8888888888888888888888888888888888888888")
+    ).toBeInTheDocument();
+  });
+
+  it("authorizes when clicking Connect Admin Wallet from Access Denied screen", () => {
+    render(<AdminDashboardPage initialConnectedAddress="" />);
+
+    const connectAdminBtn = screen.getByRole("button", {
+      name: /connect admin wallet/i,
+    });
+    fireEvent.click(connectAdminBtn);
+
+    expect(
+      screen.getByRole("heading", { name: /admin dashboard/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/admin authorized/i)).toBeInTheDocument();
+  });
+
+  it("renders metrics overview and default Create Market tab for authorized admin", () => {
+    render(
+      <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: /admin dashboard/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: /admin metrics overview/i })
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("Total Markets Created")).toBeInTheDocument();
+    expect(screen.getByText("Configured Quests")).toBeInTheDocument();
+    expect(screen.getByText("Pending Resolutions")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("heading", { name: /create prediction market/i })
+    ).toBeInTheDocument();
+  });
+
+  it("switches to Manage Quests tab and renders quest management panel", () => {
+    render(
+      <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
+    );
+
+    const manageQuestsTab = screen.getByRole("button", {
+      name: /manage quests/i,
+    });
+    fireEvent.click(manageQuestsTab);
+
+    expect(
+      screen.getByRole("heading", { name: /create new quest/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /manage existing quests/i })
+    ).toBeInTheDocument();
+  });
+
+  it("switches to Resolve Expired Markets tab and renders resolution table", () => {
+    render(
+      <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
+    );
+
+    const resolveMarketsTab = screen.getByRole("button", {
+      name: /resolve expired markets/i,
+    });
+    fireEvent.click(resolveMarketsTab);
+
+    expect(
+      screen.getByRole("heading", {
+        name: /expired markets pending resolution/i,
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("disconnects admin session and returns to Access Denied screen", () => {
+    render(
+      <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
+    );
+
+    const disconnectBtn = screen.getByRole("button", {
+      name: /disconnect admin session/i,
+    });
+    fireEvent.click(disconnectBtn);
+
+    expect(
+      screen.getByRole("heading", { name: /access denied/i })
+    ).toBeInTheDocument();
+  });
+});
