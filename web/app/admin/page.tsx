@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useTheme } from "../../components/ThemeProvider";
 import { AdminMarketCreateForm } from "../../components/AdminMarketCreateForm";
 import AdminQuestManagementForm from "../../components/AdminQuestManagementForm";
 import AdminMarketResolutionTable from "../../components/AdminMarketResolutionTable";
+import AdminLoginForm from "../../components/AdminLoginForm";
 
 export type AdminTab = "create-market" | "manage-quests" | "resolve-markets";
 
@@ -21,14 +21,14 @@ const AUTHORIZED_ADMIN_ADDRESSES = [
 ].filter(Boolean);
 
 export default function AdminDashboardPage({
-  initialConnectedAddress = "0x1234567890abcdef1234567890abcdef12345678",
+  initialConnectedAddress = "",
   initialTab = "create-market",
 }: AdminDashboardProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const [connectedAddress, setConnectedAddress] = useState<string | null>(
-    initialConnectedAddress
+    initialConnectedAddress || null
   );
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
@@ -36,71 +36,17 @@ export default function AdminDashboardPage({
     Boolean(connectedAddress) &&
     AUTHORIZED_ADMIN_ADDRESSES.includes(connectedAddress?.toLowerCase() || "");
 
-  const handleSimulateAdminLogin = () => {
-    setConnectedAddress("0x1234567890abcdef1234567890abcdef12345678");
-  };
-
   const handleDisconnect = () => {
     setConnectedAddress(null);
   };
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto flex items-center justify-center">
-        <div
-          role="alert"
-          aria-label="Access Denied Screen"
-          className={`w-full rounded-3xl border p-8 sm:p-12 text-center transition-all ${
-            isDark
-              ? "bg-[#0A0F0C] border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.6)]"
-              : "bg-white border-emerald-500/10 shadow-[0_4px_30px_rgba(14,122,78,0.08)]"
-          }`}
-        >
-          <div className="w-16 h-16 rounded-2xl bg-no-red-soft dark:bg-no-red/15 text-no-red mx-auto flex items-center justify-center mb-6">
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-accent-navy dark:text-white tracking-tight">
-            Access Denied
-          </h1>
-
-          <p className="text-sm sm:text-base text-text-muted dark:text-[#A9B3AD] mt-3 max-w-md mx-auto leading-relaxed">
-            Administrator wallet authorization is required to access protocol controls, market creation, and resolution tools.
-          </p>
-
-          <div
-            className={`mt-6 p-4 rounded-xl border text-xs font-mono max-w-md mx-auto ${
-              isDark ? "bg-[#121815] border-white/10 text-[#A9B3AD]" : "bg-[#F4FBF7] border-emerald-500/10 text-accent-navy"
-            }`}
-          >
-            {connectedAddress ? (
-              <div>
-                <span className="text-text-muted block mb-1">Current Connected Wallet (Unauthorized):</span>
-                <span className="font-bold text-no-red break-all">{connectedAddress}</span>
-              </div>
-            ) : (
-              <span className="text-warning-amber">No Web3 wallet currently connected.</span>
-            )}
-          </div>
-
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={handleSimulateAdminLogin}
-              className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-all active:scale-[0.98] cursor-pointer"
-            >
-              Connect Admin Wallet
-            </button>
-            <Link
-              href="/"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm border border-border-subtle dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-center"
-            >
-              Back to Home
-            </Link>
-          </div>
-        </div>
+      <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <AdminLoginForm
+          onLoginSuccess={(address) => setConnectedAddress(address)}
+          authorizedAddresses={AUTHORIZED_ADMIN_ADDRESSES}
+        />
       </div>
     );
   }

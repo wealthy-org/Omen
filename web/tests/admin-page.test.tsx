@@ -1,43 +1,61 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import AdminDashboardPage from "../app/admin/page";
 
 describe("AdminDashboardPage Component", () => {
-  it("renders Access Denied screen when wallet is unauthorized or not connected", () => {
+  it("renders Admin Login Portal when wallet is unauthorized or not connected", () => {
     render(<AdminDashboardPage initialConnectedAddress="" />);
 
-    expect(screen.getByRole("alert", { name: /access denied screen/i })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /access denied/i })).toBeInTheDocument();
     expect(
-      screen.getByText(/administrator wallet authorization is required/i)
+      screen.getByRole("heading", { name: /protocol admin portal/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/no web3 wallet currently connected/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/admin whitelist wallet address/i)
+    ).toBeInTheDocument();
   });
 
-  it("renders Access Denied screen with unauthorized wallet address", () => {
+  it("shows error in login portal when attempting unauthorized wallet address", async () => {
     render(
-      <AdminDashboardPage initialConnectedAddress="0x8888888888888888888888888888888888888888" />
+      <AdminDashboardPage initialConnectedAddress="" />
     );
 
-    expect(screen.getByRole("heading", { name: /access denied/i })).toBeInTheDocument();
-    expect(
-      screen.getByText("0x8888888888888888888888888888888888888888")
-    ).toBeInTheDocument();
+    const input = screen.getByLabelText(/admin whitelist wallet address/i);
+    fireEvent.change(input, {
+      target: { value: "0x8888888888888888888888888888888888888888" },
+    });
+
+    const submitBtn = screen.getByRole("button", {
+      name: /authenticate admin wallet/i,
+    });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/access denied: wallet address 0x8888888888888888888888888888888888888888 is not recognized/i)
+      ).toBeInTheDocument();
+    });
   });
 
-  it("authorizes when clicking Connect Admin Wallet from Access Denied screen", () => {
+  it("authorizes and displays Admin Dashboard after successful login", async () => {
     render(<AdminDashboardPage initialConnectedAddress="" />);
 
-    const connectAdminBtn = screen.getByRole("button", {
-      name: /connect admin wallet/i,
+    const quickFillBtn = screen.getByRole("button", {
+      name: /use demo admin credentials/i,
     });
-    fireEvent.click(connectAdminBtn);
+    fireEvent.click(quickFillBtn);
 
-    expect(
-      screen.getByRole("heading", { name: /admin dashboard/i })
-    ).toBeInTheDocument();
-    expect(screen.getByText(/admin authorized/i)).toBeInTheDocument();
+    const submitBtn = screen.getByRole("button", {
+      name: /authenticate admin wallet/i,
+    });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /admin dashboard/i })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/admin authorized/i)).toBeInTheDocument();
+    });
   });
 
   it("renders metrics overview and default Create Market tab for authorized admin", () => {
@@ -96,7 +114,7 @@ describe("AdminDashboardPage Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("disconnects admin session and returns to Access Denied screen", () => {
+  it("disconnects admin session and returns to login portal", () => {
     render(
       <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
     );
@@ -107,7 +125,7 @@ describe("AdminDashboardPage Component", () => {
     fireEvent.click(disconnectBtn);
 
     expect(
-      screen.getByRole("heading", { name: /access denied/i })
+      screen.getByRole("heading", { name: /protocol admin portal/i })
     ).toBeInTheDocument();
   });
 });
