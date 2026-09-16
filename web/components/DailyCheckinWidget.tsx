@@ -33,17 +33,24 @@ export default function DailyCheckinWidget({
   const [isClaiming, setIsClaiming] = useState(false);
   const [claimedNotice, setClaimedNotice] = useState<string | null>(null);
 
-  useEffect(() => {
+  const [prevStreak, setPrevStreak] = useState(currentStreak);
+  const [prevCanCheckIn, setPrevCanCheckIn] = useState(initialCanCheckIn);
+  const [prevCooldown, setPrevCooldown] = useState(cooldownSeconds);
+
+  if (currentStreak !== prevStreak) {
+    setPrevStreak(currentStreak);
     setStreak(currentStreak);
-  }, [currentStreak]);
+  }
 
-  useEffect(() => {
+  if (initialCanCheckIn !== prevCanCheckIn) {
+    setPrevCanCheckIn(initialCanCheckIn);
     setCanCheckIn(initialCanCheckIn);
-  }, [initialCanCheckIn]);
+  }
 
-  useEffect(() => {
+  if (cooldownSeconds !== prevCooldown) {
+    setPrevCooldown(cooldownSeconds);
     setTimeLeft(cooldownSeconds);
-  }, [cooldownSeconds]);
+  }
 
   useEffect(() => {
     if (canCheckIn || timeLeft <= 0) return;

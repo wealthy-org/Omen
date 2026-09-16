@@ -44,10 +44,10 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
 
   const isSubmitting = isLoading || internalLoading;
 
-  const minDateTimeString = useMemo(() => {
+  const [minDateTimeString] = useState(() => {
     const oneHourLater = new Date(Date.now() + 60 * 60 * 1000);
     return oneHourLater.toISOString().slice(0, 16);
-  }, []);
+  });
 
   const liquidityBreakdown = useMemo(() => {
     const parsed = parseFloat(initialLiquidity);

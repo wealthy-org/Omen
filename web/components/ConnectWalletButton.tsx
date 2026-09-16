@@ -31,17 +31,24 @@ export default function ConnectWalletButton({
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const [prevInitialStatus, setPrevInitialStatus] = useState(initialStatus);
+  const [prevInitialAddress, setPrevInitialAddress] = useState(initialAddress);
+  const [prevInitialBalance, setPrevInitialBalance] = useState(initialBalance);
+
+  if (initialStatus !== prevInitialStatus) {
+    setPrevInitialStatus(initialStatus);
     setStatus(initialStatus);
-  }, [initialStatus]);
+  }
 
-  useEffect(() => {
+  if (initialAddress !== prevInitialAddress) {
+    setPrevInitialAddress(initialAddress);
     setAddress(initialAddress);
-  }, [initialAddress]);
+  }
 
-  useEffect(() => {
+  if (initialBalance !== prevInitialBalance) {
+    setPrevInitialBalance(initialBalance);
     setBalance(initialBalance);
-  }, [initialBalance]);
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
