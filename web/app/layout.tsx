@@ -57,10 +57,12 @@ export default function RootLayout({
     <html lang="en" className={`${proximaNova.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen antialiased font-sans">
         <ThemeProvider>
-          <div className="min-h-screen flex flex-col">
+          <div className="min-h-screen flex flex-col w-full">
             <Navbar />
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-              {children}
+            <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-6 sm:py-8">
+              <div className="max-w-[1400px] w-full mx-auto">
+                {children}
+              </div>
             </main>
             <Footer />
           </div>

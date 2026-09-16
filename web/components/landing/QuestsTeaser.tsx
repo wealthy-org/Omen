@@ -12,13 +12,13 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
   const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
 
   const DAYS = [
-    { day: "D1", points: "+50", status: "completed" },
-    { day: "D2", points: "+50", status: "completed" },
-    { day: "D3", points: "+100", status: "completed", multiplier: "1.5x" },
-    { day: "D4", points: "+50", status: "today" },
-    { day: "D5", points: "+75", status: "locked" },
-    { day: "D6", points: "+100", status: "locked", multiplier: "2.0x" },
-    { day: "D7", points: "+300", status: "locked", multiplier: "3.0x" },
+    { day: "D1", points: "+50", status: "completed", isMilestone: false },
+    { day: "D2", points: "+50", status: "completed", isMilestone: false },
+    { day: "D3", points: "+100", status: "completed", multiplier: "1.5x", isMilestone: true },
+    { day: "D4", points: "+50", status: "today", isMilestone: false },
+    { day: "D5", points: "+75", status: "locked", isMilestone: false },
+    { day: "D6", points: "+100", status: "locked", multiplier: "2.0x", isMilestone: false },
+    { day: "D7", points: "+300", status: "locked", multiplier: "3.0x", isMilestone: true },
   ];
 
   const ACTIVE_QUESTS = [
@@ -46,14 +46,20 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
   ];
 
   return (
-    <section className="w-full my-12">
+    <section className="w-full my-8 sm:my-12">
       <div
         className={`rounded-3xl p-8 sm:p-10 relative overflow-hidden shadow-xl transition-all duration-300 ${
           isDark
             ? "bg-[#0A0F0C] border border-emerald-500/15"
-            : "bg-white border border-emerald-900/10 shadow-[0_4px_28px_rgba(14,122,78,0.06)]"
+            : "bg-white/95 border border-white/80 light-card-shine shadow-[0_8px_32px_rgba(14,122,78,0.06),_inset_0_1px_0_#ffffff]"
         }`}
       >
+        <div
+          className={`absolute top-0 inset-x-0 h-[1.5px] pointer-events-none ${
+            isDark ? "dark-emerald-seam" : "light-emerald-seam"
+          }`}
+        />
+
         <div
           className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none ${
             isDark
@@ -90,33 +96,80 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
           </Link>
         </div>
 
-        <div className={`grid grid-cols-7 gap-2 sm:gap-3 my-6 pb-6 border-b overflow-x-auto ${isDark ? "border-white/10" : "border-emerald-900/10"}`}>
-          {DAYS.map((d) => (
-            <div
-              key={d.day}
-              className={`rounded-xl p-3 text-center flex flex-col items-center justify-between border transition-all ${
-                d.status === "completed"
-                  ? "bg-yes-green/10 border-yes-green/40 text-yes-green"
-                  : d.status === "today"
-                  ? isDark
-                    ? "bg-emerald-500/20 border-emerald-400 text-[#34D399] shadow-[0_0_15px_rgba(52,211,153,0.3)]"
-                    : "bg-emerald-100 border-[#0E7A4E] text-[#0E7A4E] shadow-[0_0_15px_rgba(14,122,78,0.2)]"
-                  : isDark
-                  ? "bg-white/5 border-white/10 text-[#A9B3AD]"
-                  : "bg-emerald-50/50 border-emerald-900/10 text-[#4B5D55]"
-              }`}
-            >
-              <span className="text-xs font-mono font-bold">{d.day}</span>
-              <span className="text-sm font-mono font-black my-1">{d.points}</span>
-              {d.multiplier ? (
-                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${isDark ? "bg-white/10 text-white" : "bg-emerald-200 text-emerald-900"}`}>
-                  {d.multiplier}
-                </span>
-              ) : (
-                <span className="text-[10px] font-mono opacity-80">PTS</span>
-              )}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch my-6 pb-6 border-b border-emerald-500/10">
+          <div className="lg:col-span-8 flex flex-col justify-between">
+            <span className={`text-xs font-mono font-bold uppercase tracking-wider mb-3 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+              7-Day Streak Multiplier Roadmap
+            </span>
+            <div className="grid grid-cols-7 gap-2 sm:gap-3 items-end">
+              {DAYS.map((d) => (
+                <div
+                  key={d.day}
+                  className={`rounded-2xl p-2.5 sm:p-3 text-center flex flex-col items-center justify-between border transition-all ${
+                    d.isMilestone
+                      ? isDark
+                        ? "min-h-[110px] bg-gradient-to-b from-emerald-500/20 to-emerald-950/60 border-emerald-400/50 shadow-[0_0_20px_rgba(52,211,153,0.25)]"
+                        : "min-h-[110px] bg-gradient-to-b from-emerald-100 to-emerald-50 border-emerald-400 shadow-[0_4px_16px_rgba(14,122,78,0.15)]"
+                      : "min-h-[90px]"
+                  } ${
+                    d.status === "completed"
+                      ? "bg-yes-green/10 border-yes-green/40 text-yes-green"
+                      : d.status === "today"
+                      ? isDark
+                        ? "bg-emerald-500/20 border-emerald-400 text-[#34D399] shadow-[0_0_15px_rgba(52,211,153,0.3)]"
+                        : "bg-emerald-100 border-[#0E7A4E] text-[#0E7A4E] shadow-[0_0_15px_rgba(14,122,78,0.2)]"
+                      : isDark
+                      ? "bg-white/5 border-white/10 text-[#A9B3AD]"
+                      : "bg-emerald-50/60 border-emerald-500/10 text-[#4B5D55]"
+                  }`}
+                >
+                  <span className="text-xs font-mono font-bold">{d.day}</span>
+                  <span className={`font-mono font-black my-1 ${d.isMilestone ? "text-base text-yes-green" : "text-sm"}`}>
+                    {d.points}
+                  </span>
+                  {d.multiplier ? (
+                    <span
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                        d.isMilestone
+                          ? "bg-yes-green text-slate-950 shadow-xs"
+                          : isDark
+                          ? "bg-white/10 text-white"
+                          : "bg-emerald-200 text-emerald-900"
+                      }`}
+                    >
+                      {d.multiplier}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-mono opacity-80">PTS</span>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div
+            className={`lg:col-span-4 rounded-2xl p-5 flex flex-col justify-between border ${
+              isDark ? "bg-[#040D08] border-emerald-500/20" : "bg-emerald-50/60 border-emerald-500/15 shadow-xs"
+            }`}
+          >
+            <div>
+              <div className="flex items-center justify-between text-xs font-mono mb-2">
+                <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>Your Current Status</span>
+                <span className="text-xs font-mono font-bold text-yes-green px-2 py-0.5 rounded bg-yes-green/10">Active Streak</span>
+              </div>
+              <div className={`text-xl font-extrabold tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+                🔥 3-Day Consecutive Streak
+              </div>
+              <p className={`text-xs mt-2 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                You are earning with a <strong>1.5x Point Multiplier</strong>. Check in tomorrow to keep your bonus active!
+              </p>
+            </div>
+
+            <div className="pt-3 mt-3 border-t border-emerald-500/10 flex items-center justify-between text-xs font-mono">
+              <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>Next Tier: 2.0x Boost</span>
+              <span className="font-bold text-emerald-500">2 Days Left</span>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -127,10 +180,10 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
             {ACTIVE_QUESTS.map((quest) => (
               <div
                 key={quest.title}
-                className={`rounded-xl p-4 transition-all flex flex-col justify-between ${
+                className={`rounded-2xl p-4 transition-all flex flex-col justify-between ${
                   isDark
                     ? "bg-white/5 border border-white/10 hover:border-emerald-500/30"
-                    : "bg-emerald-50/60 border border-emerald-900/10 hover:border-emerald-600/30"
+                    : "bg-emerald-50/60 border border-emerald-500/10 hover:border-emerald-400/30 shadow-xs"
                 }`}
               >
                 <div>
@@ -141,7 +194,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
                   <h4 className={`text-sm font-bold mb-2 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>{quest.title}</h4>
                 </div>
 
-                <div className={`flex items-center justify-between pt-2 border-t text-xs ${isDark ? "border-white/5 text-[#A9B3AD]" : "border-emerald-900/5 text-[#4B5D55]"}`}>
+                <div className={`flex items-center justify-between pt-2 border-t text-xs ${isDark ? "border-white/5 text-[#A9B3AD]" : "border-emerald-500/10 text-[#4B5D55]"}`}>
                   <span>Progress: {quest.progress}</span>
                   <Link
                     href="/quests"

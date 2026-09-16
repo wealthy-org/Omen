@@ -18,17 +18,17 @@ describe("Landing Page Components", () => {
     expect(networkTags.length).toBeGreaterThan(0);
   });
 
-  it("renders the light emerald hero section layout and headline when theme prop is light", () => {
+  it("renders the light emerald hero section with the same centered stack layout and 3D ribbon asset", () => {
     render(<HeroSection theme="light" />);
 
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /predict onchain\. dominate airdrops\./i,
+        name: /predict onchain\. farm points\. dominate the airdrop\./i,
       })
     ).toBeInTheDocument();
 
-    expect(screen.getByAltText(/Omen 3D Emerald Turbine Sculpture/i)).toBeInTheDocument();
+    expect(screen.getByAltText(/Omen Web3 3D Dark Emerald Abstract/i)).toBeInTheDocument();
   });
 
   it("renders primary and secondary CTA buttons in the hero section", () => {

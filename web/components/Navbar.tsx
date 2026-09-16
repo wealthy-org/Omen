@@ -42,26 +42,23 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
   const isDark = activeTheme === "dark";
 
   return (
-    <header className="sticky top-0 z-50 w-full pt-4 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 w-full pt-4 px-4 sm:px-6 lg:px-8 xl:px-10">
       <div
-        className={`max-w-7xl mx-auto rounded-[20px] transition-all duration-300 relative ${
+        className={`max-w-[1400px] w-full mx-auto rounded-[20px] transition-all duration-300 relative ${
           isDark
             ? isScrolled
               ? "bg-[#0A0F0C]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
               : "bg-[#0A0F0C]/80 backdrop-blur-md border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
             : isScrolled
-              ? "bg-white/90 backdrop-blur-xl border border-emerald-900/10 shadow-[0_8px_30px_rgba(14,122,78,0.08)]"
-              : "bg-transparent backdrop-blur-xs border border-transparent"
+              ? "bg-white/90 backdrop-blur-xl border border-emerald-500/10 shadow-[0_8px_30px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)]"
+              : "bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_4px_20px_rgba(14,122,78,0.04),_inset_0_1px_0_rgba(255,255,255,0.9)]"
         }`}
       >
-        {isDark && (
-          <div
-            className="absolute top-0 inset-x-8 h-[1px] pointer-events-none"
-            style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(16,185,129,0.3) 25%, #10B981 50%, rgba(16,185,129,0.3) 75%, transparent 100%)",
-            }}
-          />
-        )}
+        <div
+          className={`absolute top-0 inset-x-8 h-[1px] pointer-events-none ${
+            isDark ? "dark-emerald-seam" : "light-emerald-seam"
+          }`}
+        />
 
         <div className="flex items-center justify-between h-[64px] px-6 sm:px-8">
           <div className="flex items-center gap-3">
@@ -70,7 +67,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               className="flex items-center gap-2 group focus:outline-none"
             >
               <div
-                className={`w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm ${
+                className={`w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm shadow-xs ${
                   isDark
                     ? "bg-emerald-500/20 text-[#34D399] border border-emerald-500/30"
                     : "bg-[#10221A] text-white"
@@ -90,7 +87,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               className={`hidden sm:inline-flex text-[11px] font-mono font-medium px-2 py-0.5 rounded-full border ${
                 isDark
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "bg-emerald-100 text-emerald-900 border-emerald-200"
+                  : "bg-emerald-50 text-[#0E7A4E] border-emerald-500/15"
               }`}
             >
               TESTNET
@@ -134,7 +131,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               className={`p-2 rounded-xl border transition-all flex items-center justify-center gap-1.5 text-xs font-semibold ${
                 isDark
                   ? "bg-white/5 border-white/10 text-[#A9B3AD] hover:text-white hover:bg-white/10"
-                  : "bg-white/80 border-emerald-900/10 text-[#4B5D55] hover:text-[#0B1F16] hover:bg-white"
+                  : "bg-white/90 border-emerald-500/10 text-[#4B5D55] hover:text-[#0B1F16] hover:bg-white shadow-xs"
               }`}
               title={isDark ? "Switch to Light Emerald" : "Switch to Dark Emerald"}
               aria-label="Toggle theme"
@@ -161,7 +158,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               className={`text-[15px] font-bold px-5 py-2.5 rounded-[14px] transition-all active:scale-[0.98] ${
                 isDark
                   ? "bg-white text-[#030906] hover:bg-white/90 shadow-[0_0_24px_rgba(255,255,255,0.2)]"
-                  : "bg-[#10221A] text-white hover:bg-[#183428]"
+                  : "bg-[#10221A] text-white hover:bg-[#183428] shadow-sm"
               }`}
             >
               Connect Wallet
@@ -173,7 +170,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               type="button"
               onClick={handleToggle}
               className={`p-2 rounded-xl border flex items-center justify-center ${
-                isDark ? "bg-white/5 border-white/10 text-emerald-400" : "bg-white border-emerald-900/10 text-emerald-800"
+                isDark ? "bg-white/5 border-white/10 text-emerald-400" : "bg-white/90 border-emerald-500/10 text-emerald-800"
               }`}
               aria-label="Toggle theme"
             >
@@ -213,7 +210,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
         {isMobileMenuOpen && (
           <div
             className={`md:hidden border-t px-6 pt-4 pb-6 space-y-3 rounded-b-[20px] ${
-              isDark ? "border-white/10 bg-[#0A0F0C]" : "border-emerald-900/10 bg-white"
+              isDark ? "border-white/10 bg-[#0A0F0C]" : "border-emerald-500/10 bg-white"
             }`}
             data-testid="mobile-menu"
           >
@@ -245,7 +242,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               })}
             </nav>
 
-            <div className={`pt-3 border-t flex flex-col gap-2 ${isDark ? "border-white/10" : "border-emerald-900/10"}`}>
+            <div className={`pt-3 border-t flex flex-col gap-2 ${isDark ? "border-white/10" : "border-emerald-500/10"}`}>
               <button
                 type="button"
                 className={`w-full h-12 text-base font-bold rounded-[14px] transition-all flex items-center justify-center ${

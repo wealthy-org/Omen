@@ -12,14 +12,20 @@ export default function AirdropBanner({ theme: propTheme }: AirdropBannerProps) 
   const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
 
   return (
-    <section className="w-full my-12">
+    <section className="w-full my-8 sm:my-12">
       <div
         className={`relative rounded-3xl p-8 sm:p-12 overflow-hidden shadow-2xl text-center flex flex-col items-center transition-all duration-300 ${
           isDark
             ? "bg-gradient-to-b from-[#0A120D] via-[#030906] to-[#08140E] border border-emerald-500/20"
-            : "light-hero-gradient border border-emerald-900/10 shadow-[0_10px_40px_rgba(14,122,78,0.08)]"
+            : "light-hero-gradient border border-white/90 light-card-shine shadow-[0_12px_48px_rgba(14,122,78,0.08),_inset_0_1px_0_#ffffff]"
         }`}
       >
+        <div
+          className={`absolute top-0 inset-x-0 h-[1.5px] pointer-events-none ${
+            isDark ? "dark-emerald-seam" : "light-emerald-seam"
+          }`}
+        />
+
         <div
           className={`absolute -top-24 -left-24 w-72 h-72 rounded-full blur-3xl pointer-events-none ${
             isDark ? "bg-emerald-500/15" : "bg-emerald-400/20"
@@ -35,7 +41,7 @@ export default function AirdropBanner({ theme: propTheme }: AirdropBannerProps) 
           className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-semibold mb-6 border ${
             isDark
               ? "bg-emerald-950/60 border-emerald-500/20 text-[#34D399]"
-              : "bg-white/80 border-emerald-600/20 text-[#0E7A4E]"
+              : "bg-white/90 border-emerald-500/15 text-[#0E7A4E] shadow-xs"
           }`}
         >
           <span className={`w-2 h-2 rounded-full animate-ping ${isDark ? "bg-[#34D399]" : "bg-[#22C55E]"}`} />
@@ -60,7 +66,7 @@ export default function AirdropBanner({ theme: propTheme }: AirdropBannerProps) 
             className={`w-full sm:w-auto px-8 py-3.5 rounded-[14px] text-[15px] font-bold transition-all flex items-center justify-center gap-2 active:scale-[0.98] ${
               isDark
                 ? "text-[#030906] bg-[#34D399] hover:bg-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.4)]"
-                : "bg-[#10221A] text-white hover:bg-[#183428]"
+                : "bg-[#10221A] text-white hover:bg-[#183428] shadow-sm"
             }`}
           >
             <span>Start Farming Quests Now</span>
@@ -74,7 +80,7 @@ export default function AirdropBanner({ theme: propTheme }: AirdropBannerProps) 
             className={`w-full sm:w-auto px-7 py-3.5 rounded-[14px] text-[15px] font-semibold backdrop-blur-md transition-all flex items-center justify-center ${
               isDark
                 ? "text-white bg-white/5 hover:bg-white/10 border border-white/15"
-                : "text-[#0B1F16] bg-white/80 hover:bg-white border border-emerald-900/15"
+                : "text-[#0B1F16] bg-white/90 hover:bg-white border border-emerald-500/15 shadow-xs"
             }`}
           >
             <span>View Points Leaderboard</span>

@@ -68,6 +68,14 @@
   background: linear-gradient(90deg, transparent 0%, rgba(16, 185, 129, 0.2) 20%, #10B981 50%, rgba(16, 185, 129, 0.2) 80%, transparent 100%);
 }
 
+.light-emerald-seam {
+  background: linear-gradient(90deg, transparent 0%, rgba(34, 197, 94, 0.2) 20%, #22C55E 50%, rgba(34, 197, 94, 0.2) 80%, transparent 100%);
+}
+
+.light-card-shine {
+  box-shadow: 0 4px 24px rgba(14, 122, 78, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
 html,
 body {
   max-width: 100vw;

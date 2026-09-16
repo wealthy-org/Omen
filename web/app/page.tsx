@@ -7,7 +7,7 @@ import AirdropBanner from "@/components/landing/AirdropBanner";
 
 export default function HomePage() {
   return (
-    <div className="w-full flex flex-col items-center gap-6 sm:gap-8 animate-in fade-in duration-300">
+    <div className="w-full flex flex-col items-stretch gap-6 sm:gap-8 animate-in fade-in duration-300">
       <HeroSection />
       <StatsOverview />
       <FeaturePillars />

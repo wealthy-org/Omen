@@ -35,15 +35,15 @@ export default function Footer({ theme: propTheme }: FooterProps) {
   return (
     <footer
       className={`w-full border-t mt-auto transition-colors duration-300 ${
-        isDark ? "bg-[#030906] border-white/10" : "bg-white border-emerald-900/10"
+        isDark ? "bg-[#030906] border-white/10" : "bg-white/95 border-emerald-500/10 shadow-[0_-4px_24px_rgba(14,122,78,0.03)]"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
               <div
-                className={`w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm ${
+                className={`w-7 h-7 rounded-lg flex items-center justify-center font-extrabold text-sm shadow-xs ${
                   isDark
                     ? "bg-emerald-500/20 text-[#34D399] border border-emerald-500/30"
                     : "bg-[#10221A] text-white"
@@ -64,7 +64,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${
                 isDark
                   ? "bg-emerald-950/60 border-emerald-500/20 text-white/80"
-                  : "bg-emerald-50 border-emerald-200 text-[#0E7A4E]"
+                  : "bg-emerald-50/80 border-emerald-500/15 text-[#0E7A4E]"
               }`}
             >
               <span className="w-2 h-2 rounded-full bg-yes-green animate-pulse" />
@@ -168,7 +168,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
 
         <div
           className={`pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs ${
-            isDark ? "border-white/10 text-[#A9B3AD]" : "border-emerald-900/10 text-[#4B5D55]"
+            isDark ? "border-white/10 text-[#A9B3AD]" : "border-emerald-500/10 text-[#4B5D55]"
           }`}
         >
           <p>© {currentYear} Omen Protocol. All rights reserved.</p>
