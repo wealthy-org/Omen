@@ -69,7 +69,7 @@ export default function QuestCard({
       }
       if (onVerify) {
         await onVerify(id);
-      } else {
+      } else if (!onAction) {
         await new Promise((resolve) => setTimeout(resolve, 800));
       }
       setCurrentStatus("COMPLETED");

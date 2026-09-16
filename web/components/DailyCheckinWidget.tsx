@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
+import { mockPredictionMarket } from "../lib/mockPredictionMarket";
 
 export interface DailyCheckinWidgetProps {
   currentStreak?: number;
@@ -76,11 +77,21 @@ export default function DailyCheckinWidget({
     if (!canCheckIn || isClaiming) return;
 
     setIsClaiming(true);
+    const demo = mockPredictionMarket.getDemoWallet();
+
     try {
       if (onCheckIn) {
         await onCheckIn(activeDayNumber, activePoints);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        try {
+          await fetch("/api/checkin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ wallet_address: demo.address }),
+          });
+        } catch {
+        }
+        await new Promise((resolve) => setTimeout(resolve, 400));
       }
       setStreak((prev) => Math.min(prev + 1, totalDays));
       setCanCheckIn(false);
@@ -135,7 +146,6 @@ export default function DailyCheckinWidget({
           const points = pointsSchedule[index] || 100;
           const isChecked = index < streak;
           const isActive = index === streak && canCheckIn;
-          const isLocked = index > streak || (index === streak && !canCheckIn);
 
           if (isChecked) {
             return (

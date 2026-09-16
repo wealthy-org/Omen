@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import DailyCheckinWidget from "@/components/DailyCheckinWidget";
 import QuestCard, { QuestCategory, QuestStatus } from "@/components/QuestCard";
+import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
 
 interface QuestItem {
   id: string;
@@ -104,20 +105,67 @@ export default function QuestsPage() {
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("ALL");
   const [totalPoints, setTotalPoints] = useState(2450);
 
-  const handleQuestAction = (questId: string) => {
-    setQuests((prev) =>
-      prev.map((q) => {
-        if (q.id === questId && q.status !== "COMPLETED") {
-          setTotalPoints((current) => current + q.points);
-          return { ...q, status: "COMPLETED" as QuestStatus };
+  useEffect(() => {
+    async function fetchLiveQuests() {
+      const demo = mockPredictionMarket.getDemoWallet();
+      try {
+        const res = await fetch(`/api/quests?wallet_address=${demo.address}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.quests && Array.isArray(data.quests) && data.quests.length > 0) {
+            const mapped: QuestItem[] = data.quests.map((q: any) => ({
+              id: q.id,
+              title: q.title,
+              description: q.description || "",
+              category: (q.category || "DAILY").toUpperCase() as QuestCategory,
+              points: Number(q.points_reward || 100),
+              status: q.is_completed ? "COMPLETED" : "AVAILABLE",
+              actionLabel: q.is_completed ? "Completed" : "Complete Quest",
+              actionUrl: q.action_url,
+            }));
+            setQuests(mapped);
+          }
         }
-        return q;
-      })
-    );
+      } catch {
+      }
+    }
+
+    fetchLiveQuests();
+  }, []);
+
+  const handleQuestAction = async (questId: string) => {
+    const demo = mockPredictionMarket.getDemoWallet();
+    const targetQuest = quests.find((q) => q.id === questId);
+
+    if (targetQuest && targetQuest.status !== "COMPLETED") {
+      setTotalPoints((current) => current + targetQuest.points);
+      setQuests((prev) =>
+        prev.map((q) => (q.id === questId ? { ...q, status: "COMPLETED" as QuestStatus } : q))
+      );
+
+      try {
+        await fetch(`/api/quests/${questId}/complete`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ wallet_address: demo.address }),
+        });
+      } catch {
+      }
+    }
   };
 
-  const handleDailyCheckIn = (_day: number, points: number) => {
+  const handleDailyCheckIn = async (_day: number, points: number) => {
+    const demo = mockPredictionMarket.getDemoWallet();
     setTotalPoints((prev) => prev + points);
+
+    try {
+      await fetch("/api/checkin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet_address: demo.address }),
+      });
+    } catch {
+    }
   };
 
   const filteredQuests =
@@ -277,7 +325,6 @@ export default function QuestsPage() {
                 actionLabel={quest.actionLabel}
                 actionUrl={quest.actionUrl}
                 onAction={handleQuestAction}
-                onVerify={handleQuestAction}
               />
             ))}
           </div>

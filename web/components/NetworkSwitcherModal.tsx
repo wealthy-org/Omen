@@ -29,6 +29,7 @@ export default function NetworkSwitcherModal({
 
   if (!isOpen) return null;
 
+  // TODO(TICKET-48): Connect handleSwitch to Wagmi useSwitchChain hook for Arbitrum Sepolia (Chain ID 421614)
   const handleSwitch = async () => {
     setIsSwitching(true);
     try {

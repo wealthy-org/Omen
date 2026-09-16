@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { MarketData, MarketOutcome } from "./MarketCard";
+import { usePlaceBet } from "@/hooks/usePlaceBet";
 
 export interface BettingModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   userBalance = "1.50",
   onConfirmBet,
 }) => {
+  const { placeBet, isPending: isWeb3Pending } = usePlaceBet();
   const [selectedOutcome, setSelectedOutcome] = useState<MarketOutcome>(initialOutcome);
   const [amount, setAmount] = useState<string>("0.05");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -94,6 +96,12 @@ export const BettingModal: React.FC<BettingModalProps> = ({
       setIsSubmitting(true);
       if (onConfirmBet) {
         await onConfirmBet({
+          marketId: market.id,
+          outcome: selectedOutcome,
+          amount,
+        });
+      } else {
+        await placeBet({
           marketId: market.id,
           outcome: selectedOutcome,
           amount,
@@ -261,14 +269,14 @@ export const BettingModal: React.FC<BettingModalProps> = ({
 
           <button
             type="submit"
-            disabled={isSubmitting || numAmount <= 0}
+            disabled={isSubmitting || isWeb3Pending || numAmount <= 0}
             className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 ${
-              isSubmitting || numAmount <= 0
+              isSubmitting || isWeb3Pending || numAmount <= 0
                 ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
                 : "bg-emerald-600 hover:bg-emerald-700 text-white active:scale-98"
             }`}
           >
-            {isSubmitting ? (
+            {isSubmitting || isWeb3Pending ? (
               <>
                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />

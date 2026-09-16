@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import LeaderboardTable, { LeaderboardEntry } from "@/components/LeaderboardTable";
+import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
 
-const FULL_LEADERBOARD_DATA: LeaderboardEntry[] = [
+export const FULL_LEADERBOARD_DATA: LeaderboardEntry[] = [
   { rank: 1, address: "0x71C8364f3B3979B6396c5678440A4418652D875F", ensName: "oracle-king.eth", streakDays: 24, totalPoints: 128500, multiplier: "3.0x", winRate: "82%" },
   { rank: 2, address: "0x3A945b630B72d8e6E1fE46a297E59b20757Ebb30", ensName: "arbitrum-whale.eth", streakDays: 21, totalPoints: 94200, multiplier: "3.0x", winRate: "78%" },
   { rank: 3, address: "0x98Fc4E2551e737B244243684B98818c3B1280B3A", ensName: "satoshi-prophet.eth", streakDays: 19, totalPoints: 81400, multiplier: "2.5x", winRate: "75%" },
@@ -19,15 +20,49 @@ const FULL_LEADERBOARD_DATA: LeaderboardEntry[] = [
   { rank: 12, address: "0x22B38192641029384512B74239856129486A2022", streakDays: 4, totalPoints: 17300, multiplier: "1.0x", winRate: "58%" },
 ];
 
-const CURRENT_USER = "0x1234567890abcdef1234567890abcdef12345678";
+export const CURRENT_USER = "0x1234567890abcdef1234567890abcdef12345678";
 
 export default function LeaderboardPage() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [entries, setEntries] = useState<LeaderboardEntry[]>(FULL_LEADERBOARD_DATA);
+  const [userRank, setUserRank] = useState<number>(4);
+  const [userPoints, setUserPoints] = useState<number>(52300);
 
-  const filteredEntries = FULL_LEADERBOARD_DATA.filter((entry) => {
+  useEffect(() => {
+    async function fetchLeaderboard() {
+      const demo = mockPredictionMarket.getDemoWallet();
+      try {
+        const res = await fetch(`/api/leaderboard/points?wallet_address=${demo.address}&limit=50&offset=0`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.leaderboard && Array.isArray(data.leaderboard) && data.leaderboard.length > 0) {
+            const mapped: LeaderboardEntry[] = data.leaderboard.map((item: any) => ({
+              rank: item.rank,
+              address: item.wallet_address,
+              ensName: item.ens_name,
+              streakDays: item.streak_days || 1,
+              totalPoints: Number(item.total_points || 0),
+              multiplier: `${(1 + Math.min(Number(item.streak_days || 1) * 0.1, 2.0)).toFixed(1)}x`,
+              winRate: item.win_rate ? `${item.win_rate}%` : "65%",
+            }));
+            setEntries(mapped);
+          }
+          if (data.currentUserRank) {
+            setUserRank(data.currentUserRank.rank || 4);
+            setUserPoints(data.currentUserRank.totalPoints || 52300);
+          }
+        }
+      } catch {
+      }
+    }
+
+    fetchLeaderboard();
+  }, []);
+
+  const filteredEntries = entries.filter((entry) => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
     return (
@@ -69,7 +104,7 @@ export default function LeaderboardPage() {
             </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono mt-2 text-accent-navy dark:text-white flex items-center gap-2">
-            <span>#4</span>
+            <span>#{userRank}</span>
             <span className="text-sm font-semibold text-text-muted dark:text-[#A9B3AD] font-sans">
               (omen-hunter.eth)
             </span>
@@ -95,7 +130,7 @@ export default function LeaderboardPage() {
             </span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono mt-2 text-primary-blue">
-            52,300 <span className="text-lg font-bold">PTS</span>
+            {userPoints.toLocaleString()} <span className="text-lg font-bold">PTS</span>
           </div>
           <p className="text-xs text-text-muted dark:text-[#A9B3AD] mt-2">
             14 consecutive streak days maintaining 2.0x boost.

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { ClaimPayoutButton } from "../components/ClaimPayoutButton";
 
@@ -52,5 +52,14 @@ describe("ClaimPayoutButton Component", () => {
 
     fireEvent.click(button);
     expect(onClaim).not.toHaveBeenCalled();
+  });
+
+  it("renders with marketId and triggers claim payout flow", async () => {
+    render(<ClaimPayoutButton amount="0.75" marketId="1" />);
+    const button = screen.getByRole("button", { name: /claim 0\.75 eth payout/i });
+    expect(button).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(button);
+    });
   });
 });

@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   MarketCategoryFilter,
 } from "@/components/MarketCategoryFilter";
 import { MarketCard, MarketData, MarketOutcome } from "@/components/MarketCard";
 import { BettingModal } from "@/components/BettingModal";
+import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
 
 export const MOCK_MARKETS: MarketData[] = [
   {
@@ -100,6 +101,7 @@ export const MOCK_MARKETS: MarketData[] = [
 ];
 
 export default function PredictionsPage() {
+  const [markets, setMarkets] = useState<MarketData[]>(MOCK_MARKETS);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("highest-pool");
@@ -115,30 +117,66 @@ export default function PredictionsPage() {
     outcome: "YES",
   });
 
+  useEffect(() => {
+    async function fetchLiveMarkets() {
+      try {
+        const res = await fetch("/api/markets");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.markets && Array.isArray(data.markets) && data.markets.length > 0) {
+            const mapped: MarketData[] = data.markets.map((m: any, index: number) => {
+              const yes = Number(m.yes_pool || 0);
+              const no = Number(m.no_pool || 0);
+              const total = yes + no;
+              const yesPct = total > 0 ? Math.round((yes / total) * 100) : 50;
+              const noPct = 100 - yesPct;
+              return {
+                id: m.id || `mkt-${m.contract_market_id || index + 1}`,
+                title: m.title,
+                category: (m.category || "CRYPTO").toUpperCase(),
+                status: m.status === "active" ? "active" : "resolved",
+                endTime: m.deadline ? `Ends ${new Date(m.deadline).toLocaleDateString()}` : "Active",
+                totalPool: total.toFixed(2),
+                yesPercentage: yesPct,
+                noPercentage: noPct,
+                volume: total.toFixed(2),
+                resolvedOutcome: m.status === "resolved_yes" ? "YES" : m.status === "resolved_no" ? "NO" : undefined,
+              };
+            });
+            setMarkets(mapped);
+          }
+        }
+      } catch {
+      }
+    }
+
+    fetchLiveMarkets();
+  }, []);
+
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {
-      all: MOCK_MARKETS.length,
-      trending: MOCK_MARKETS.filter(
+      all: markets.length,
+      trending: markets.filter(
         (m) =>
           m.category.toLowerCase() === "trending" ||
           parseFloat(m.volume || "0") > 50
       ).length,
-      crypto: MOCK_MARKETS.filter(
+      crypto: markets.filter(
         (m) =>
           m.category.toLowerCase() === "crypto" ||
           m.category.toLowerCase() === "l2"
       ).length,
-      meme: MOCK_MARKETS.filter((m) => m.category.toLowerCase() === "meme")
+      meme: markets.filter((m) => m.category.toLowerCase() === "meme")
         .length,
-      "closing-soon": MOCK_MARKETS.filter((m) => m.status === "closing-soon")
+      "closing-soon": markets.filter((m) => m.status === "closing-soon")
         .length,
-      resolved: MOCK_MARKETS.filter((m) => m.status === "resolved").length,
+      resolved: markets.filter((m) => m.status === "resolved").length,
     };
     return counts;
-  }, []);
+  }, [markets]);
 
   const filteredMarkets = useMemo(() => {
-    return MOCK_MARKETS.filter((market) => {
+    return markets.filter((market) => {
       if (selectedCategory !== "all") {
         if (selectedCategory === "trending") {
           const isTrending =
@@ -178,7 +216,7 @@ export default function PredictionsPage() {
       }
       return 0;
     });
-  }, [selectedCategory, searchQuery, sortBy]);
+  }, [markets, selectedCategory, searchQuery, sortBy]);
 
   const handleSelectOutcome = (market: MarketData, outcome: MarketOutcome) => {
     setBettingModal({
@@ -197,8 +235,33 @@ export default function PredictionsPage() {
     outcome: MarketOutcome;
     amount: string;
   }) => {
-    const market = MOCK_MARKETS.find((m) => m.id === marketId);
+    const market = markets.find((m) => m.id === marketId) || MOCK_MARKETS.find((m) => m.id === marketId);
     const marketTitle = market ? market.title : `Market #${marketId}`;
+    const numericMarketId = typeof marketId === "number" ? marketId : parseInt(String(marketId).replace(/\D/g, "") || "1", 10);
+    const demo = mockPredictionMarket.getDemoWallet();
+
+    try {
+      const res = await mockPredictionMarket.placeBet({
+        marketId: numericMarketId,
+        side: outcome,
+        amountEth: amount,
+        userAddress: demo.address,
+      });
+
+      await fetch("/api/bets/index", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tx_hash: res.txHash,
+          contract_market_id: numericMarketId,
+          wallet_address: demo.address,
+          side: outcome.toLowerCase(),
+          amount: parseFloat(amount),
+        }),
+      });
+    } catch {
+    }
+
     setSelectedOutcomeInfo(
       `Confirmed bet of ${amount} ETH on ${outcome} for "${marketTitle}"! Position registered.`
     );
@@ -229,7 +292,7 @@ export default function PredictionsPage() {
         <div className="flex items-center gap-3">
           <div className="px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs text-right">
             <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Active Markets</p>
-            <p className="text-lg font-bold font-mono text-zinc-900 dark:text-zinc-100">{MOCK_MARKETS.length}</p>
+            <p className="text-lg font-bold font-mono text-zinc-900 dark:text-zinc-100">{markets.length}</p>
           </div>
           <div className="px-4 py-2.5 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-xs text-right">
             <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Total Pool</p>

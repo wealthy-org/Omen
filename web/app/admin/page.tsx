@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../../components/ThemeProvider";
 import { AdminMarketCreateForm, AdminMarketFormData } from "../../components/AdminMarketCreateForm";
 import AdminQuestManagementForm, { AdminQuestItem } from "../../components/AdminQuestManagementForm";
@@ -40,6 +40,39 @@ export default function AdminDashboardPage({
   const isAuthorized =
     Boolean(connectedAddress) &&
     AUTHORIZED_ADMIN_ADDRESSES.includes(connectedAddress?.toLowerCase() || "");
+
+  useEffect(() => {
+    async function fetchAdminMetrics() {
+      try {
+        const [marketsRes, questsRes] = await Promise.all([
+          fetch("/api/markets"),
+          fetch("/api/admin/quests"),
+        ]);
+        if (marketsRes.ok) {
+          const mData = await marketsRes.json();
+          if (mData.markets && Array.isArray(mData.markets) && mData.markets.length > 0) {
+            setTotalMarketsCreated(mData.markets.length);
+            const pending = mData.markets.filter(
+              (m: any) => m.status === "active" && m.deadline && new Date(m.deadline) <= new Date()
+            ).length;
+            if (pending > 0) setPendingResolutionsCount(pending);
+          }
+        }
+        if (questsRes.ok) {
+          const qData = await questsRes.json();
+          if (qData.quests && Array.isArray(qData.quests) && qData.quests.length > 0) {
+            const active = qData.quests.filter((q: any) => q.is_active).length;
+            setActiveQuestsCount(active);
+          }
+        }
+      } catch {
+      }
+    }
+
+    if (isAuthorized) {
+      fetchAdminMetrics();
+    }
+  }, [isAuthorized]);
 
   const handleDisconnect = () => {
     setConnectedAddress(null);

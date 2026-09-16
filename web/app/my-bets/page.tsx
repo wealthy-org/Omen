@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { UserBetsTable, UserBet, BetStatus } from "@/components/UserBetsTable";
+import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
 
 export const INITIAL_USER_BETS: UserBet[] = [
   {
@@ -68,6 +69,37 @@ export default function MyBetsPage() {
   const [activeTab, setActiveTab] = useState<"all" | BetStatus>("all");
   const [claimNotification, setClaimNotification] = useState<string | null>(null);
 
+  useEffect(() => {
+    async function fetchUserBets() {
+      const demo = mockPredictionMarket.getDemoWallet();
+      try {
+        const res = await fetch(`/api/bets?wallet_address=${demo.address}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.bets && Array.isArray(data.bets) && data.bets.length > 0) {
+            const mapped: UserBet[] = data.bets.map((b: any) => ({
+              id: b.id,
+              marketId: b.market_id || b.markets?.contract_market_id || "1",
+              marketTitle: b.markets?.title || `Market #${b.market_id}`,
+              category: (b.markets?.category || "CRYPTO").toUpperCase(),
+              side: (b.side || "YES").toUpperCase() as "YES" | "NO",
+              amount: Number(b.amount || 0).toFixed(2),
+              payout: Number(b.payout || b.amount * 1.5 || 0).toFixed(2),
+              roiPercent: Math.round(((Number(b.payout || b.amount * 1.5) - Number(b.amount)) / Number(b.amount)) * 100),
+              status: (b.status || "active") as BetStatus,
+              isClaimed: Boolean(b.claimed),
+              createdAt: b.created_at ? new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Today",
+            }));
+            setBets(mapped);
+          }
+        }
+      } catch {
+      }
+    }
+
+    fetchUserBets();
+  }, []);
+
   const totalStaked = useMemo(() => {
     return bets.reduce((sum, b) => sum + parseFloat(b.amount || "0"), 0).toFixed(2);
   }, [bets]);
@@ -92,6 +124,9 @@ export default function MyBetsPage() {
   }, [bets, activeTab]);
 
   const handleClaimPayout = (targetBet: UserBet) => {
+    const numericMarketId = typeof targetBet.marketId === "number" ? targetBet.marketId : parseInt(String(targetBet.marketId).replace(/\D/g, "") || "1", 10);
+    mockPredictionMarket.claimPayout({ marketId: numericMarketId }).catch(() => {});
+
     setBets((prev) =>
       prev.map((b) => (b.id === targetBet.id ? { ...b, isClaimed: true } : b))
     );
