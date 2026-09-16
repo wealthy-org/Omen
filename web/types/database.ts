@@ -4,34 +4,34 @@ export type MarketStatus = "active" | "resolved_yes" | "resolved_no" | "cancelle
 
 export type BetSide = "yes" | "no";
 
-export interface User {
+export type User = {
   id: string;
   wallet_address: string;
   total_points: number;
   last_checkin_at: string | null;
   streak_count: number;
   created_at: string;
-}
+};
 
-export interface Quest {
+export type Quest = {
   id: string;
   title: string;
   description: string | null;
   points_reward: number;
   is_active: boolean;
   created_at: string;
-}
+};
 
-export interface PointsEvent {
+export type PointsEvent = {
   id: string;
   wallet_address: string;
   quest_id: string | null;
   source: PointsSource;
   points: number;
   created_at: string;
-}
+};
 
-export interface Market {
+export type Market = {
   id: string;
   contract_market_id: number;
   title: string;
@@ -42,9 +42,9 @@ export interface Market {
   total_pool_no: number;
   resolution_source: string | null;
   created_at: string;
-}
+};
 
-export interface Bet {
+export type Bet = {
   id: string;
   market_id: string;
   wallet_address: string;
@@ -53,9 +53,9 @@ export interface Bet {
   claimed: boolean;
   tx_hash: string;
   created_at: string;
-}
+};
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       users: {
@@ -76,6 +76,7 @@ export interface Database {
           streak_count?: number;
           created_at?: string;
         };
+        Relationships: [];
       };
       quests: {
         Row: Quest;
@@ -95,6 +96,7 @@ export interface Database {
           is_active?: boolean;
           created_at?: string;
         };
+        Relationships: [];
       };
       points_events: {
         Row: PointsEvent;
@@ -114,6 +116,15 @@ export interface Database {
           points?: number;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "points_events_quest_id_fkey";
+            columns: ["quest_id"];
+            isOneToOne: false;
+            referencedRelation: "quests";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       markets: {
         Row: Market;
@@ -141,6 +152,7 @@ export interface Database {
           resolution_source?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       bets: {
         Row: Bet;
@@ -164,7 +176,18 @@ export interface Database {
           tx_hash?: string;
           created_at?: string;
         };
+        Relationships: [
+          {
+            foreignKeyName: "bets_market_id_fkey";
+            columns: ["market_id"];
+            isOneToOne: false;
+            referencedRelation: "markets";
+            referencedColumns: ["id"];
+          }
+        ];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
   };
-}
+};
