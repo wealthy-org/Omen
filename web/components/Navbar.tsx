@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
+import ConnectWalletButton from "./ConnectWalletButton";
 
 const NAV_ITEMS = [
   { label: "Predictions", href: "/predictions" },
@@ -153,16 +154,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               )}
             </button>
 
-            <button
-              type="button"
-              className={`text-[15px] font-bold px-5 py-2.5 rounded-[14px] transition-all active:scale-[0.98] ${
-                isDark
-                  ? "bg-white text-[#030906] hover:bg-white/90 shadow-[0_0_24px_rgba(255,255,255,0.2)]"
-                  : "bg-[#10221A] text-white hover:bg-[#183428] shadow-sm"
-              }`}
-            >
-              Connect Wallet
-            </button>
+            <ConnectWalletButton />
           </div>
 
           <div className="flex md:hidden items-center gap-2">
@@ -243,14 +235,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
             </nav>
 
             <div className={`pt-3 border-t flex flex-col gap-2 ${isDark ? "border-white/10" : "border-emerald-500/10"}`}>
-              <button
-                type="button"
-                className={`w-full h-12 text-base font-bold rounded-[14px] transition-all flex items-center justify-center ${
-                  isDark ? "bg-white text-[#030906] hover:bg-white/90" : "bg-[#10221A] text-white hover:bg-[#183428]"
-                }`}
-              >
-                Connect Wallet
-              </button>
+              <ConnectWalletButton className="w-full justify-center" />
             </div>
           </div>
         )}
