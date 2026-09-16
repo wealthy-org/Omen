@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
 import ConnectWalletButton from "./ConnectWalletButton";
+import NetworkSwitcherModal from "./NetworkSwitcherModal";
 
 const NAV_ITEMS = [
   { label: "Predictions", href: "/predictions" },
@@ -16,9 +17,10 @@ const NAV_ITEMS = [
 export interface NavbarProps {
   theme?: "dark" | "light";
   onToggleTheme?: () => void;
+  isWrongNetwork?: boolean;
 }
 
-export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps) {
+export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork = false }: NavbarProps) {
   const pathname = usePathname();
   const contextTheme = useTheme();
   const activeTheme = propTheme || contextTheme.theme || "dark";
@@ -26,6 +28,15 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isWrongNetworkState, setIsWrongNetworkState] = useState(isWrongNetwork);
+  const [isNetworkModalOpen, setIsNetworkModalOpen] = useState(isWrongNetwork);
+
+  useEffect(() => {
+    setIsWrongNetworkState(isWrongNetwork);
+    if (isWrongNetwork) {
+      setIsNetworkModalOpen(true);
+    }
+  }, [isWrongNetwork]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -154,6 +165,18 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
               )}
             </button>
 
+            {isWrongNetworkState && (
+              <button
+                type="button"
+                onClick={() => setIsNetworkModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-no-red-soft dark:bg-no-red/10 text-no-red border border-no-red/20 shadow-xs hover:opacity-90 transition-all cursor-pointer"
+                aria-label="Wrong network warning"
+              >
+                <span className="w-2 h-2 rounded-full bg-no-red animate-ping" />
+                <span>Wrong Network</span>
+              </button>
+            )}
+
             <ConnectWalletButton />
           </div>
 
@@ -235,11 +258,34 @@ export default function Navbar({ theme: propTheme, onToggleTheme }: NavbarProps)
             </nav>
 
             <div className={`pt-3 border-t flex flex-col gap-2 ${isDark ? "border-white/10" : "border-emerald-500/10"}`}>
+              {isWrongNetworkState && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsNetworkModalOpen(true);
+                  }}
+                  className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-mono font-bold bg-no-red-soft dark:bg-no-red/10 text-no-red border border-no-red/20"
+                >
+                  <span className="w-2 h-2 rounded-full bg-no-red" />
+                  <span>Wrong Network (Switch Network)</span>
+                </button>
+              )}
               <ConnectWalletButton className="w-full justify-center" />
             </div>
           </div>
         )}
       </div>
+
+      <NetworkSwitcherModal
+        isOpen={isNetworkModalOpen}
+        onClose={() => setIsNetworkModalOpen(false)}
+        onSwitchNetwork={async () => {
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          setIsWrongNetworkState(false);
+          setIsNetworkModalOpen(false);
+        }}
+      />
     </header>
   );
 }
