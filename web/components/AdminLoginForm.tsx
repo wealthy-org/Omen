@@ -183,26 +183,6 @@ export default function AdminLoginForm({
         />
 
         <div className="text-center mb-5">
-          <div
-            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-medium mb-3 backdrop-blur-md border ${
-              isDark
-                ? "bg-emerald-950/40 border-emerald-500/20 text-[#DCE5DF]"
-                : "bg-white/90 border-emerald-500/15 text-[#0E7A4E]"
-            }`}
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-                isDark ? "bg-[#34D399]" : "bg-[#22C55E]"
-              }`}
-            />
-            <span>
-              Protocol Governance •{" "}
-              <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>
-                Arbitrum Sepolia
-              </strong>
-            </span>
-          </div>
-
           <h1
             className={`text-xl sm:text-2xl font-black tracking-tight leading-tight ${
               isDark ? "text-white" : "text-[#0B1F16]"
