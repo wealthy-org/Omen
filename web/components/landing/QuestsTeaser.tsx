@@ -28,6 +28,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
       reward: "+100 PTS",
       status: "Available",
       progress: "0/1",
+      pct: 0,
     },
     {
       title: "Place First Binary Bet (≥ 0.01 ETH)",
@@ -35,6 +36,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
       reward: "+250 PTS",
       status: "Available",
       progress: "0/1",
+      pct: 0,
     },
     {
       title: "Maintain 3-Day Check-in Streak",
@@ -42,16 +44,17 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
       reward: "+150 PTS",
       status: "In Progress",
       progress: "2/3",
+      pct: 66,
     },
   ];
 
   return (
     <section className="w-full my-8 sm:my-12">
       <div
-        className={`rounded-3xl p-8 sm:p-10 relative overflow-hidden shadow-xl transition-all duration-300 ${
+        className={`rounded-3xl border p-6 sm:p-10 transition-all duration-300 overflow-hidden relative ${
           isDark
-            ? "bg-[#0A0F0C] border border-emerald-500/15"
-            : "bg-white/95 border border-white/80 light-card-shine shadow-[0_8px_32px_rgba(14,122,78,0.06),_inset_0_1px_0_#ffffff]"
+            ? "bg-[#070D09]/95 border-emerald-500/20 shadow-2xl"
+            : "bg-white/95 border-emerald-500/15 light-card-shine shadow-[0_8px_32px_rgba(14,122,78,0.06),_inset_0_1px_0_#ffffff]"
         }`}
       >
         <div
@@ -60,15 +63,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
           }`}
         />
 
-        <div
-          className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none ${
-            isDark
-              ? "bg-gradient-to-bl from-emerald-500/15 via-emerald-600/5 to-transparent"
-              : "bg-gradient-to-bl from-emerald-400/20 via-mint-soft/30 to-transparent"
-          }`}
-        />
-
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pb-8 border-b border-emerald-500/10">
           <div>
             <span className={`text-xs font-mono font-bold uppercase tracking-widest ${isDark ? "text-[#34D399]" : "text-[#0E7A4E]"}`}>
               Gamification & Quest Engine
@@ -76,51 +71,59 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
             <h2 className={`text-2xl sm:text-3xl font-extrabold tracking-tight mt-1 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
               Build Streaks. Multiply Your Points.
             </h2>
-            <p className={`text-sm sm:text-base mt-2 max-w-xl ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+            <p className={`text-sm sm:text-base mt-1.5 max-w-xl ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
               Check in daily to build your streak multiplier and complete interactive quests to maximize your Season 1 Airdrop allocation.
             </p>
           </div>
 
-          <Link
-            href="/quests"
-            className={`px-6 py-3.5 rounded-[14px] text-sm font-bold shrink-0 flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] ${
-              isDark
-                ? "bg-[#34D399] text-[#030906] hover:bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]"
-                : "bg-[#10221A] text-white hover:bg-[#183428]"
-            }`}
-          >
-            <span>Claim Today&apos;s +50 PTS</span>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/quests"
+              className={`px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] ${
+                isDark
+                  ? "bg-[#34D399] text-[#030906] hover:bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]"
+                  : "bg-[#10221A] text-white hover:bg-[#183428]"
+              }`}
+            >
+              <span>Claim Today&apos;s +50 PTS</span>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch my-6 pb-6 border-b border-emerald-500/10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 my-8 pb-8 border-b border-emerald-500/10 items-stretch">
           <div className="lg:col-span-8 flex flex-col justify-between">
-            <span className={`text-xs font-mono font-bold uppercase tracking-wider mb-3 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
-              7-Day Streak Multiplier Roadmap
-            </span>
-            <div className="grid grid-cols-7 gap-2 sm:gap-3 items-end">
+            <div className="flex items-center justify-between mb-4">
+              <span className={`text-xs font-mono font-bold uppercase tracking-wider ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                7-Day Streak Multiplier Roadmap
+              </span>
+              <span className="text-[11px] font-mono text-yes-green font-bold">Gasless Check-in</span>
+            </div>
+
+            <div className="grid grid-cols-7 gap-2 sm:gap-3">
               {DAYS.map((d) => (
                 <div
                   key={d.day}
-                  className={`rounded-2xl p-2.5 sm:p-3 text-center flex flex-col items-center justify-between border transition-all ${
+                  className={`rounded-xl p-2.5 sm:p-3 text-center flex flex-col items-center justify-between border transition-all ${
                     d.isMilestone
                       ? isDark
-                        ? "min-h-[110px] bg-gradient-to-b from-emerald-500/20 to-emerald-950/60 border-emerald-400/50 shadow-[0_0_20px_rgba(52,211,153,0.25)]"
-                        : "min-h-[110px] bg-gradient-to-b from-emerald-100 to-emerald-50 border-emerald-400 shadow-[0_4px_16px_rgba(14,122,78,0.15)]"
-                      : "min-h-[90px]"
+                        ? "bg-gradient-to-b from-emerald-500/20 to-emerald-950/60 border-emerald-400/40 shadow-[0_0_15px_rgba(52,211,153,0.2)]"
+                        : "bg-emerald-100/70 border-emerald-300 shadow-xs"
+                      : isDark
+                      ? "bg-black/30 border-white/10"
+                      : "bg-emerald-50/50 border-emerald-500/10"
                   } ${
                     d.status === "completed"
-                      ? "bg-yes-green/10 border-yes-green/40 text-yes-green"
+                      ? "border-yes-green/40 text-yes-green"
                       : d.status === "today"
                       ? isDark
-                        ? "bg-emerald-500/20 border-emerald-400 text-[#34D399] shadow-[0_0_15px_rgba(52,211,153,0.3)]"
-                        : "bg-emerald-100 border-[#0E7A4E] text-[#0E7A4E] shadow-[0_0_15px_rgba(14,122,78,0.2)]"
+                        ? "border-emerald-400 text-[#34D399] shadow-[0_0_12px_rgba(52,211,153,0.3)]"
+                        : "border-[#0E7A4E] text-[#0E7A4E]"
                       : isDark
-                      ? "bg-white/5 border-white/10 text-[#A9B3AD]"
-                      : "bg-emerald-50/60 border-emerald-500/10 text-[#4B5D55]"
+                      ? "text-[#A9B3AD]"
+                      : "text-[#4B5D55]"
                   }`}
                 >
                   <span className="text-xs font-mono font-bold">{d.day}</span>
@@ -129,9 +132,9 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
                   </span>
                   {d.multiplier ? (
                     <span
-                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold ${
+                      className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
                         d.isMilestone
-                          ? "bg-yes-green text-slate-950 shadow-xs"
+                          ? "bg-yes-green text-slate-950"
                           : isDark
                           ? "bg-white/10 text-white"
                           : "bg-emerald-200 text-emerald-900"
@@ -140,7 +143,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
                       {d.multiplier}
                     </span>
                   ) : (
-                    <span className="text-[10px] font-mono opacity-80">PTS</span>
+                    <span className="text-[10px] font-mono opacity-70">PTS</span>
                   )}
                 </div>
               ))}
@@ -149,15 +152,17 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
 
           <div
             className={`lg:col-span-4 rounded-2xl p-5 flex flex-col justify-between border ${
-              isDark ? "bg-[#040D08] border-emerald-500/20" : "bg-emerald-50/60 border-emerald-500/15 shadow-xs"
+              isDark ? "bg-[#030704] border-emerald-500/20" : "bg-emerald-50/40 border-emerald-500/15"
             }`}
           >
             <div>
               <div className="flex items-center justify-between text-xs font-mono mb-2">
                 <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>Your Current Status</span>
-                <span className="text-xs font-mono font-bold text-yes-green px-2 py-0.5 rounded bg-yes-green/10">Active Streak</span>
+                <span className="text-[10px] font-mono font-bold text-yes-green px-2 py-0.5 rounded bg-yes-green/10 border border-yes-green/20">
+                  Active Streak
+                </span>
               </div>
-              <div className={`text-xl font-extrabold tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <div className={`text-lg font-black tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
                 🔥 3-Day Consecutive Streak
               </div>
               <p className={`text-xs mt-2 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
@@ -165,7 +170,7 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
               </p>
             </div>
 
-            <div className="pt-3 mt-3 border-t border-emerald-500/10 flex items-center justify-between text-xs font-mono">
+            <div className="pt-3 mt-4 border-t border-emerald-500/10 flex items-center justify-between text-xs font-mono">
               <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>Next Tier: 2.0x Boost</span>
               <span className="font-bold text-emerald-500">2 Days Left</span>
             </div>
@@ -173,32 +178,50 @@ export default function QuestsTeaser({ theme: propTheme }: QuestsTeaserProps) {
         </div>
 
         <div>
-          <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
-            Featured Quests Available Now
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center justify-between mb-4">
+            <span className={`text-xs font-mono font-bold uppercase tracking-wider ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+              Task Center • Available Quests
+            </span>
+            <Link href="/quests" className="text-xs font-mono font-semibold text-yes-green hover:underline">
+              View All Tasks →
+            </Link>
+          </div>
+
+          <div className="divide-y divide-emerald-500/10 border border-emerald-500/10 rounded-2xl overflow-hidden">
             {ACTIVE_QUESTS.map((quest) => (
               <div
                 key={quest.title}
-                className={`rounded-2xl p-4 transition-all flex flex-col justify-between ${
-                  isDark
-                    ? "bg-white/5 border border-white/10 hover:border-emerald-500/30"
-                    : "bg-emerald-50/60 border border-emerald-500/10 hover:border-emerald-400/30 shadow-xs"
+                className={`p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors ${
+                  isDark ? "hover:bg-emerald-500/[0.03] bg-black/20" : "hover:bg-emerald-50/50 bg-white"
                 }`}
               >
-                <div>
-                  <div className="flex items-center justify-between text-xs font-mono mb-2">
-                    <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>{quest.category}</span>
-                    <span className={`font-bold ${isDark ? "text-[#34D399]" : "text-[#0E7A4E]"}`}>{quest.reward}</span>
+                <div className="flex items-center gap-3">
+                  <span className={`text-[10px] font-mono px-2.5 py-1 rounded-md border font-semibold ${
+                    isDark ? "bg-white/5 border-white/10 text-white/80" : "bg-emerald-50 border-emerald-500/20 text-[#0E7A4E]"
+                  }`}>
+                    {quest.category}
+                  </span>
+                  <div>
+                    <h4 className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+                      {quest.title}
+                    </h4>
+                    <span className="text-xs font-mono text-[#A9B3AD]">
+                      Progress: {quest.progress}
+                    </span>
                   </div>
-                  <h4 className={`text-sm font-bold mb-2 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>{quest.title}</h4>
                 </div>
 
-                <div className={`flex items-center justify-between pt-2 border-t text-xs ${isDark ? "border-white/5 text-[#A9B3AD]" : "border-emerald-500/10 text-[#4B5D55]"}`}>
-                  <span>Progress: {quest.progress}</span>
+                <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                  <span className="text-xs font-mono font-black text-yes-green px-2.5 py-1 rounded-md bg-yes-green/10 border border-yes-green/20">
+                    {quest.reward}
+                  </span>
                   <Link
                     href="/quests"
-                    className={`text-xs font-mono font-semibold ${isDark ? "text-[#34D399] hover:text-[#6EE7B7]" : "text-[#0E7A4E] hover:text-[#047857]"}`}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+                      isDark
+                        ? "bg-white/10 text-white hover:bg-[#34D399] hover:text-[#030906]"
+                        : "bg-[#10221A] text-white hover:bg-[#183428]"
+                    }`}
                   >
                     Start →
                   </Link>

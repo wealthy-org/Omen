@@ -57,13 +57,22 @@ describe("Landing Page Components", () => {
     expect(screen.getByText(/Pillar II • Gamification, Quest & Airdrop/i)).toBeInTheDocument();
   });
 
-  it("renders the trending prediction markets teaser section", () => {
+  it("renders the trending prediction markets teaser section and filters by tabs", () => {
     render(<HomePage />);
 
     expect(screen.getByText(/Trending Prediction Markets/i)).toBeInTheDocument();
     expect(screen.getByText(/Will Ethereum trade above \$4,500/i)).toBeInTheDocument();
     expect(screen.getByText(/Will Arbitrum Daily Active Users exceed 1\.5 Million/i)).toBeInTheDocument();
+
+    const cryptoTab = screen.getByRole("button", { name: /Crypto/i });
+    const l2Tab = screen.getByRole("button", { name: /Layer 2/i });
+    const macroTab = screen.getByRole("button", { name: /Macro/i });
+
+    expect(cryptoTab).toBeInTheDocument();
+    expect(l2Tab).toBeInTheDocument();
+    expect(macroTab).toBeInTheDocument();
   });
+
 
   it("renders the gamified 7-day streak calendar in QuestsTeaser", () => {
     render(<HomePage />);
@@ -71,6 +80,15 @@ describe("Landing Page Components", () => {
     expect(screen.getByText(/Gamification & Quest Engine/i)).toBeInTheDocument();
     expect(screen.getByText("D1")).toBeInTheDocument();
     expect(screen.getByText("D7")).toBeInTheDocument();
+  });
+
+  it("renders the 3-step onboarding journey section", () => {
+    render(<HomePage />);
+
+    expect(screen.getByText(/How to Get Started in 3 Simple Steps/i)).toBeInTheDocument();
+    expect(screen.getByText("01")).toBeInTheDocument();
+    expect(screen.getByText("02")).toBeInTheDocument();
+    expect(screen.getByText("03")).toBeInTheDocument();
   });
 
   it("renders the Season 1 Airdrop campaign banner", () => {
@@ -83,3 +101,5 @@ describe("Landing Page Components", () => {
     );
   });
 });
+
+

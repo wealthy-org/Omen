@@ -18,7 +18,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
       className={`relative w-full overflow-hidden rounded-[24px] transition-all duration-300 ${
         isDark
           ? "bg-[#030906] border border-white/10 shadow-[0_24px_80px_rgba(0,0,0,0.8)]"
-          : "border border-white/80 shadow-[0_20px_60px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)] light-hero-gradient"
+          : "bg-gradient-to-b from-white via-[#FAFCFA] to-[#E2F7ED] border border-emerald-500/15 shadow-[0_20px_60px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)]"
       }`}
     >
       <div
@@ -27,7 +27,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
         }`}
       />
 
-      <div className="relative z-20 flex flex-col items-center text-center px-4 sm:px-6 lg:px-10 xl:px-14 pt-16 sm:pt-24 pb-52 sm:pb-72 w-full mx-auto">
+      <div className="relative z-20 flex flex-col items-center text-center px-4 sm:px-6 lg:px-10 xl:px-14 pt-16 sm:pt-24 pb-48 sm:pb-64 w-full mx-auto">
         <div
           className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium mb-6 backdrop-blur-md shadow-xs animate-in fade-in duration-500 border ${
             isDark
@@ -111,21 +111,23 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
         </div>
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 h-[68%] pointer-events-none z-10 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden">
         <Image
           src="/images/hero-dark-emerald.jpg"
           alt="Omen Web3 3D Dark Emerald Abstract"
           fill
           priority
           sizes="(max-width: 1400px) 100vw, 1400px"
-          className="object-cover object-bottom"
+          className={`object-cover object-bottom transition-opacity duration-300 ${
+            isDark ? "opacity-90" : "opacity-35 mix-blend-luminosity"
+          }`}
         />
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 transition-all duration-300"
           style={{
             background: isDark
-              ? "linear-gradient(180deg, #030906 0%, rgba(3,9,6,0.8) 35%, rgba(3,9,6,0.1) 75%, rgba(3,9,6,0.95) 100%)"
-              : "linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.85) 30%, rgba(255,255,255,0.25) 70%, rgba(207,243,226,0.85) 100%)",
+              ? "linear-gradient(180deg, #030906 0%, rgba(3,9,6,0.7) 40%, rgba(3,9,6,0.15) 70%, rgba(3,9,6,0.95) 100%)"
+              : "linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.95) 35%, rgba(255,255,255,0.6) 65%, rgba(226,247,237,0.9) 100%)",
           }}
         />
       </div>
