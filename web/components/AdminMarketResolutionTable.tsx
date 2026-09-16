@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTheme } from "./ThemeProvider";
+import { useAdminResolveMarket } from "@/hooks/useAdminResolveMarket";
 
 export type ResolutionOutcome = "YES" | "NO" | "CANCEL";
 
@@ -116,6 +117,7 @@ export default function AdminMarketResolutionTable({
 }: AdminMarketResolutionTableProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { resolveMarket } = useAdminResolveMarket();
 
   const [markets, setMarkets] = useState<ResolvableMarketItem[]>(initialMarkets);
   const [searchQuery, setSearchQuery] = useState("");
@@ -182,6 +184,14 @@ export default function AdminMarketResolutionTable({
 
     try {
       const resolvedTimestamp = new Date().toISOString();
+
+      await resolveMarket({
+        marketId: activeModal.market.id,
+        outcome: activeModal.outcome,
+        notes: resolutionNotes.trim() || undefined,
+        cancellationReason: activeModal.outcome === "CANCEL" ? cancellationReason : undefined,
+      });
+
       if (onResolveMarket) {
         await onResolveMarket(
           activeModal.market.id,
