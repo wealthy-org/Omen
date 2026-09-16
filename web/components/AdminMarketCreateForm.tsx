@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { MarketCard, MarketData } from "./MarketCard";
+import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
 
 export interface AdminMarketFormData {
   title: string;
@@ -29,7 +30,8 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
   onSubmitMarket,
   isLoading = false,
 }) => {
-  const [title, setTitle] = useState<string>("" );
+  const { createMarket, isPending: isTxPending, isConfirming, isSyncing } = useAdminCreateMarket();
+  const [title, setTitle] = useState<string>("");
   const [category, setCategory] = useState<string>("CRYPTO");
   const [endTime, setEndTime] = useState<string>("");
   const [resolutionSourceUrl, setResolutionSourceUrl] = useState<string>("");
@@ -42,7 +44,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
 
-  const isSubmitting = isLoading || internalLoading;
+  const isSubmitting = isLoading || internalLoading || isTxPending || isConfirming || isSyncing;
 
   const minDateTimeString = useMemo(() => {
     const oneHourLater = new Date(Date.now() + 60 * 60 * 1000);
@@ -143,6 +145,15 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
     try {
       setInternalLoading(true);
       setErrorMessage(null);
+
+      await createMarket({
+        title: title.trim(),
+        category,
+        endTime,
+        resolutionSourceUrl: resolutionSourceUrl.trim(),
+        resolutionCriteria: resolutionCriteria.trim(),
+        initialLiquidity,
+      });
 
       if (onSubmitMarket) {
         await onSubmitMarket({
