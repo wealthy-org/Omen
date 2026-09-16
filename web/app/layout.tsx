@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Web3Providers } from "./providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import "./globals.css";
@@ -61,15 +62,17 @@ export default function RootLayout({
     <html lang="en" className={`${proximaNova.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen antialiased font-sans">
         <ThemeProvider>
-          <div className="min-h-screen flex flex-col w-full">
-            <Navbar />
-            <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-6 sm:py-8">
-              <div className="max-w-[1400px] w-full mx-auto">
-                {children}
-              </div>
-            </main>
-            <Footer />
-          </div>
+          <Web3Providers>
+            <div className="min-h-screen flex flex-col w-full">
+              <Navbar />
+              <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-6 sm:py-8">
+                <div className="max-w-[1400px] w-full mx-auto">
+                  {children}
+                </div>
+              </main>
+              <Footer />
+            </div>
+          </Web3Providers>
         </ThemeProvider>
       </body>
     </html>
