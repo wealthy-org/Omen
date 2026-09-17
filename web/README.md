@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OMEN — V1 Social Belief Protocol
+
+OMEN is a decentralized social belief protocol enabling continuous market formation on high-conviction opinions, AI-extracted structured claims, creator EIP-712 cryptographic attestation, and deterministic Chainlink oracle resolution across dual testnets (Ethereum Sepolia and Robinhood Chain Testnet).
+
+---
+
+## Key Features
+
+- **Social Belief Markets**: Bet AGREE or DISAGREE on social opinions and influencer convictions with real-time ETH liquidity pools.
+- **AI Extraction Wizard (`/create`)**: Transform unstructured text and social posts into verified structured belief statements with auto-calculated confidence metrics.
+- **Creator Attestation (EIP-712)**: Gasless cryptographic signature enabling creators to verify authentic ownership of detected statements.
+- **Chainlink Oracle Price Feeds**: Deterministic price-based resolution (`PRICE_ABOVE`, `PRICE_BELOW`, `RELATIVE_PERFORMANCE`).
+- **Dual Testnet Support**: Built for both Ethereum Sepolia (`11155111`) and Robinhood Chain Testnet (`46630`).
+- **OpenZeppelin Dark Theme**: High-density glassmorphism UI with emerald, rose, and purple conviction accents.
+
+---
+
+## Directory Architecture
+
+- `app/`: Next.js 15 App router pages (`/`, `/markets`, `/market/[id]`, `/beliefs`, `/creators`, `/creator/[address]`, `/create`, `/activity`)
+- `components/`: Modular React components (`BeliefMarketCard`, `PositionPanel`, `BeliefCard`, `CreatorConfirmation`, `DiscoveryFilter`, `ActivityFeed`, `MarketDetailPanels`)
+- `hooks/`: Wagmi v2 custom Web3 hooks (`usePosition`, `useClaim`, `useMarket`, `useCreateMarket`, `useCreatorConfirm`)
+- `lib/`: Web3 client configuration (`wagmi.ts`, `contracts.ts`, `oracle/chainlink.ts`)
+- `tests/`: Comprehensive unit and E2E test suites with Vitest
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Environment Variables
+
+Copy `.env.example` to `.env.local` and configure your RPC URLs and contract addresses:
+
+```bash
+cp .env.example .env.local
+```
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Verification & Testing
 
-## Learn More
+### Run Vitest Suite
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx vitest run
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Run ESLint
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx eslint .
+```
 
-## Deploy on Vercel
+### Run Build Check
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+```

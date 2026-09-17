@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import { WagmiContext, useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 export interface ClaimPayoutResult {
@@ -12,23 +11,6 @@ export interface ClaimPayoutResult {
 }
 
 export function useClaimPayout(): ClaimPayoutResult {
-  const context = useContext(WagmiContext);
-  if (!context) {
-    return {
-      claimPayout: async () => "",
-      txHash: undefined,
-      isPending: false,
-      isConfirming: false,
-      isConfirmed: false,
-      error: null,
-    };
-  }
-
-  return useClaimPayoutInner();
-}
-
-function useClaimPayoutInner(): ClaimPayoutResult {
-  const { address } = useAccount();
   const {
     writeContractAsync,
     data: txHash,
@@ -62,3 +44,5 @@ function useClaimPayoutInner(): ClaimPayoutResult {
     error: writeError,
   };
 }
+
+export default useClaimPayout;

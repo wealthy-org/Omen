@@ -1,6 +1,5 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import {
-  WagmiContext,
   useWriteContract,
   useWaitForTransactionReceipt,
   useAccount,
@@ -29,23 +28,6 @@ export interface CreateMarketResult {
 }
 
 export function useAdminCreateMarket(): CreateMarketResult {
-  const context = useContext(WagmiContext);
-  if (!context) {
-    return {
-      createMarket: async () => ({ hash: "", contractMarketId: "0" }),
-      txHash: undefined,
-      isPending: false,
-      isConfirming: false,
-      isConfirmed: false,
-      isSyncing: false,
-      error: null,
-    };
-  }
-
-  return useAdminCreateMarketInner();
-}
-
-function useAdminCreateMarketInner(): CreateMarketResult {
   const { address } = useAccount();
   const publicClient = usePublicClient();
   const {
@@ -144,3 +126,5 @@ function useAdminCreateMarketInner(): CreateMarketResult {
     error: writeError || (syncError ? new Error(syncError) : null),
   };
 }
+
+export default useAdminCreateMarket;
