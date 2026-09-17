@@ -72,17 +72,17 @@ export function CreatorConfirmation({
   }
 
   return (
-    <div className="bg-zinc-900/70 border border-purple-500/30 rounded-xl p-5 backdrop-blur-md relative overflow-hidden">
+    <div className="bg-purple-50/50 dark:bg-zinc-900/70 border border-purple-500/30 rounded-xl p-5 backdrop-blur-md relative overflow-hidden">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+            <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30">
               Creator Verification
             </span>
-            <span className="text-xs text-zinc-400">Gasless EIP-712</span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">Gasless EIP-712</span>
           </div>
-          <p className="text-sm text-zinc-300">
-            Are you <span className="font-semibold text-purple-300">@{authorHandle}</span>? Sign typed data to officially authenticate this belief statement.
+          <p className="text-sm text-zinc-800 dark:text-zinc-300">
+            Are you <span className="font-semibold text-purple-700 dark:text-purple-300">@{authorHandle}</span>? Sign typed data to officially authenticate this belief statement.
           </p>
         </div>
 
@@ -125,7 +125,7 @@ export function CreatorConfirmation({
       </div>
 
       {error && (
-        <div className="mt-3 text-xs text-rose-400 bg-rose-950/30 border border-rose-500/30 rounded p-2">
+        <div className="mt-3 text-xs text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 rounded p-2">
           {error.message || "Failed to sign creator confirmation"}
         </div>
       )}

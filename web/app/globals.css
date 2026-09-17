@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary-blue: #4E5EE4;
   --color-primary-blue-hover: #3D4CC8;

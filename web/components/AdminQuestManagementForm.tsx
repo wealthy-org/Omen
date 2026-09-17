@@ -55,10 +55,11 @@ export default function AdminQuestManagementForm({
 
   const [deleteModalQuest, setDeleteModalQuest] = useState<AdminQuestItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
+  const [prevInitialQuests, setPrevInitialQuests] = useState(initialQuests);
+  if (initialQuests !== prevInitialQuests) {
+    setPrevInitialQuests(initialQuests);
     setQuests(initialQuests);
-  }, [initialQuests]);
+  }
 
   const getCategoryBadgeClass = (cat: QuestCategory) => {
     switch (cat) {
@@ -253,14 +254,8 @@ export default function AdminQuestManagementForm({
 
   return (
     <div className={`space-y-8 ${className}`}>
-      <div
-        className={`rounded-2xl border p-6 sm:p-8 transition-all ${
-          isDark
-            ? "bg-[#0A0F0C] border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
-            : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.06)]"
-        }`}
-      >
-        <div className="flex items-center gap-3 pb-6 border-b border-border-subtle dark:border-white/10">
+      <div className="rounded-2xl border p-6 sm:p-8 transition-all bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 shadow-sm">
+        <div className="flex items-center gap-3 pb-6 border-b border-zinc-200 dark:border-white/10">
           <div className="w-10 h-10 rounded-xl bg-primary-blue-soft text-primary-blue dark:bg-primary-blue/15 flex items-center justify-center font-bold">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -325,7 +320,7 @@ export default function AdminQuestManagementForm({
                 className={`w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all outline-none ${
                   fieldErrors.title
                     ? "border-no-red bg-rose-50/50 dark:bg-rose-950/20 text-accent-navy dark:text-white"
-                    : "bg-[#F4FBF7] dark:bg-[#121815] border-emerald-500/20 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
+                    : "bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
                 }`}
               />
               {fieldErrors.title && (
@@ -346,11 +341,7 @@ export default function AdminQuestManagementForm({
                 id="quest-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value as QuestCategory)}
-                className={`w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all outline-none cursor-pointer ${
-                  isDark
-                    ? "bg-[#121815] border-white/10 text-white focus:border-emerald-500/50"
-                    : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy focus:border-emerald-500"
-                }`}
+                className="w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all outline-none cursor-pointer bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
               >
                 <option value="ONBOARDING">ONBOARDING</option>
                 <option value="SOCIAL">SOCIAL</option>
@@ -384,7 +375,7 @@ export default function AdminQuestManagementForm({
                 className={`w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all outline-none resize-none ${
                   fieldErrors.description
                     ? "border-no-red bg-rose-50/50 dark:bg-rose-950/20 text-accent-navy dark:text-white"
-                    : "bg-[#F4FBF7] dark:bg-[#121815] border-emerald-500/20 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
+                    : "bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
                 }`}
               />
               {fieldErrors.description && (
@@ -405,11 +396,7 @@ export default function AdminQuestManagementForm({
                 id="quest-recurrence"
                 value={recurrence}
                 onChange={(e) => setRecurrence(e.target.value as QuestRecurrence)}
-                className={`w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all outline-none cursor-pointer ${
-                  isDark
-                    ? "bg-[#121815] border-white/10 text-white focus:border-emerald-500/50"
-                    : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy focus:border-emerald-500"
-                }`}
+                className="w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all outline-none cursor-pointer bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
               >
                 <option value="ONE_TIME">One-Time Completion</option>
                 <option value="DAILY">Daily Recurring</option>
@@ -445,7 +432,7 @@ export default function AdminQuestManagementForm({
                 className={`w-full px-4 py-3 rounded-xl border font-mono text-sm font-bold transition-all outline-none ${
                   fieldErrors.points
                     ? "border-no-red bg-rose-50/50 dark:bg-rose-950/20 text-accent-navy dark:text-white"
-                    : "bg-[#F4FBF7] dark:bg-[#121815] border-emerald-500/20 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
+                    : "bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
                 }`}
               />
               {fieldErrors.points && (
@@ -478,7 +465,7 @@ export default function AdminQuestManagementForm({
                 className={`w-full px-4 py-3 rounded-xl border text-sm font-medium transition-all outline-none ${
                   fieldErrors.actionUrl
                     ? "border-no-red bg-rose-50/50 dark:bg-rose-950/20 text-accent-navy dark:text-white"
-                    : "bg-[#F4FBF7] dark:bg-[#121815] border-emerald-500/20 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
+                    : "bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
                 }`}
               />
               {fieldErrors.actionUrl && (
@@ -493,7 +480,7 @@ export default function AdminQuestManagementForm({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+              className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
                 isSubmitting
                   ? "opacity-60 cursor-not-allowed bg-emerald-600 text-white"
                   : "bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white"
@@ -524,14 +511,8 @@ export default function AdminQuestManagementForm({
         </form>
       </div>
 
-      <div
-        className={`rounded-2xl border p-6 sm:p-8 transition-all ${
-          isDark
-            ? "bg-[#0A0F0C] border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
-            : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.06)]"
-        }`}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border-subtle dark:border-white/10">
+      <div className="rounded-2xl border p-6 sm:p-8 transition-all bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-zinc-200 dark:border-white/10">
           <div>
             <h2 className="text-xl font-bold text-accent-navy dark:text-white">
               Manage Existing Quests
@@ -542,14 +523,14 @@ export default function AdminQuestManagementForm({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex rounded-xl p-1 bg-[#F4FBF7] dark:bg-[#121815] border border-emerald-500/10 dark:border-white/10 text-xs font-bold">
+            <div className="flex rounded-xl p-1 bg-zinc-100 dark:bg-[#121815] border border-zinc-200 dark:border-white/10 text-xs font-bold">
               <button
                 type="button"
                 onClick={() => setStatusFilter("ALL")}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   statusFilter === "ALL"
                     ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                    : "text-zinc-600 dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
                 }`}
               >
                 All ({quests.length})
@@ -560,7 +541,7 @@ export default function AdminQuestManagementForm({
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   statusFilter === "ACTIVE"
                     ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                    : "text-zinc-600 dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
                 }`}
               >
                 Active ({quests.filter((q) => q.isActive).length})
@@ -571,7 +552,7 @@ export default function AdminQuestManagementForm({
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   statusFilter === "INACTIVE"
                     ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                    : "text-zinc-600 dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
                 }`}
               >
                 Inactive ({quests.filter((q) => !q.isActive).length})
@@ -587,24 +568,14 @@ export default function AdminQuestManagementForm({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search quest by title, description, or ID..."
             aria-label="Search quests"
-            className={`w-full px-4 py-2.5 rounded-xl border text-sm transition-all outline-none ${
-              isDark
-                ? "bg-[#121815] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/50"
-                : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy placeholder:text-accent-navy/40 focus:border-emerald-500"
-            }`}
+            className="w-full px-4 py-2.5 rounded-xl border text-sm transition-all outline-none bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/30 focus:border-emerald-500"
           />
         </div>
 
-        <div className="overflow-x-auto rounded-xl border border-border-subtle dark:border-white/10">
+        <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-white/10">
           <table className="w-full text-left border-collapse" aria-label="Existing Quests Table">
             <thead>
-              <tr
-                className={`text-[11px] font-mono uppercase tracking-wider border-b ${
-                  isDark
-                    ? "bg-[#121815] text-[#CBD5E1] border-white/10"
-                    : "bg-[#F4FBF7] text-text-muted border-emerald-500/10"
-                }`}
-              >
+              <tr className="text-[11px] font-mono uppercase tracking-wider border-b bg-zinc-50 dark:bg-[#121815] text-zinc-600 dark:text-[#CBD5E1] border-zinc-200 dark:border-white/10">
                 <th className="py-3 px-4 font-bold">Quest Details</th>
                 <th className="py-3 px-4 font-bold">Category</th>
                 <th className="py-3 px-4 font-bold">Points / Type</th>
@@ -736,14 +707,8 @@ export default function AdminQuestManagementForm({
           aria-labelledby="delete-dialog-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         >
-          <div
-            className={`w-full max-w-md rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl space-y-4 ${
-              isDark
-                ? "bg-[#0A0F0C] border-white/10 text-white"
-                : "bg-white border-emerald-500/20 text-accent-navy"
-            }`}
-          >
-            <div className="flex items-center gap-3 pb-3 border-b border-border-subtle dark:border-white/10">
+          <div className="w-full max-w-md rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl space-y-4 bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white">
+            <div className="flex items-center gap-3 pb-3 border-b border-zinc-200 dark:border-white/10">
               <div className="w-10 h-10 rounded-xl bg-no-red-soft dark:bg-no-red/20 text-no-red flex items-center justify-center font-bold">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -763,12 +728,12 @@ export default function AdminQuestManagementForm({
               Are you sure you want to archive quest <strong>&ldquo;{deleteModalQuest.title}&rdquo;</strong>? Users will no longer be able to complete this task.
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-border-subtle dark:border-white/10">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setDeleteModalQuest(null)}
                 disabled={isDeleting}
-                className="px-4 py-2.5 rounded-xl font-bold text-xs border border-border-subtle dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all cursor-pointer"
+                className="px-4 py-2.5 rounded-xl font-bold text-xs border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 text-accent-navy dark:text-white transition-all cursor-pointer"
               >
                 Cancel
               </button>

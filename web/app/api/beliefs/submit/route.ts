@@ -120,14 +120,20 @@ export async function POST(req: NextRequest) {
       chainId: effectiveChainId,
     });
 
+    const generatedMarketId = Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 1000);
     const { data: market, error: marketError } = await supabase
       .from("markets")
       .insert({
         belief_id: belief.id,
+        contract_market_id: generatedMarketId,
+        title: statement.trim(),
+        deadline: new Date(effectiveCloseTime * 1000).toISOString(),
         contract_address: onChainResult.contractAddress,
         chain_id: effectiveChainId,
         agree_pool: 0,
         disagree_pool: 0,
+        total_pool_yes: 0,
+        total_pool_no: 0,
         open_time: new Date(effectiveOpenTime * 1000).toISOString(),
         close_time: new Date(effectiveCloseTime * 1000).toISOString(),
         status: "OPEN",

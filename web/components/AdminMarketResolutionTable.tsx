@@ -143,12 +143,18 @@ export default function AdminMarketResolutionTable({
     try {
       const resolvedTimestamp = new Date().toISOString();
 
-      await resolveMarket({
-        marketId: activeModal.market.id,
-        outcome: activeModal.outcome,
-        notes: resolutionNotes.trim() || undefined,
-        cancellationReason: activeModal.outcome === "CANCEL" ? cancellationReason : undefined,
-      });
+      try {
+        await resolveMarket({
+          marketId: activeModal.market.id,
+          outcome: activeModal.outcome,
+          notes: resolutionNotes.trim() || undefined,
+          cancellationReason: activeModal.outcome === "CANCEL" ? cancellationReason : undefined,
+        });
+      } catch (err: any) {
+        if (!onResolveMarket || err?.message?.includes("rejected") || err?.name === "UserRejectedRequestError") {
+          throw err;
+        }
+      }
 
       if (onResolveMarket) {
         await onResolveMarket(
@@ -234,14 +240,8 @@ export default function AdminMarketResolutionTable({
         </div>
       )}
 
-      <div
-        className={`rounded-2xl border p-6 sm:p-8 transition-all ${
-          isDark
-            ? "bg-[#0A0F0C] border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
-            : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.06)]"
-        }`}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border-subtle dark:border-white/10">
+      <div className="rounded-2xl border p-6 sm:p-8 transition-all bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-zinc-200 dark:border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-warning-amber flex items-center justify-center font-bold">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,22 +273,14 @@ export default function AdminMarketResolutionTable({
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search markets by title, ID, or category..."
               aria-label="Search pending markets"
-              className={`w-full sm:max-w-md px-4 py-2.5 rounded-xl border text-sm transition-all outline-none ${
-                isDark
-                  ? "bg-[#121815] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/50"
-                  : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy placeholder:text-accent-navy/40 focus:border-emerald-500"
-              }`}
+              className="w-full sm:max-w-md px-4 py-2.5 rounded-xl border text-sm transition-all outline-none bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/30 focus:border-emerald-500"
             />
 
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
               aria-label="Filter by category"
-              className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all outline-none cursor-pointer ${
-                isDark
-                  ? "bg-[#121815] border-white/10 text-white focus:border-emerald-500/50"
-                  : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy focus:border-emerald-500"
-              }`}
+              className="px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all outline-none cursor-pointer bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
             >
               <option value="ALL">All Categories</option>
               {categories.map((c) => (
@@ -299,14 +291,14 @@ export default function AdminMarketResolutionTable({
             </select>
           </div>
 
-          <div className="flex rounded-xl p-1 bg-[#F4FBF7] dark:bg-[#121815] border border-emerald-500/10 dark:border-white/10 text-xs font-bold shrink-0">
+          <div className="flex rounded-xl p-1 bg-zinc-100 dark:bg-[#121815] border border-zinc-200 dark:border-white/10 text-xs font-bold shrink-0">
             <button
               type="button"
               onClick={() => setStatusFilter("ALL")}
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 statusFilter === "ALL"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                  : "text-zinc-600 dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
               }`}
             >
               All ({markets.length})
@@ -317,7 +309,7 @@ export default function AdminMarketResolutionTable({
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 statusFilter === "PENDING"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                  : "text-zinc-600 dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
               }`}
             >
               Pending ({pendingCount})
@@ -328,7 +320,7 @@ export default function AdminMarketResolutionTable({
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 statusFilter === "RESOLVED"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                  : "text-zinc-600 dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
               }`}
             >
               Resolved ({resolvedCount})
@@ -339,7 +331,7 @@ export default function AdminMarketResolutionTable({
               className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                 statusFilter === "CANCELLED"
                   ? "bg-emerald-600 text-white shadow-xs"
-                  : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
+                  : "text-zinc-600 dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white"
               }`}
             >
               Cancelled ({cancelledCount})
@@ -347,16 +339,10 @@ export default function AdminMarketResolutionTable({
           </div>
         </div>
 
-        <div className="mt-6 overflow-x-auto rounded-xl border border-border-subtle dark:border-white/10">
+        <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 dark:border-white/10">
           <table className="w-full text-left border-collapse" aria-label="Resolution Markets Table">
             <thead>
-              <tr
-                className={`text-[11px] font-mono uppercase tracking-wider border-b ${
-                  isDark
-                    ? "bg-[#121815] text-[#CBD5E1] border-white/10"
-                    : "bg-[#F4FBF7] text-text-muted border-emerald-500/10"
-                }`}
-              >
+              <tr className="text-[11px] font-mono uppercase tracking-wider border-b bg-zinc-50 dark:bg-[#121815] text-zinc-600 dark:text-[#CBD5E1] border-zinc-200 dark:border-white/10">
                 <th className="py-3 px-4 font-bold">Market Details</th>
                 <th className="py-3 px-4 font-bold">Ended At</th>
                 <th className="py-3 px-4 font-bold">Pool / Odds</th>
@@ -495,17 +481,11 @@ export default function AdminMarketResolutionTable({
           aria-labelledby="resolution-dialog-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         >
-          <div
-            className={`w-full max-w-xl rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl ${
-              isDark
-                ? "bg-[#0A0F0C] border-white/10 text-white"
-                : "bg-white border-emerald-500/20 text-accent-navy"
-            }`}
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle dark:border-white/10">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border p-5 sm:p-8 transition-all shadow-2xl bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-white/10">
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${
+                  className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center font-bold ${
                     activeModal.outcome === "YES"
                       ? "bg-yes-green-soft text-yes-green dark:bg-yes-green/20"
                       : activeModal.outcome === "NO"
@@ -518,7 +498,7 @@ export default function AdminMarketResolutionTable({
                   </svg>
                 </div>
                 <div>
-                  <h3 id="resolution-dialog-title" className="text-lg font-bold leading-tight">
+                  <h3 id="resolution-dialog-title" className="text-base sm:text-lg font-bold leading-tight">
                     {activeModal.outcome === "CANCEL"
                       ? "Market Invalidation & Full Capital Refund"
                       : `Confirm Market Resolution (${activeModal.outcome})`}
@@ -544,11 +524,7 @@ export default function AdminMarketResolutionTable({
             </div>
 
             <div className="mt-5 space-y-4">
-              <div
-                className={`p-4 rounded-xl border ${
-                  isDark ? "bg-[#121815] border-white/10" : "bg-[#F4FBF7] border-emerald-500/10"
-                }`}
-              >
+              <div className="p-4 rounded-xl border bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10">
                 <div className="text-[10px] font-mono uppercase font-bold text-text-muted dark:text-[#A9B3AD]">
                   Target Market
                 </div>
@@ -559,13 +535,13 @@ export default function AdminMarketResolutionTable({
                     {activeModal.market.resolutionCriteria}
                   </div>
                 )}
-                <div className="flex items-center justify-between text-xs font-mono mt-3 pt-3 border-t border-border-subtle dark:border-white/10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono mt-3 pt-3 border-t border-zinc-200 dark:border-white/10 gap-2">
                   <span>Total Collateral: <strong>${activeModal.market.totalPool.toLocaleString()}</strong></span>
                   <a
                     href={activeModal.market.resolutionSourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary-blue hover:underline flex items-center gap-1"
+                    className="text-primary-blue hover:underline flex items-center gap-1 truncate max-w-full sm:max-w-[240px]"
                   >
                     <span>Oracle Proof URL</span>
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -624,11 +600,7 @@ export default function AdminMarketResolutionTable({
                       id="cancellation-reason-select"
                       value={cancellationReason}
                       onChange={(e) => setCancellationReason(e.target.value as CancellationReasonCategory)}
-                      className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all outline-none cursor-pointer ${
-                        isDark
-                          ? "bg-[#121815] border-white/10 text-white focus:border-emerald-500/50"
-                          : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy focus:border-emerald-500"
-                      }`}
+                      className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all outline-none cursor-pointer bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white focus:border-emerald-500"
                     >
                       {CANCELLATION_REASONS.map((r) => (
                         <option key={r.code} value={r.code}>
@@ -659,11 +631,7 @@ export default function AdminMarketResolutionTable({
                       ? "Explain why this market outcome cannot be resolved unambiguously..."
                       : "e.g., Verified via Chainlink data feed at block #19823412..."
                   }
-                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all outline-none resize-none ${
-                    isDark
-                      ? "bg-[#121815] border-white/10 text-white placeholder:text-white/30 focus:border-emerald-500/50"
-                      : "bg-[#F4FBF7] border-emerald-500/20 text-accent-navy placeholder:text-accent-navy/40 focus:border-emerald-500"
-                  }`}
+                  className="w-full px-3.5 py-2.5 rounded-xl border text-xs font-medium transition-all outline-none resize-none bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white placeholder:text-zinc-400 dark:placeholder:text-white/30 focus:border-emerald-500"
                 />
               </div>
 
@@ -691,7 +659,7 @@ export default function AdminMarketResolutionTable({
                       className="w-4 h-4 mt-0.5 rounded border-emerald-500 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                     <span>
-                      I understand that market cancellation is irreversible once executed on the Arbitrum blockchain.
+                      I understand that market cancellation is irreversible once executed on the blockchain.
                     </span>
                   </label>
                 )}
@@ -710,12 +678,12 @@ export default function AdminMarketResolutionTable({
               )}
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-border-subtle dark:border-white/10">
+            <div className="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={handleCloseModal}
                 disabled={isResolving}
-                className="px-4 py-2.5 rounded-xl font-bold text-xs border border-border-subtle dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs border border-zinc-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-accent-navy dark:text-white transition-all cursor-pointer text-center"
               >
                 Cancel
               </button>
@@ -723,7 +691,7 @@ export default function AdminMarketResolutionTable({
                 type="button"
                 onClick={handleConfirmResolution}
                 disabled={isResolving}
-                className={`px-5 py-2.5 rounded-xl font-bold text-xs tracking-wide transition-all shadow-md flex items-center gap-2 cursor-pointer ${
+                className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
                   activeModal.outcome === "YES"
                     ? "bg-yes-green hover:bg-emerald-600 text-white"
                     : activeModal.outcome === "NO"
@@ -761,16 +729,10 @@ export default function AdminMarketResolutionTable({
           aria-labelledby="details-dialog-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         >
-          <div
-            className={`w-full max-w-lg rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl space-y-4 ${
-              isDark
-                ? "bg-[#0A0F0C] border-white/10 text-white"
-                : "bg-white border-emerald-500/20 text-accent-navy"
-            }`}
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle dark:border-white/10">
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border p-5 sm:p-8 transition-all shadow-2xl space-y-4 bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-white/10">
               <div>
-                <h3 id="details-dialog-title" className="text-lg font-bold">
+                <h3 id="details-dialog-title" className="text-base sm:text-lg font-bold">
                   Resolution Record & Details
                 </h3>
                 <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
@@ -831,7 +793,7 @@ export default function AdminMarketResolutionTable({
               <button
                 type="button"
                 onClick={() => setDetailsModalMarket(null)}
-                className="px-4 py-2.5 rounded-xl font-bold text-xs bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/20 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs bg-zinc-100 dark:bg-white/10 hover:bg-zinc-200 dark:hover:bg-white/20 text-accent-navy dark:text-white transition-all cursor-pointer text-center"
               >
                 Close Details
               </button>

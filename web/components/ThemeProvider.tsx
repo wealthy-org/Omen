@@ -29,13 +29,28 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const handleSetTheme = (newTheme: Theme) => {
     setTheme(newTheme);
-    localStorage.setItem("omen-theme", newTheme);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("omen-theme", newTheme);
+    }
   };
 
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     handleSetTheme(next);
   };
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
+      root.style.colorScheme = "dark";
+    } else {
+      root.classList.remove("dark");
+      root.classList.add("light");
+      root.style.colorScheme = "light";
+    }
+  }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, toggleTheme }}>

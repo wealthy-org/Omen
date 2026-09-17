@@ -13,10 +13,22 @@ CREATE TABLE IF NOT EXISTS quests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   description TEXT,
+  category TEXT DEFAULT 'DAILY',
   points_reward NUMERIC NOT NULL,
+  action_url TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quests' AND column_name = 'category') THEN
+    ALTER TABLE quests ADD COLUMN category TEXT DEFAULT 'DAILY';
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quests' AND column_name = 'action_url') THEN
+    ALTER TABLE quests ADD COLUMN action_url TEXT;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS points_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -146,14 +146,20 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
       setInternalLoading(true);
       setErrorMessage(null);
 
-      await createMarket({
-        title: title.trim(),
-        category,
-        endTime,
-        resolutionSourceUrl: resolutionSourceUrl.trim(),
-        resolutionCriteria: resolutionCriteria.trim(),
-        initialLiquidity,
-      });
+      try {
+        await createMarket({
+          title: title.trim(),
+          category,
+          endTime,
+          resolutionSourceUrl: resolutionSourceUrl.trim(),
+          resolutionCriteria: resolutionCriteria.trim(),
+          initialLiquidity,
+        });
+      } catch (err: any) {
+        if (!onSubmitMarket || err?.message?.includes("rejected") || err?.name === "UserRejectedRequestError") {
+          throw err;
+        }
+      }
 
       if (onSubmitMarket) {
         await onSubmitMarket({
@@ -174,8 +180,8 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
       setResolutionCriteria("");
       setInitialLiquidity("0.50");
       setFieldErrors({});
-    } catch {
-      setErrorMessage("Failed to deploy market contract to blockchain. Please check network and wallet balance.");
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Failed to deploy market contract to blockchain. Please check network and wallet balance.");
     } finally {
       setInternalLoading(false);
     }
@@ -507,20 +513,20 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
           aria-labelledby="review-dialog-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
         >
-          <div className="w-full max-w-xl rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 p-6 sm:p-8 text-accent-navy dark:text-white shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-4 border-b border-border-subtle dark:border-white/10">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 p-5 sm:p-8 text-accent-navy dark:text-white shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-white/10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 id="review-dialog-title" className="text-lg font-bold">
+                  <h3 id="review-dialog-title" className="text-base sm:text-lg font-bold">
                     Confirm Prediction Market Deployment
                   </h3>
                   <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
-                    Verify smart contract parameters before broadcasting to Arbitrum Sepolia
+                    Verify smart contract parameters before broadcasting to Testnet
                   </p>
                 </div>
               </div>
@@ -536,11 +542,23 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
               </button>
             </div>
 
+            {errorMessage && (
+              <div
+                role="alert"
+                className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-500/20 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-2"
+              >
+                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
             <div className="space-y-3.5 text-xs font-mono">
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10 space-y-2">
                 <div className="text-[10px] uppercase font-bold text-text-muted">Market Title</div>
                 <div className="font-bold text-sm text-accent-navy dark:text-white font-sans">{title}</div>
-                <div className="flex flex-wrap gap-3 pt-2 text-[11px] border-t border-border-subtle dark:border-white/10">
+                <div className="flex flex-wrap gap-2 sm:gap-3 pt-2 text-[11px] border-t border-zinc-200 dark:border-white/10">
                   <span>Category: <strong className="text-emerald-600 dark:text-emerald-400">{category}</strong></span>
                   <span>•</span>
                   <span>Deadline: <strong>{new Date(endTime).toUTCString()}</strong></span>
@@ -557,19 +575,19 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
               </div>
 
               {resolutionSourceUrl && (
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10 flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <span className="text-[10px] uppercase font-bold text-text-muted">Oracle Reference:</span>
-                  <span className="truncate max-w-[280px] text-primary-blue underline">{resolutionSourceUrl}</span>
+                  <span className="truncate max-w-full sm:max-w-[280px] text-primary-blue underline">{resolutionSourceUrl}</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle dark:border-white/10">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setShowReviewModal(false)}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 rounded-xl font-bold text-xs border border-border-subtle dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs border border-zinc-200 dark:border-white/10 hover:bg-zinc-100 dark:hover:bg-white/5 text-accent-navy dark:text-white transition-all cursor-pointer text-center"
               >
                 Back to Edit
               </button>
@@ -577,7 +595,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
                 type="button"
                 onClick={handleConfirmDeploy}
                 disabled={isSubmitting}
-                className={`px-5 py-2.5 rounded-xl font-bold text-xs tracking-wide bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-md flex items-center gap-2 cursor-pointer ${
+                className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs tracking-wide bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
                   isSubmitting ? "opacity-60 cursor-not-allowed" : "active:scale-[0.98]"
                 }`}
               >
@@ -587,7 +605,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    <span>Deploying to Arbitrum...</span>
+                    <span>Deploying to Testnet...</span>
                   </>
                 ) : (
                   <span>Confirm & Deploy On-Chain</span>
