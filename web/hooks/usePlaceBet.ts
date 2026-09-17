@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
 import { parseEther } from "viem";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 export interface PlaceBetParams {
   marketId: string | number;
@@ -32,7 +32,7 @@ export function usePlaceBet() {
     const value = parseEther(amount);
 
     const hash = await writeContractAsync({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "placeBet",
       args: [numericMarketId, side],

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useAccount, useSignTypedData, useChainId } from "wagmi";
 import { Address } from "viem";
-import { OMEN_FACTORY_ADDRESS } from "@/lib/contracts";
-import { USE_MOCK_CONTRACT } from "@/lib/mock-contracts";
+import { getOmenFactoryAddress } from "@/lib/contracts";
+import { USE_MOCK_CONTRACT, getMockOmenFactoryAddress } from "@/lib/mock-contracts";
 
 export interface ConfirmBeliefPayload {
   beliefId: string;
@@ -51,11 +51,17 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
       if (USE_MOCK_CONTRACT || !signTypedDataAsync) {
         signedSig = `0xMockSignatureEIP712${Math.random().toString(16).substring(2, 10)}${"0".repeat(40)}`;
       } else {
+        const verifyingContract =
+          payload.marketAddress ||
+          (USE_MOCK_CONTRACT
+            ? getMockOmenFactoryAddress(chainId)
+            : getOmenFactoryAddress(chainId));
+
         const domain = {
           name: "Omen Belief Protocol",
           version: "1",
           chainId: chainId || 11155111,
-          verifyingContract: payload.marketAddress || OMEN_FACTORY_ADDRESS,
+          verifyingContract,
         } as const;
 
         const types = {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { Address, parseUnits } from "viem";
-import { OMEN_FACTORY_ADDRESS, OMEN_FACTORY_ABI } from "@/lib/contracts";
+import { getOmenFactoryAddress, OMEN_FACTORY_ABI } from "@/lib/contracts";
 import { USE_MOCK_CONTRACT } from "@/lib/mock-contracts";
 
 export interface CreateMarketParams {
@@ -88,8 +88,9 @@ export function useCreateMarket(): UseCreateMarketResult {
         return { marketAddress: mockAddress, txHash: mockHash };
       }
 
+      const factoryAddress = getOmenFactoryAddress();
       const tx = await writeContractAsync({
-        address: OMEN_FACTORY_ADDRESS,
+        address: factoryAddress,
         abi: OMEN_FACTORY_ABI,
         functionName: "createMarket",
         args: [

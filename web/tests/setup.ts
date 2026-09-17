@@ -1,6 +1,11 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
+process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA = "0x1111111111111111111111111111111111111111";
+process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD = "0x2222222222222222222222222222222222222222";
+process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS = "0x1111111111111111111111111111111111111111";
+
 vi.mock("wagmi", async (importOriginal) => {
   const actual = await importOriginal<typeof import("wagmi")>();
   const React = await import("react");

@@ -6,7 +6,7 @@ import {
   usePublicClient,
 } from "wagmi";
 import { decodeEventLog } from "viem";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 export interface CreateMarketParams {
   title: string;
@@ -56,7 +56,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
     const deadline = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
 
     const hash = await writeContractAsync({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "createMarket",
       args: [title, deadline],

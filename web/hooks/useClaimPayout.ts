@@ -1,5 +1,5 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 export interface ClaimPayoutResult {
   claimPayout: (marketId: string | number) => Promise<string>;
@@ -26,7 +26,7 @@ export function useClaimPayout(): ClaimPayoutResult {
     const numericMarketId = BigInt(marketId);
 
     const hash = await writeContractAsync({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "claim",
       args: [numericMarketId],

@@ -4,7 +4,7 @@ import {
   useWaitForTransactionReceipt,
   useAccount,
 } from "wagmi";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 export interface ResolveMarketParams {
   marketId: string | number;
@@ -50,10 +50,11 @@ export function useAdminResolveMarket(): ResolveMarketResult {
     const numericMarketId = BigInt(numericStr.length > 0 ? numericStr : "1");
 
     let hash: `0x${string}`;
+    const contractAddress = getPredictionMarketAddress();
 
     if (outcome === "CANCEL") {
       hash = await writeContractAsync({
-        address: PREDICTION_MARKET_ADDRESS,
+        address: contractAddress,
         abi: PREDICTION_MARKET_ABI,
         functionName: "cancelMarket",
         args: [numericMarketId],
@@ -61,7 +62,7 @@ export function useAdminResolveMarket(): ResolveMarketResult {
     } else {
       const result = outcome === "YES";
       hash = await writeContractAsync({
-        address: PREDICTION_MARKET_ADDRESS,
+        address: contractAddress,
         abi: PREDICTION_MARKET_ABI,
         functionName: "resolveMarket",
         args: [numericMarketId, result],

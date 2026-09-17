@@ -7,6 +7,7 @@ import {
   OMEN_FACTORY_ADDRESS_SEPOLIA,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
   getOmenFactoryAddress,
+  getPredictionMarketAddress,
 } from "../lib/contracts";
 import {
   MOCK_OMEN_FACTORY_ADDRESS_SEPOLIA,
@@ -18,15 +19,18 @@ import {
 describe("TICKET-71: Smart Contract ABI Exports & Separate Mock Configuration", () => {
   const originalSepolia = process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA;
   const originalRobinhood = process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD;
+  const originalPrediction = process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS;
 
   beforeEach(() => {
     process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA = "0x1234567890123456789012345678901234567890";
     process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD = "0x0987654321098765432109876543210987654321";
+    process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
   });
 
   afterAll(() => {
     process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA = originalSepolia;
     process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD = originalRobinhood;
+    process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS = originalPrediction;
   });
 
   it("should adhere strictly to Zero-Comment Policy in contracts config, mock config, and deploy script", () => {
@@ -108,14 +112,25 @@ describe("TICKET-71: Smart Contract ABI Exports & Separate Mock Configuration", 
     expect(getMockOmenFactoryAddress(46630)).toBe("0x2222222222222222222222222222222222222222");
   });
 
-  it("should resolve correct factory address per chain", () => {
-    expect(OMEN_FACTORY_ADDRESS_SEPOLIA).toBeDefined();
-    expect(OMEN_FACTORY_ADDRESS_ROBINHOOD).toBeDefined();
-
+  it("should resolve configured factory address and prediction market address", () => {
     const sepoliaAddr = getOmenFactoryAddress(11155111);
-    expect(sepoliaAddr).toBeDefined();
+    expect(sepoliaAddr).toBe("0x1234567890123456789012345678901234567890");
 
     const robinhoodAddr = getOmenFactoryAddress(46630);
-    expect(robinhoodAddr).toBeDefined();
+    expect(robinhoodAddr).toBe("0x0987654321098765432109876543210987654321");
+
+    const predictionAddr = getPredictionMarketAddress();
+    expect(predictionAddr).toBe("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd");
+  });
+
+  it("should throw an explicit error when contract address environment variable is not configured", () => {
+    delete process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA;
+    delete process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS;
+    delete process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD;
+    delete process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS;
+
+    expect(() => getOmenFactoryAddress(11155111)).toThrow(/not configured/i);
+    expect(() => getOmenFactoryAddress(46630)).toThrow(/not configured/i);
+    expect(() => getPredictionMarketAddress()).toThrow(/not configured/i);
   });
 });
