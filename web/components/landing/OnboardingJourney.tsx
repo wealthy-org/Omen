@@ -14,27 +14,27 @@ export default function OnboardingJourney({ theme: propTheme }: OnboardingJourne
   const STEPS = [
     {
       step: "01",
-      title: "Connect Web3 Wallet",
-      description: "Link your favorite Web3 wallet (MetaMask, Coinbase, Rainbow) to Arbitrum Sepolia in one click with zero setup fees.",
-      badge: "Arbitrum Sepolia",
-      action: "Connect Now",
-      href: "/predictions",
+      title: "AI Ingests Social Beliefs",
+      description: "Our pipeline indexes high-conviction statements from Twitter, Warpcast, and community thinkers, transforming raw opinions into structured predictions.",
+      badge: "AI Extraction",
+      action: "Submit Opinion",
+      href: "/create",
     },
     {
       step: "02",
-      title: "Claim Gasless Daily Quests",
-      description: "Check in daily to build your consecutive streak, earn PTS rewards, and unlock up to 3.0x points multiplier without paying gas.",
-      badge: "Instant Rewards",
-      action: "Start Quests",
-      href: "/quests",
+      title: "Creator EIP-712 Verification",
+      description: "Creators sign off on their belief using cryptographic EIP-712 signatures to earn verified badges and receive 1.5% protocol creator fees.",
+      badge: "Cryptographic Trust",
+      action: "Explore Creators",
+      href: "/creators",
     },
     {
       step: "03",
-      title: "Predict & Earn Airdrop",
-      description: "Place YES/NO positions on trending crypto & tech events. Smart contracts escrow your funds with instant non-custodial payouts.",
-      badge: "Season 1 Airdrop",
+      title: "Stake AGREE or DISAGREE",
+      description: "Participants allocate capital into escrow pools on Ethereum Sepolia or Robinhood Chain Testnet with decentralized oracle resolutions.",
+      badge: "Dual-Testnet Active",
       action: "Explore Markets",
-      href: "/predictions",
+      href: "/markets",
     },
   ];
 
@@ -42,10 +42,10 @@ export default function OnboardingJourney({ theme: propTheme }: OnboardingJourne
     <section className="w-full my-8 sm:my-16">
       <div className="text-center max-w-2xl mx-auto mb-10">
         <h2 className={`text-xs font-mono font-bold uppercase tracking-widest mb-2 ${isDark ? "text-[#34D399]" : "text-[#0E7A4E]"}`}>
-          Seamless Onboarding
+          Protocol Architecture
         </h2>
         <p className={`text-2xl sm:text-4xl font-extrabold tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
-          How to Get Started in 3 Simple Steps
+          How Social Belief Markets Work
         </p>
       </div>
 

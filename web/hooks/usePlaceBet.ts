@@ -1,5 +1,5 @@
-import { useState, useContext } from "react";
-import { WagmiContext, useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
+import { useState } from "react";
+import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
 import { parseEther } from "viem";
 import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
@@ -10,23 +10,6 @@ export interface PlaceBetParams {
 }
 
 export function usePlaceBet() {
-  const context = useContext(WagmiContext);
-  if (!context) {
-    return {
-      placeBet: async () => "",
-      txHash: undefined,
-      isPending: false,
-      isConfirming: false,
-      isConfirmed: false,
-      isIndexing: false,
-      error: null,
-    };
-  }
-
-  return usePlaceBetInner();
-}
-
-function usePlaceBetInner() {
   const { address } = useAccount();
   const {
     writeContractAsync,
@@ -90,3 +73,5 @@ function usePlaceBetInner() {
     error: writeError || (indexerError ? new Error(indexerError) : null),
   };
 }
+
+export default usePlaceBet;

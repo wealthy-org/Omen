@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { useConfig, useChainId } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { Web3Providers } from "@/app/providers";
-import { config } from "@/lib/wagmi";
+import { config, robinhoodTestnet } from "@/lib/wagmi";
 
 function TestConsumer() {
   const wagmiConfig = useConfig();
@@ -42,13 +42,13 @@ describe("Web3Providers Component", () => {
     expect(screen.getByTestId("consumer-content")).toBeInTheDocument();
     expect(screen.getByTestId("has-wagmi-config")).toHaveTextContent("yes");
     expect(screen.getByTestId("has-query-client")).toHaveTextContent("yes");
-    expect(screen.getByTestId("chain-id")).toHaveTextContent("421614");
+    expect(screen.getByTestId("chain-id")).toHaveTextContent("11155111");
   });
 
-  it("has correct Wagmi configuration for Arbitrum Sepolia", () => {
+  it("has correct Wagmi configuration for Sepolia and Robinhood Testnet", () => {
     expect(config.chains).toBeDefined();
-    expect(config.chains.length).toBeGreaterThanOrEqual(1);
-    expect(config.chains[0].id).toBe(421614);
-    expect(config.chains[0].name).toBe("Arbitrum Sepolia");
+    expect(config.chains.length).toBeGreaterThanOrEqual(2);
+    expect(config.chains.map((c) => c.id)).toContain(11155111);
+    expect(config.chains.map((c) => c.id)).toContain(robinhoodTestnet.id);
   });
 });

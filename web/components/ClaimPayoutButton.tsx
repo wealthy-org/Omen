@@ -28,14 +28,7 @@ export const ClaimPayoutButton: React.FC<ClaimPayoutButtonProps> = ({
   const [hasClaimedLocally, setHasClaimedLocally] = useState<boolean>(false);
   const { claimPayout, isPending: isTxPending, isConfirming, isConfirmed } = useClaimPayout();
 
-  useEffect(() => {
-    if (isConfirmed) {
-      setHasClaimedLocally(true);
-      onSuccess?.();
-    }
-  }, [isConfirmed, onSuccess]);
-
-  const effectivelyClaimed = isClaimed || hasClaimedLocally;
+  const effectivelyClaimed = isClaimed || isConfirmed || hasClaimedLocally;
   const isPending = isLoading || internalLoading || isTxPending || isConfirming;
 
   const handleClick = async () => {
@@ -45,8 +38,11 @@ export const ClaimPayoutButton: React.FC<ClaimPayoutButtonProps> = ({
       setInternalLoading(true);
       if (onClaim) {
         await onClaim();
+        onSuccess?.();
       } else if (marketId !== undefined) {
         await claimPayout(marketId);
+        setHasClaimedLocally(true);
+        onSuccess?.();
       }
     } catch {
     } finally {

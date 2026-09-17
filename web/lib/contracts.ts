@@ -515,3 +515,100 @@ export const PREDICTION_MARKET_ABI = [
     "type": "function"
   }
 ] as const;
+
+export const OMEN_MARKET_ABI = [
+  {
+    name: "depositAgree",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [],
+    outputs: [],
+  },
+  {
+    name: "depositDisagree",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [],
+    outputs: [],
+  },
+  {
+    name: "claimPayout",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [],
+    outputs: [],
+  },
+  {
+    name: "totalAgree",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    name: "totalDisagree",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    name: "status",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+  {
+    name: "getMarketSummary",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [
+      { name: "agreePool", type: "uint256" },
+      { name: "disagreePool", type: "uint256" },
+      { name: "marketStatus", type: "uint8" },
+      { name: "openTime", type: "uint256" },
+      { name: "closeTime", type: "uint256" },
+    ],
+  },
+] as const;
+
+export const OMEN_FACTORY_ADDRESS =
+  (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS as `0x${string}`) ||
+  ("0x1111111111111111111111111111111111111111" as `0x${string}`);
+
+export const OMEN_FACTORY_ABI = [
+  {
+    name: "createMarket",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "statement", type: "string" },
+      { name: "oracleFeed", type: "address" },
+      { name: "targetPrice", type: "uint256" },
+      { name: "resolutionType", type: "uint8" },
+      { name: "closeTime", type: "uint256" },
+      { name: "creator", type: "address" },
+    ],
+    outputs: [{ name: "marketAddress", type: "address" }],
+  },
+  {
+    name: "getAllMarkets",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address[]" }],
+  },
+  {
+    name: "MarketCreated",
+    type: "event",
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "marketAddress", type: "address" },
+      { indexed: true, name: "creator", type: "address" },
+      { indexed: false, name: "statement", type: "string" },
+    ],
+  },
+] as const;
+
