@@ -1,20 +1,20 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "./ThemeProvider";
 
 const PLATFORM_LINKS = [
-  { label: "Predictions Feed", href: "/predictions" },
-  { label: "Quests Farming", href: "/quests" },
-  { label: "Points Leaderboard", href: "/leaderboard" },
-  { label: "My Bets", href: "/my-bets" },
+  { label: "Markets Feed", href: "/markets" },
+  { label: "Beliefs Catalog", href: "/beliefs" },
+  { label: "Creators Directory", href: "/creators" },
+  { label: "Activity Feed", href: "/activity" },
+  { label: "Submit Belief", href: "/create" },
 ];
 
 const DEVELOPER_LINKS = [
-  { label: "Smart Contracts", href: "https://sepolia.arbiscan.io", external: true },
+  { label: "Sepolia Explorer", href: "https://sepolia.etherscan.io", external: true },
+  { label: "Robinhood Explorer", href: "https://explorer.testnet.chain.robinhood.com", external: true },
   { label: "GitHub Repository", href: "https://github.com/wealthy-org/Omen", external: true },
-  { label: "Security Audits", href: "#", external: false },
   { label: "Documentation", href: "#", external: false },
 ];
 
@@ -58,7 +58,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
             </div>
 
             <p className={`text-sm leading-relaxed max-w-sm ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
-              Institutional Web3 prediction market and gamified points farming protocol built on Arbitrum Sepolia.
+              Social Belief Market Protocol turning opinions into tradable on-chain markets across Ethereum Sepolia & Robinhood Chain Testnet.
             </p>
 
             <div
@@ -70,7 +70,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
             >
               <span className="w-2 h-2 rounded-full bg-yes-green animate-pulse" />
               <span className="text-xs font-mono font-medium">
-                Arbitrum Sepolia Testnet
+                Dual-Testnet Active
               </span>
             </div>
           </div>
@@ -181,3 +181,4 @@ export default function Footer({ theme: propTheme }: FooterProps) {
     </footer>
   );
 }
+
