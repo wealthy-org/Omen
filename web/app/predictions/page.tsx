@@ -183,8 +183,8 @@ export default function PredictionsPage() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+    <div className="space-y-8 pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-zinc-800 animate-slide-down">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-3">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -198,12 +198,12 @@ export default function PredictionsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-mono">
-          <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl border border-zinc-200 dark:border-zinc-700/50">
+        <div className="flex items-center gap-4 text-xs font-mono animate-slide-right">
+          <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl border border-zinc-200 dark:border-zinc-700/50 hover-lift">
             <span className="text-zinc-500 dark:text-zinc-400 block">Total Pool Volume</span>
             <span className="text-base font-bold text-zinc-900 dark:text-zinc-100">{totalVolume} ETH</span>
           </div>
-          <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl border border-zinc-200 dark:border-zinc-700/50">
+          <div className="px-4 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl border border-zinc-200 dark:border-zinc-700/50 hover-lift">
             <span className="text-zinc-500 dark:text-zinc-400 block">Active Markets</span>
             <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">{activeCount}</span>
           </div>
@@ -213,7 +213,7 @@ export default function PredictionsPage() {
       {selectedOutcomeInfo && (
         <div
           role="status"
-          className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-xl flex items-center justify-between text-sm text-emerald-800 dark:text-emerald-200"
+          className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-xl flex items-center justify-between text-sm text-emerald-800 dark:text-emerald-200 animate-slide-down"
         >
           <span>{selectedOutcomeInfo}</span>
           <button
@@ -226,15 +226,17 @@ export default function PredictionsPage() {
         </div>
       )}
 
-      <MarketCategoryFilter
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        marketCounts={categoryCounts}
-      />
+      <div className="animate-slide-up stagger-1">
+        <MarketCategoryFilter
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          marketCounts={categoryCounts}
+        />
+      </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
@@ -248,7 +250,7 @@ export default function PredictionsPage() {
       ) : sortedMarkets.length > 0 ? (
         <div
           data-testid="predictions-grid"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up stagger-2"
         >
           {sortedMarkets.map((market) => (
             <MarketCard
@@ -261,7 +263,7 @@ export default function PredictionsPage() {
       ) : (
         <div
           data-testid="empty-markets"
-          className="p-12 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-4"
+          className="p-12 text-center bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl space-y-4 animate-scale-in"
         >
           <p className="text-lg font-bold text-zinc-800 dark:text-zinc-200">No markets found</p>
           <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
@@ -270,7 +272,7 @@ export default function PredictionsPage() {
           <button
             type="button"
             onClick={handleResetFilters}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-all shadow-xs"
+            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition-all hover-lift shadow-xs"
           >
             Reset Filters
           </button>

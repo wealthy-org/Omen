@@ -42,7 +42,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
     <section className="w-full my-4 sm:my-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div
-          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 group ${
+          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 hover-lift animate-slide-up stagger-1 group ${
             isDark
               ? "bg-[#070D09]/90 border-emerald-500/20 hover:border-emerald-400/40 shadow-lg hover:bg-emerald-500/[0.03]"
               : "bg-white/95 border-emerald-500/15 light-card-shine hover:border-emerald-400/35 shadow-xs"
@@ -85,7 +85,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
         </div>
 
         <div
-          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 group ${
+          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 hover-lift animate-slide-up stagger-2 group ${
             isDark
               ? "bg-[#070D09]/90 border-emerald-500/20 hover:border-emerald-400/40 shadow-lg hover:bg-emerald-500/[0.03]"
               : "bg-white/95 border-emerald-500/15 light-card-shine hover:border-emerald-400/35 shadow-xs"
@@ -129,7 +129,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
         </div>
 
         <div
-          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 group ${
+          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 hover-lift animate-slide-up stagger-3 group ${
             isDark
               ? "bg-[#070D09]/90 border-emerald-500/20 hover:border-emerald-400/40 shadow-lg hover:bg-emerald-500/[0.03]"
               : "bg-white/95 border-emerald-500/15 light-card-shine hover:border-emerald-400/35 shadow-xs"
@@ -174,7 +174,7 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
         </div>
 
         <div
-          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 group ${
+          className={`rounded-2xl p-5 flex flex-col justify-between border transition-all duration-300 hover-lift animate-slide-up stagger-4 group ${
             isDark
               ? "bg-[#070D09]/90 border-emerald-500/20 hover:border-emerald-400/40 shadow-lg hover:bg-emerald-500/[0.03]"
               : "bg-white/95 border-emerald-500/15 light-card-shine hover:border-emerald-400/35 shadow-xs"

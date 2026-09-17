@@ -57,7 +57,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
   const isDark = activeTheme === "dark";
 
   return (
-    <header className="sticky top-0 z-50 w-full pt-4 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <header className="sticky top-0 z-50 w-full pt-4 px-4 sm:px-6 lg:px-8 xl:px-10 animate-slide-down">
       <div
         className={`max-w-[1400px] w-full mx-auto rounded-[20px] transition-all duration-300 relative ${
           isDark

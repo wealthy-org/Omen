@@ -82,7 +82,7 @@ export default function QuestCard({
     <article
       role="article"
       aria-label={`Quest: ${title}`}
-      className={`rounded-2xl border p-5 sm:p-6 transition-all duration-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
+      className={`rounded-2xl border p-5 sm:p-6 transition-all duration-200 hover-lift flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
         isDark
           ? "bg-[#0A0F0C] border-white/10 hover:border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
           : "bg-white border-emerald-500/10 hover:border-emerald-500/20 shadow-[0_4px_16px_rgba(14,122,78,0.04)]"

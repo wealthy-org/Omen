@@ -14,7 +14,7 @@ export const CreatorProfileHeader: React.FC<CreatorProfileHeaderProps> = ({ crea
   const shortAddress = `${creator.address.slice(0, 6)}...${creator.address.slice(-4)}`;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm mb-8">
+    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm mb-8 animate-slide-up">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-black text-2xl sm:text-3xl shadow-md shrink-0">
