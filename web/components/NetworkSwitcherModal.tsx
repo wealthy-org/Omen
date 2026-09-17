@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useTheme } from "./ThemeProvider";
 
@@ -9,7 +8,7 @@ export interface NetworkSwitcherModalProps {
   currentNetworkName?: string;
   targetChainId?: number;
   targetNetworkName?: string;
-  onSwitchNetwork?: () => Promise<void> | void;
+  onSwitchNetwork?: (chainId?: number) => Promise<void> | void;
   onClose?: () => void;
 }
 
@@ -17,31 +16,42 @@ export default function NetworkSwitcherModal({
   isOpen,
   currentChainId = 1,
   currentNetworkName = "Ethereum Mainnet",
-  targetChainId = 421614,
-  targetNetworkName = "Arbitrum Sepolia",
+  targetChainId = 11155111,
+  targetNetworkName = "Ethereum Sepolia",
   onSwitchNetwork,
   onClose,
 }: NetworkSwitcherModalProps) {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  const [selectedChainId, setSelectedChainId] = useState<number>(targetChainId);
   const [isSwitching, setIsSwitching] = useState(false);
 
   if (!isOpen) return null;
 
-  // TODO(TICKET-48): Connect handleSwitch to Wagmi useSwitchChain hook for Arbitrum Sepolia (Chain ID 421614)
+  const supportedNetworks = [
+    { id: 11155111, name: "Ethereum Sepolia" },
+    { id: 46630, name: "Robinhood Chain Testnet" },
+  ];
+
   const handleSwitch = async () => {
     setIsSwitching(true);
     try {
       if (onSwitchNetwork) {
-        await onSwitchNetwork();
+        await onSwitchNetwork(selectedChainId);
       } else {
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        await new Promise((resolve) => setTimeout(resolve, 600));
       }
     } finally {
       setIsSwitching(false);
     }
   };
+
+  const currentSelectedNetwork =
+    supportedNetworks.find((n) => n.id === selectedChainId) || {
+      id: targetChainId,
+      name: targetNetworkName,
+    };
 
   return (
     <div
@@ -96,11 +106,11 @@ export default function NetworkSwitcherModal({
             isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
           }`}
         >
-          Omen operates exclusively on Arbitrum Sepolia Testnet. Please switch your wallet network to continue.
+          Omen operates on Ethereum Sepolia and Robinhood Chain Testnet. Please switch your wallet network to continue.
         </p>
 
         <div
-          className={`p-3.5 rounded-xl border mb-6 text-left space-y-2.5 ${
+          className={`p-3.5 rounded-xl border mb-4 text-left space-y-2.5 ${
             isDark ? "bg-white/5 border-white/10" : "bg-emerald-50/50 border-emerald-500/15"
           }`}
         >
@@ -112,12 +122,34 @@ export default function NetworkSwitcherModal({
             </span>
           </div>
 
-          <div className="flex items-center justify-between text-xs">
-            <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>Target Network:</span>
-            <span className="inline-flex items-center gap-1.5 font-mono font-semibold text-yes-green bg-yes-green-soft dark:bg-yes-green/10 px-2 py-0.5 rounded border border-yes-green/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-yes-green animate-pulse" />
-              {targetNetworkName} ({targetChainId})
-            </span>
+          <div className="pt-2 border-t border-white/5 dark:border-white/10">
+            <div className="text-xs font-semibold mb-2 text-muted">Select Target Network:</div>
+            <div className="grid grid-cols-1 gap-2">
+              {supportedNetworks.map((net) => (
+                <button
+                  key={net.id}
+                  type="button"
+                  onClick={() => setSelectedChainId(net.id)}
+                  className={`flex items-center justify-between p-2.5 rounded-lg border text-xs font-medium transition-all ${
+                    selectedChainId === net.id
+                      ? "border-primary-blue bg-primary-blue/10 text-primary-blue font-semibold"
+                      : isDark
+                      ? "border-white/10 hover:border-white/20 bg-white/5"
+                      : "border-slate-200 hover:border-slate-300 bg-white"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        selectedChainId === net.id ? "bg-yes-green animate-pulse" : "bg-slate-400"
+                      }`}
+                    />
+                    {net.name}
+                  </span>
+                  <span className="font-mono text-[11px] opacity-75">ID: {net.id}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -141,7 +173,7 @@ export default function NetworkSwitcherModal({
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              <span>Switching to {targetNetworkName}...</span>
+              <span>Switching to {currentSelectedNetwork.name}...</span>
             </>
           ) : (
             <>
@@ -153,7 +185,7 @@ export default function NetworkSwitcherModal({
                   d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
                 />
               </svg>
-              <span>Switch to {targetNetworkName}</span>
+              <span>Switch to {currentSelectedNetwork.name}</span>
             </>
           )}
         </button>
@@ -173,3 +205,4 @@ export default function NetworkSwitcherModal({
     </div>
   );
 }
+
