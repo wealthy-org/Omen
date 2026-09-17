@@ -1,11 +1,39 @@
+import OmenFactoryJson from "@/contracts/OmenFactory.json";
+import OmenMarketJson from "@/contracts/OmenMarket.json";
+
 export const PREDICTION_MARKET_ADDRESS =
   (process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS as `0x${string}`) ||
   ("0x5FbDB2315678afecb367f032d93F642f64180aa3" as `0x${string}`);
 
 export const ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
+export const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
+export const ROBINHOOD_TESTNET_CHAIN_ID = 46630;
+
+export const OMEN_FACTORY_ADDRESS_SEPOLIA =
+  (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA as `0x${string}`) ||
+  ("0x1111111111111111111111111111111111111111" as `0x${string}`);
+
+export const OMEN_FACTORY_ADDRESS_ROBINHOOD =
+  (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD as `0x${string}`) ||
+  ("0x2222222222222222222222222222222222222222" as `0x${string}`);
+
+export const OMEN_FACTORY_ADDRESS =
+  (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS as `0x${string}`) ||
+  OMEN_FACTORY_ADDRESS_SEPOLIA;
+
+export const getOmenFactoryAddress = (chainId?: number): `0x${string}` => {
+  if (chainId === ROBINHOOD_TESTNET_CHAIN_ID) {
+    return OMEN_FACTORY_ADDRESS_ROBINHOOD;
+  }
+  return OMEN_FACTORY_ADDRESS_SEPOLIA;
+};
 
 export const USE_MOCK_CONTRACT =
   process.env.NEXT_PUBLIC_USE_MOCK_CONTRACT !== "false";
+
+export const OMEN_FACTORY_ABI = OmenFactoryJson;
+
+export const OMEN_MARKET_ABI = OmenMarketJson;
 
 export const PREDICTION_MARKET_ABI = [
   {
@@ -515,100 +543,3 @@ export const PREDICTION_MARKET_ABI = [
     "type": "function"
   }
 ] as const;
-
-export const OMEN_MARKET_ABI = [
-  {
-    name: "depositAgree",
-    type: "function",
-    stateMutability: "payable",
-    inputs: [],
-    outputs: [],
-  },
-  {
-    name: "depositDisagree",
-    type: "function",
-    stateMutability: "payable",
-    inputs: [],
-    outputs: [],
-  },
-  {
-    name: "claimPayout",
-    type: "function",
-    stateMutability: "nonpayable",
-    inputs: [],
-    outputs: [],
-  },
-  {
-    name: "totalAgree",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256" }],
-  },
-  {
-    name: "totalDisagree",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256" }],
-  },
-  {
-    name: "status",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "uint8" }],
-  },
-  {
-    name: "getMarketSummary",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [
-      { name: "agreePool", type: "uint256" },
-      { name: "disagreePool", type: "uint256" },
-      { name: "marketStatus", type: "uint8" },
-      { name: "openTime", type: "uint256" },
-      { name: "closeTime", type: "uint256" },
-    ],
-  },
-] as const;
-
-export const OMEN_FACTORY_ADDRESS =
-  (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS as `0x${string}`) ||
-  ("0x1111111111111111111111111111111111111111" as `0x${string}`);
-
-export const OMEN_FACTORY_ABI = [
-  {
-    name: "createMarket",
-    type: "function",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "statement", type: "string" },
-      { name: "oracleFeed", type: "address" },
-      { name: "targetPrice", type: "uint256" },
-      { name: "resolutionType", type: "uint8" },
-      { name: "closeTime", type: "uint256" },
-      { name: "creator", type: "address" },
-    ],
-    outputs: [{ name: "marketAddress", type: "address" }],
-  },
-  {
-    name: "getAllMarkets",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ name: "", type: "address[]" }],
-  },
-  {
-    name: "MarketCreated",
-    type: "event",
-    anonymous: false,
-    inputs: [
-      { indexed: true, name: "marketAddress", type: "address" },
-      { indexed: true, name: "creator", type: "address" },
-      { indexed: false, name: "statement", type: "string" },
-    ],
-  },
-] as const;
-
