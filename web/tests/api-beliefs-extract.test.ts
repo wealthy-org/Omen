@@ -1,23 +1,31 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST } from "../app/api/beliefs/extract/route";
+import { extractBeliefFromText } from "../lib/ai/openrouter";
 import fs from "node:fs";
 import path from "node:path";
 
 describe("TICKET-84: POST /api/beliefs/extract", () => {
   const originalFetch = global.fetch;
+  const originalApiKey = process.env.AI_API_KEY;
+  const originalModel = process.env.AI_MODEL;
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    process.env.AI_API_KEY = "test-openrouter-key";
+    process.env.AI_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
   });
 
   afterEach(() => {
     global.fetch = originalFetch;
+    process.env.AI_API_KEY = originalApiKey;
+    process.env.AI_MODEL = originalModel;
   });
 
   it("should adhere strictly to Zero-Comment Policy in route, lib, and type files", () => {
     const filesToCheck = [
       path.resolve(process.cwd(), "app/api/beliefs/extract/route.ts"),
       path.resolve(process.cwd(), "lib/ai/openrouter.ts"),
+      path.resolve(process.cwd(), "lib/ai/mockOpenRouter.ts"),
       path.resolve(process.cwd(), "types/belief.ts"),
     ];
 
@@ -33,6 +41,25 @@ describe("TICKET-84: POST /api/beliefs/extract", () => {
         }
       }
     }
+  });
+
+  it("should throw an explicit error when AI_API_KEY is not configured", async () => {
+    delete process.env.AI_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
+
+    await expect(extractBeliefFromText("ETH to 5000")).rejects.toThrow(
+      "AI_API_KEY or OPENROUTER_API_KEY is not configured."
+    );
+  });
+
+  it("should throw an explicit error when AI_MODEL is not configured", async () => {
+    process.env.AI_API_KEY = "valid-key";
+    delete process.env.AI_MODEL;
+    delete process.env.OPENROUTER_MODEL;
+
+    await expect(extractBeliefFromText("ETH to 5000")).rejects.toThrow(
+      "AI_MODEL or OPENROUTER_MODEL is not configured."
+    );
   });
 
   it("should successfully extract relative performance belief", async () => {

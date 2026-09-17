@@ -120,8 +120,8 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
-      <div className="mb-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <div className="mb-6 animate-slide-right">
         <Link
           href="/creators"
           className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
@@ -135,7 +135,7 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
 
       <CreatorProfileHeader creator={{ ...creator, address: targetAddress }} />
 
-      <div className="flex items-center gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-800 pb-3 overflow-x-auto">
+      <div className="flex items-center gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-800 pb-3 overflow-x-auto animate-fade-in">
         <button
           type="button"
           onClick={() => setActiveTab("active")}
@@ -177,13 +177,13 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
           <div className="h-48 bg-zinc-100 dark:bg-zinc-800/60 rounded-2xl" />
         </div>
       ) : filteredBeliefs.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40">
+        <div className="p-12 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 animate-scale-in">
           <p className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
             No beliefs found in this tab.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up stagger-1">
           {filteredBeliefs.map((belief) => (
             <BeliefCard key={belief.id} belief={belief} />
           ))}

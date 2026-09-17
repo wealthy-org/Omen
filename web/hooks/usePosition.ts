@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { parseEther, Address } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
-import { OMEN_MARKET_ABI, USE_MOCK_CONTRACT } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
+import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
 
 export interface PlacePositionParams {
   marketAddress: string;
@@ -15,7 +16,7 @@ export interface PlacePositionParams {
 
 export function usePosition() {
   const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+  const { mutateAsync } = useWriteContract();
 
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -33,7 +34,7 @@ export function usePosition() {
     setIsSuccess(false);
     setError(null);
 
-    const rawAmount = amount ?? amountEth;
+    const rawAmount = amount !== undefined && amount !== null ? amount : amountEth;
     const strAmount = rawAmount !== undefined && rawAmount !== null ? String(rawAmount) : "";
     const numAmount = parseFloat(strAmount);
 
@@ -48,9 +49,9 @@ export function usePosition() {
       const parsedWei = parseEther(strAmount);
       let hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
 
-      if (!USE_MOCK_CONTRACT && writeContractAsync) {
+      if (!USE_MOCK_CONTRACT && mutateAsync) {
         const functionName = side === "AGREE" ? "depositAgree" : "depositDisagree";
-        hash = await writeContractAsync({
+        hash = await mutateAsync({
           address: marketAddress as Address,
           abi: OMEN_MARKET_ABI,
           functionName,
@@ -61,18 +62,22 @@ export function usePosition() {
       setTxHash(hash);
 
       const syncId = marketId || marketAddress;
+      const userAddr = address || "0x1111111111111111111111111111111111111111";
       try {
-        await fetch(`/api/markets/${syncId}/position`, {
+        const res = await fetch(`/api/markets/${syncId}/position`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userAddress: address || "0x1111111111111111111111111111111111111111",
-            marketId: syncId,
+            wallet_address: userAddr,
             side,
             amount: numAmount,
-            txHash: hash,
+            tx_hash: hash,
           }),
         });
+
+        if (!res.ok) {
+          throw new Error("Failed to record position in database");
+        }
       } catch {
       }
 

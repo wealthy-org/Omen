@@ -224,6 +224,7 @@ describe("TICKET-88: EIP-712 Creator Confirmation API", () => {
       creator_address: testAccount.address,
       signature: "0x1234",
       timestamp: 1726500000,
+      chain_id: 11155111,
     });
 
     const res = await confirmBelief(req, { params: Promise.resolve({ id: "non-existent" }) });

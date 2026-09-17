@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ExtractBeliefRequestSchema } from "../../../../types/belief";
 import { extractBeliefFromText } from "../../../../lib/ai/openrouter";
+import { extractMockBelief, USE_MOCK_AI } from "../../../../lib/ai/mockOpenRouter";
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +25,15 @@ export async function POST(request: Request) {
     }
 
     const { raw_text, author_handle, source_url } = validation.data;
+
+    if (process.env.NODE_ENV !== "test" && USE_MOCK_AI) {
+      const mockData = extractMockBelief(raw_text);
+      return NextResponse.json(
+        { success: true, data: mockData },
+        { status: 200 }
+      );
+    }
+
     const result = await extractBeliefFromText(
       raw_text,
       author_handle || undefined,
@@ -31,6 +41,13 @@ export async function POST(request: Request) {
     );
 
     if (!result.success) {
+      if (process.env.NODE_ENV !== "test" && USE_MOCK_AI) {
+        const fallbackData = extractMockBelief(raw_text);
+        return NextResponse.json(
+          { success: true, data: fallbackData },
+          { status: 200 }
+        );
+      }
       return NextResponse.json(
         { success: false, error: result.error },
         { status: result.status || 500 }

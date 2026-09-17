@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
 import { parseEther } from "viem";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 export interface PlaceBetParams {
   marketId: string | number;
@@ -12,7 +12,7 @@ export interface PlaceBetParams {
 export function usePlaceBet() {
   const { address } = useAccount();
   const {
-    writeContractAsync,
+    mutateAsync,
     data: txHash,
     isPending: isWritePending,
     error: writeError,
@@ -31,8 +31,8 @@ export function usePlaceBet() {
     const numericMarketId = BigInt(marketId);
     const value = parseEther(amount);
 
-    const hash = await writeContractAsync({
-      address: PREDICTION_MARKET_ADDRESS,
+    const hash = await mutateAsync({
+      address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "placeBet",
       args: [numericMarketId, side],
@@ -41,19 +41,23 @@ export function usePlaceBet() {
 
     try {
       setIsIndexing(true);
-      await fetch("/api/bets/index", {
+      const res = await fetch("/api/bets/index", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          market_id: String(marketId),
+          contract_market_id: Number(marketId),
           wallet_address: address,
-          side: outcome,
+          side: outcome.toLowerCase(),
           amount: parseFloat(amount),
           tx_hash: hash,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to index bet off-chain");
+      }
     } catch {
       setIndexerError("Failed to index bet off-chain");
     } finally {

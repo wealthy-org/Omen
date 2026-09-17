@@ -23,7 +23,10 @@ const {
 vi.mock("wagmi", () => ({
   WagmiContext: mockWagmiContext,
   useWriteContract: () => ({
+    writeContract: mockWriteContractAsync,
     writeContractAsync: mockWriteContractAsync,
+    mutate: mockWriteContractAsync,
+    mutateAsync: mockWriteContractAsync,
     data: "0xmockcreatetx123",
     isPending: false,
     error: null,
@@ -84,7 +87,10 @@ describe("useAdminCreateMarket Hook", () => {
     expect(output?.hash).toBe("0xmockcreatetx123");
     expect(global.fetch).toHaveBeenCalledWith("/api/markets", expect.objectContaining({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: expect.objectContaining({
+        "Content-Type": "application/json",
+        "x-admin-wallet": "0xadminwallet1111111111111111111111111111",
+      }),
     }));
   });
 

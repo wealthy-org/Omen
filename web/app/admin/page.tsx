@@ -19,8 +19,6 @@ export interface AdminDashboardProps {
 }
 
 const AUTHORIZED_ADMIN_ADDRESSES = [
-  "0x1234567890abcdef1234567890abcdef12345678".toLowerCase(),
-  "0xAdmin99999999999999999999999999999999999".toLowerCase(),
   (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase(),
 ].filter(Boolean);
 
@@ -202,8 +200,8 @@ export default function AdminDashboardPage({
   }
 
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-border-subtle dark:border-white/10">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 animate-fade-in">
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-border-subtle dark:border-white/10 animate-slide-down">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
@@ -235,7 +233,7 @@ export default function AdminDashboardPage({
             type="button"
             onClick={handleDisconnect}
             aria-label="Disconnect Admin Session"
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
               isDark
                 ? "border-no-red/30 text-no-red hover:bg-no-red/10"
                 : "border-no-red/40 text-no-red hover:bg-rose-50"
@@ -249,7 +247,7 @@ export default function AdminDashboardPage({
       {globalNotice && (
         <div
           role="status"
-          className={`p-4 rounded-xl border flex items-center justify-between text-xs sm:text-sm ${
+          className={`p-4 rounded-xl border flex items-center justify-between text-xs sm:text-sm animate-slide-down ${
             globalNotice.type === "success"
               ? "bg-yes-green-soft dark:bg-yes-green/10 border-yes-green/30 text-yes-green"
               : "bg-primary-blue-soft dark:bg-primary-blue/10 border-primary-blue/30 text-primary-blue"
@@ -274,7 +272,7 @@ export default function AdminDashboardPage({
         className="grid grid-cols-1 sm:grid-cols-3 gap-4"
       >
         <div
-          className={`p-5 rounded-2xl border transition-all ${
+          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-1 ${
             isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
           }`}
         >
@@ -290,7 +288,7 @@ export default function AdminDashboardPage({
         </div>
 
         <div
-          className={`p-5 rounded-2xl border transition-all ${
+          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-2 ${
             isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
           }`}
         >
@@ -306,7 +304,7 @@ export default function AdminDashboardPage({
         </div>
 
         <div
-          className={`p-5 rounded-2xl border transition-all ${
+          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-3 ${
             isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
           }`}
         >
@@ -322,7 +320,7 @@ export default function AdminDashboardPage({
         </div>
       </section>
 
-      <div className="flex border-b border-border-subtle dark:border-white/10 gap-2 sm:gap-4 overflow-x-auto pb-1">
+      <div className="flex border-b border-border-subtle dark:border-white/10 gap-2 sm:gap-4 overflow-x-auto pb-1 animate-fade-in">
         <button
           type="button"
           onClick={() => setActiveTab("create-market")}
@@ -377,7 +375,7 @@ export default function AdminDashboardPage({
         </button>
       </div>
 
-      <main className="pt-2">
+      <main className="pt-2 animate-slide-up">
         {activeTab === "create-market" && (
           <AdminMarketCreateForm onSubmitMarket={handleMarketCreated} />
         )}

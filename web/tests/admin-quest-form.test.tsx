@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import AdminQuestManagementForm, { AdminQuestItem } from "../components/AdminQuestManagementForm";
 
 const MOCK_QUESTS: AdminQuestItem[] = [
@@ -27,6 +27,36 @@ const MOCK_QUESTS: AdminQuestItem[] = [
 ];
 
 describe("AdminQuestManagementForm Component", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    global.fetch = vi.fn().mockImplementation(async (_url: string, opts?: any) => {
+      if (opts?.method === "POST") {
+        const body = JSON.parse(opts.body || "{}");
+        return {
+          ok: true,
+          status: 201,
+          json: async () => ({
+            success: true,
+            quest: {
+              id: "quest-created-1",
+              title: body.title,
+              description: body.description,
+              category: body.category,
+              points_reward: body.points_reward,
+              action_url: body.action_url,
+              is_active: true,
+              created_at: "2026-09-17",
+            },
+          }),
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true }),
+      };
+    });
+  });
   it("renders form inputs, recurrence selector, and existing quests table", () => {
     render(<AdminQuestManagementForm initialQuests={MOCK_QUESTS} />);
 

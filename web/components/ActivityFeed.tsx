@@ -113,7 +113,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
         return (
           <div
             key={item.id}
-            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-emerald-500/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+            className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-emerald-500/30 transition-all hover-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
           >
             <div className="flex items-start sm:items-center gap-3.5">
               <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs text-zinc-700 dark:text-zinc-300 shrink-0 border border-zinc-200 dark:border-zinc-700">

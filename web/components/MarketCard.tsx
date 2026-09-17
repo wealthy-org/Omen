@@ -57,7 +57,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
   return (
     <div
       data-testid={`market-card-${market.id}`}
-      className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:shadow-md transition-all flex flex-col justify-between group"
+      className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:shadow-md transition-all hover-lift flex flex-col justify-between group"
     >
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">

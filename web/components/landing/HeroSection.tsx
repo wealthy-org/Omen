@@ -42,7 +42,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
         </div>
 
         <h1
-          className={`font-black tracking-tight leading-[0.95] max-w-5xl ${
+          className={`font-black tracking-tight leading-[0.95] max-w-5xl animate-slide-up ${
             isDark ? "text-white" : "text-[#0B1F16]"
           }`}
           style={{
@@ -54,17 +54,17 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
         </h1>
 
         <p
-          className={`mt-6 max-w-[700px] text-base sm:text-lg leading-relaxed font-normal ${
+          className={`mt-6 max-w-[700px] text-base sm:text-lg leading-relaxed font-normal animate-slide-up stagger-1 ${
             isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
           }`}
         >
           Transform high-conviction social opinions from Twitter, Warpcast, and community thinkers into decentralized belief markets. Stake capital on AGREE or DISAGREE, backed by EIP-712 creator verification and dual-testnet settlements.
         </p>
 
-        <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+        <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto animate-slide-up stagger-2">
           <Link
             href="/markets"
-            className={`w-full sm:w-auto px-8 py-4 rounded-[14px] text-[15px] font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5 group ${
+            className={`w-full sm:w-auto px-8 py-4 rounded-[14px] text-[15px] font-bold transition-all duration-200 active:scale-[0.98] hover-lift flex items-center justify-center gap-2.5 group ${
               isDark
                 ? "text-[#030906]"
                 : "text-white bg-[#10221A] hover:bg-[#183428] shadow-[0_4px_20px_rgba(16,34,26,0.25)]"
@@ -91,7 +91,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
 
           <Link
             href="/create"
-            className={`w-full sm:w-auto px-7 py-4 rounded-[14px] text-[15px] font-semibold backdrop-blur-md transition-all duration-200 flex items-center justify-center gap-2.5 border ${
+            className={`w-full sm:w-auto px-7 py-4 rounded-[14px] text-[15px] font-semibold backdrop-blur-md transition-all duration-200 hover-lift flex items-center justify-center gap-2.5 border ${
               isDark
                 ? "text-white bg-white/5 hover:bg-white/10 border-emerald-500/20"
                 : "text-[#0B1F16] bg-white/90 hover:bg-white border-emerald-500/15 shadow-xs"

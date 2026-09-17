@@ -17,7 +17,10 @@ const { mockWagmiContext, mockWriteContractAsync, mockUseAccount, mockUseWaitFor
 vi.mock("wagmi", () => ({
   WagmiContext: mockWagmiContext,
   useWriteContract: () => ({
+    writeContract: mockWriteContractAsync,
     writeContractAsync: mockWriteContractAsync,
+    mutate: mockWriteContractAsync,
+    mutateAsync: mockWriteContractAsync,
     data: "0xmocktxhash123",
     isPending: false,
     error: null,
@@ -69,9 +72,9 @@ describe("usePlaceBet Hook", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        market_id: "1",
+        contract_market_id: 1,
         wallet_address: "0x1111111111111111111111111111111111111111",
-        side: "YES",
+        side: "yes",
         amount: 0.5,
         tx_hash: "0xmocktxhash123",
       }),

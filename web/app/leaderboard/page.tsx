@@ -88,8 +88,8 @@ export default function LeaderboardPage() {
   const pointsGap = gapTarget ? Math.max(0, gapTarget.totalPoints - userPoints) : 0;
 
   return (
-    <div className="w-full flex flex-col gap-8 pb-16 animate-in fade-in duration-300">
-      <div className="flex flex-col gap-2">
+    <div className="w-full flex flex-col gap-8 pb-16 animate-fade-in">
+      <div className="flex flex-col gap-2 animate-slide-down">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border bg-primary-blue-soft text-primary-blue dark:bg-primary-blue/15 dark:text-primary-blue border-primary-blue/20">
             Leaderboard • Global Season 1
@@ -105,7 +105,7 @@ export default function LeaderboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div
-          className={`p-6 rounded-2xl border transition-all ${
+          className={`p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-1 ${
             isDark
               ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"
@@ -133,7 +133,7 @@ export default function LeaderboardPage() {
         </div>
 
         <div
-          className={`p-6 rounded-2xl border transition-all ${
+          className={`p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-2 ${
             isDark
               ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"
@@ -156,7 +156,7 @@ export default function LeaderboardPage() {
         </div>
 
         <div
-          className={`p-6 rounded-2xl border transition-all ${
+          className={`p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-3 ${
             isDark
               ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
               : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"

@@ -13,7 +13,10 @@ vi.mock("wagmi", () => ({
     isConnected: true,
   }),
   useWriteContract: () => ({
+    writeContract: mocks.writeContractAsyncMock,
     writeContractAsync: mocks.writeContractAsyncMock,
+    mutate: mocks.writeContractAsyncMock,
+    mutateAsync: mocks.writeContractAsyncMock,
     isPending: false,
   }),
 }));

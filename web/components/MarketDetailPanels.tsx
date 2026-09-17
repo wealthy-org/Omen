@@ -65,7 +65,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      <div className="lg:col-span-7 space-y-6">
+      <div className="lg:col-span-7 space-y-6 animate-slide-up">
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 backdrop-blur-md relative overflow-hidden shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
@@ -192,7 +192,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
         </div>
       </div>
 
-      <div className="lg:col-span-5 space-y-6">
+      <div className="lg:col-span-5 space-y-6 animate-slide-left">
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-6 backdrop-blur-md shadow-xl space-y-6">
           <h2 className="text-lg font-semibold text-white">Consensus & Pool Metrics</h2>
 

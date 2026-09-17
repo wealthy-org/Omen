@@ -1,13 +1,22 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, afterAll } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import {
   ROBINHOOD_TESTNET_CHAIN_ID,
-  OMEN_FACTORY_ADDRESS_ROBINHOOD,
   getOmenFactoryAddress,
 } from "../lib/contracts";
 
 describe("TICKET-98: Robinhood Chain Testnet Deployment Script & Configuration", () => {
+  const originalRobinhood = process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD;
+
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD = "0x2222222222222222222222222222222222222222";
+  });
+
+  afterAll(() => {
+    process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD = originalRobinhood;
+  });
+
   it("should adhere strictly to Zero-Comment Policy in Robinhood deploy script", () => {
     const scriptPath = path.resolve(process.cwd(), "../contracts/script/DeployRobinhood.s.sol");
 
@@ -31,9 +40,13 @@ describe("TICKET-98: Robinhood Chain Testnet Deployment Script & Configuration",
 
   it("should export Robinhood Chain ID 46630 and factory address resolver", () => {
     expect(ROBINHOOD_TESTNET_CHAIN_ID).toBe(46630);
-    expect(OMEN_FACTORY_ADDRESS_ROBINHOOD).toBeDefined();
 
     const resolvedAddress = getOmenFactoryAddress(46630);
-    expect(resolvedAddress).toBe(OMEN_FACTORY_ADDRESS_ROBINHOOD);
+    expect(resolvedAddress).toBe("0x2222222222222222222222222222222222222222");
+  });
+
+  it("should throw an error when Robinhood factory address is not configured", () => {
+    delete process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD;
+    expect(() => getOmenFactoryAddress(46630)).toThrow(/not configured/i);
   });
 });

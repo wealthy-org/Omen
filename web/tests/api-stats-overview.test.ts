@@ -59,7 +59,7 @@ describe("GET /api/stats/overview", () => {
     expect(json.stats.active_wallets).toBe(2);
   });
 
-  it("handles fallback gracefully when supabase returns errors or empty data", async () => {
+  it("returns 500 error when supabase returns a database error", async () => {
     const mockFrom = vi.fn().mockImplementation(() => {
       return {
         select: vi.fn().mockResolvedValue({ data: null, error: { message: "db error" } }),
@@ -73,10 +73,8 @@ describe("GET /api/stats/overview", () => {
     const res = await GET();
     const json = await res.json();
 
-    expect(res.status).toBe(200);
-    expect(json.success).toBe(true);
-    expect(json.stats.total_tvl_eth).toBe("148.50");
-    expect(json.stats.active_markets).toBe(24);
-    expect(json.stats.total_points).toBe(1420000);
+    expect(res.status).toBe(500);
+    expect(json.success).toBe(false);
+    expect(json.error).toBe("db error");
   });
 });

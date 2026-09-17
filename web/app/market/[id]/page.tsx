@@ -97,9 +97,9 @@ function MarketDetailContent({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-zinc-950 text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8 animate-fade-in">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-2 text-xs text-zinc-400">
+        <div className="flex items-center gap-2 text-xs text-zinc-400 animate-slide-right">
           <Link href="/markets" className="hover:text-emerald-400 transition-colors">
             Markets
           </Link>

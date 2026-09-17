@@ -10,8 +10,8 @@ function CreatePageContent() {
   const initialAuthor = searchParams?.get("author") || "";
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
-      <div className="mb-8">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <div className="mb-8 animate-slide-down">
         <div className="flex items-center gap-2 mb-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-xs font-mono font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
@@ -26,10 +26,12 @@ function CreatePageContent() {
         </p>
       </div>
 
-      <BeliefSubmitForm
-        initialRawText={initialRawText}
-        initialAuthorHandle={initialAuthor}
-      />
+      <div className="animate-slide-up stagger-1">
+        <BeliefSubmitForm
+          initialRawText={initialRawText}
+          initialAuthorHandle={initialAuthor}
+        />
+      </div>
     </div>
   );
 }

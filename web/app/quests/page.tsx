@@ -137,8 +137,8 @@ export default function QuestsPage() {
     totalPoints >= 5000 ? "Top 3%" : totalPoints >= 2000 ? "Top 8%" : totalPoints >= 500 ? "Top 25%" : "Top 50%";
 
   return (
-    <div className="w-full flex flex-col gap-8 pb-16 animate-in fade-in duration-300">
-      <div className="flex flex-col gap-2">
+    <div className="w-full flex flex-col gap-8 pb-16 animate-fade-in">
+      <div className="flex flex-col gap-2 animate-slide-down">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border bg-primary-blue-soft text-primary-blue dark:bg-primary-blue/15 dark:text-primary-blue border-primary-blue/20">
             Points Hub • Season 1
@@ -153,7 +153,7 @@ export default function QuestsPage() {
       </div>
 
       <div
-        className={`rounded-2xl border p-6 sm:p-8 transition-all ${
+        className={`rounded-2xl border p-6 sm:p-8 transition-all animate-slide-up stagger-1 ${
           isDark
             ? "bg-gradient-to-r from-[#0A0F0C] via-[#0D1612] to-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
             : "bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 border-emerald-500/15 shadow-[0_4px_24px_rgba(14,122,78,0.06)]"
@@ -178,21 +178,21 @@ export default function QuestsPage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className={`p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
+            <div className={`p-4 rounded-xl border hover-lift ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Quests Done</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-accent-navy dark:text-white">
                 {completedCount}/{quests.length}
               </div>
             </div>
 
-            <div className={`p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
+            <div className={`p-4 rounded-xl border hover-lift ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Active Streak</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-warning-amber">
                 {streakCount} Days
               </div>
             </div>
 
-            <div className={`col-span-2 sm:col-span-1 p-4 rounded-xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
+            <div className={`col-span-2 sm:col-span-1 p-4 rounded-xl border hover-lift ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Airdrop Rank</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-yes-green">
                 {airdropRank}
@@ -202,12 +202,14 @@ export default function QuestsPage() {
         </div>
       </div>
 
-      <DailyCheckinWidget
-        currentStreak={streakCount}
-        onCheckIn={handleDailyCheckIn}
-      />
+      <div className="animate-slide-up stagger-2">
+        <DailyCheckinWidget
+          currentStreak={streakCount}
+          onCheckIn={handleDailyCheckIn}
+        />
+      </div>
 
-      <section className="flex flex-col gap-5">
+      <section className="flex flex-col gap-5 animate-slide-up stagger-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-accent-navy dark:text-white">

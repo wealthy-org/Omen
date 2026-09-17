@@ -117,8 +117,8 @@ export default function MyBetsPage() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-zinc-800">
+    <div className="space-y-8 pb-12 animate-fade-in">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-zinc-800 animate-slide-down">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-3">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -134,7 +134,7 @@ export default function MyBetsPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs">
+        <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs hover-lift animate-slide-up stagger-1">
           <p className="text-xs font-mono font-semibold uppercase text-zinc-500 dark:text-zinc-400">
             Total ETH Staked
           </p>
@@ -146,7 +146,7 @@ export default function MyBetsPage() {
           </p>
         </div>
 
-        <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs">
+        <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs hover-lift animate-slide-up stagger-2">
           <p className="text-xs font-mono font-semibold uppercase text-zinc-500 dark:text-zinc-400">
             Total Payouts Won
           </p>
@@ -158,7 +158,7 @@ export default function MyBetsPage() {
           </p>
         </div>
 
-        <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs">
+        <div className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-xs hover-lift animate-slide-up stagger-3">
           <p className="text-xs font-mono font-semibold uppercase text-zinc-500 dark:text-zinc-400">
             Prediction Win Rate
           </p>
@@ -174,7 +174,7 @@ export default function MyBetsPage() {
       {claimNotification && (
         <div
           role="status"
-          className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-xl flex items-center justify-between text-sm text-emerald-800 dark:text-emerald-200"
+          className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-500/30 rounded-xl flex items-center justify-between text-sm text-emerald-800 dark:text-emerald-200 animate-slide-down"
         >
           <span>{claimNotification}</span>
           <button
@@ -187,7 +187,7 @@ export default function MyBetsPage() {
         </div>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-4 animate-slide-up stagger-2">
         <div className="flex items-center gap-2 border-b border-zinc-200 dark:border-zinc-800 pb-3 overflow-x-auto">
           {FILTER_TABS.map((tab) => {
             const isActive = activeTab === tab.id;

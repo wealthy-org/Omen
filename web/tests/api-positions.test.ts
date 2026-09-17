@@ -7,6 +7,8 @@ import { GET as getUserPositions } from "../app/api/positions/route";
 import * as supabaseLib from "../lib/supabase";
 
 describe("TICKET-87: Positions Indexer & History APIs", () => {
+  const validWallet = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
+
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -51,7 +53,7 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
     const mockPosition = {
       id: "pos-1",
       market_id: "m-uuid-1",
-      wallet_address: "0x1111",
+      wallet_address: validWallet.toLowerCase(),
       side: "AGREE",
       amount: 2.5,
       claimed: false,
@@ -99,9 +101,9 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
     } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
 
     const req = createMockRequest("http://localhost:3000/api/markets/m-uuid-1/position", "POST", {
-      wallet_address: "0x1111",
+      wallet_address: validWallet,
       side: "AGREE",
-      amount_eth: 2.5,
+      amount: 2.5,
       tx_hash: "0xtx123",
       block_number: 123456,
     });
@@ -138,9 +140,9 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
     } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
 
     const req = createMockRequest("http://localhost:3000/api/markets/m-uuid-1/position", "POST", {
-      wallet_address: "0x1111",
+      wallet_address: validWallet,
       side: "AGREE",
-      amount_eth: 1.0,
+      amount: 1.0,
       tx_hash: "0xduplicate-tx",
     });
 
@@ -154,9 +156,9 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
 
   it("should return HTTP 400 for invalid position payload", async () => {
     const req = createMockRequest("http://localhost:3000/api/markets/m-1/position", "POST", {
-      wallet_address: "0x1111",
+      wallet_address: validWallet,
       side: "INVALID_SIDE",
-      amount_eth: -5,
+      amount: -5,
     });
 
     const res = await indexPosition(req, { params: Promise.resolve({ id: "m-1" }) });
@@ -172,7 +174,7 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
       {
         id: "p-1",
         market_id: "m-1",
-        wallet_address: "0xuser1",
+        wallet_address: validWallet.toLowerCase(),
         side: "AGREE",
         amount: 2,
         claimed: false,
@@ -190,7 +192,7 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
       {
         id: "p-2",
         market_id: "m-2",
-        wallet_address: "0xuser1",
+        wallet_address: validWallet.toLowerCase(),
         side: "DISAGREE",
         amount: 3,
         claimed: true,
@@ -217,7 +219,7 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
       from: vi.fn().mockReturnValue({ select: mockSelect }),
     } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
 
-    const req = createMockRequest("http://localhost:3000/api/positions?wallet=0xuser1");
+    const req = createMockRequest(`http://localhost:3000/api/positions?wallet_address=${validWallet}`);
     const res = await getUserPositions(req);
     expect(res.status).toBe(200);
 
@@ -236,6 +238,6 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
 
     const body = await res.json();
     expect(body.success).toBe(false);
-    expect(body.error).toContain("Wallet address is required");
+    expect(body.error).toContain("wallet_address");
   });
 });

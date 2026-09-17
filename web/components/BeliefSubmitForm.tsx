@@ -63,20 +63,21 @@ export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
       const res = await fetch("/api/beliefs/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rawText, authorHandle, sourceUrl }),
+        body: JSON.stringify({ raw_text: rawText, author_handle: authorHandle, source_url: sourceUrl }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        if (data.extracted) {
+        const extractedData = data.data || data.extracted;
+        if (extractedData) {
           setExtracted({
-            statement: data.extracted.statement || rawText,
-            subject: data.extracted.subject || "Crypto",
-            direction: data.extracted.direction || "ABOVE",
-            targetPrice: data.extracted.targetPrice || 4000,
-            targetTime: data.extracted.targetTime || "2026-12-31",
-            category: data.extracted.category || "Crypto",
-            confidenceScore: Number(data.extracted.confidenceScore || 90),
+            statement: extractedData.statement || rawText,
+            subject: extractedData.subject || "Crypto",
+            direction: extractedData.direction || "ABOVE",
+            targetPrice: extractedData.target_price || extractedData.targetPrice || 4000,
+            targetTime: extractedData.target_time || extractedData.targetTime || "2026-12-31",
+            category: extractedData.category || "Crypto",
+            confidenceScore: Number(extractedData.confidence_score || extractedData.confidenceScore || 90),
           });
         }
         setStep(2);
@@ -126,15 +127,20 @@ export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          rawText,
-          authorHandle,
-          sourceUrl,
-          extracted,
+          statement: extracted.statement.trim(),
+          raw_text: rawText.trim(),
+          author: authorHandle.trim(),
+          source_url: sourceUrl.trim() || null,
+          ai_confidence: extracted.confidenceScore,
         }),
       });
 
+      if (!res.ok) {
+        throw new Error("Failed to deploy market");
+      }
+
       const data = await res.json();
-      const marketId = data.marketId || "market-1";
+      const marketId = data.marketId || data.data?.market_id || "market-1";
 
       if (onSuccessRedirect) {
         onSuccessRedirect(marketId);

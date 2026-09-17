@@ -15,7 +15,10 @@ vi.mock("wagmi", () => ({
   }),
   useChainId: () => 11155111,
   useWriteContract: () => ({
+    writeContract: mocks.writeContractAsyncMock,
     writeContractAsync: mocks.writeContractAsyncMock,
+    mutate: mocks.writeContractAsyncMock,
+    mutateAsync: mocks.writeContractAsyncMock,
     isPending: false,
   }),
   useReadContract: () => ({
@@ -23,10 +26,16 @@ vi.mock("wagmi", () => ({
     isLoading: false,
     refetch: vi.fn(),
   }),
-  useSignTypedData: () => ({
-    signTypedDataAsync: vi.fn().mockResolvedValue("0xMockSignature"),
-    isPending: false,
-  }),
+  useSignTypedData: () => {
+    const mockSign = vi.fn().mockResolvedValue("0xMockSignature");
+    return {
+      signTypedData: mockSign,
+      signTypedDataAsync: mockSign,
+      mutate: mockSign,
+      mutateAsync: mockSign,
+      isPending: false,
+    };
+  },
 }));
 
 describe("Market Detail Page (/market/[id])", () => {

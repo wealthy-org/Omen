@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Address } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
-import { OMEN_MARKET_ABI, USE_MOCK_CONTRACT } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
+import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
 
 export interface ClaimPayoutParams {
   marketAddress: string;
@@ -12,7 +13,7 @@ export interface ClaimPayoutParams {
 
 export function useClaim(defaultMarketAddress?: string) {
   const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+  const { mutateAsync } = useWriteContract();
 
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -27,8 +28,8 @@ export function useClaim(defaultMarketAddress?: string) {
     try {
       let hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
 
-      if (!USE_MOCK_CONTRACT && writeContractAsync) {
-        hash = await writeContractAsync({
+      if (!USE_MOCK_CONTRACT && mutateAsync) {
+        hash = await mutateAsync({
           address: marketAddress as Address,
           abi: OMEN_MARKET_ABI,
           functionName: "claimPayout",
@@ -38,16 +39,20 @@ export function useClaim(defaultMarketAddress?: string) {
       setTxHash(hash);
 
       const syncId = marketId || marketAddress;
+      const userAddr = address || "0x1111111111111111111111111111111111111111";
       try {
-        await fetch(`/api/markets/${syncId}/claim`, {
+        const res = await fetch(`/api/markets/${syncId}/claim`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userAddress: address || "0x1111111111111111111111111111111111111111",
-            marketId: syncId,
-            txHash: hash,
+            wallet_address: userAddr,
+            tx_hash: hash,
           }),
         });
+
+        if (!res.ok) {
+          throw new Error("Failed to record claim in database");
+        }
       } catch {
       }
 

@@ -6,7 +6,7 @@ import {
   usePublicClient,
 } from "wagmi";
 import { decodeEventLog } from "viem";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 export interface CreateMarketParams {
   title: string;
@@ -31,7 +31,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
   const { address } = useAccount();
   const publicClient = usePublicClient();
   const {
-    writeContractAsync,
+    mutateAsync,
     data: txHash,
     isPending: isWritePending,
     error: writeError,
@@ -55,8 +55,8 @@ export function useAdminCreateMarket(): CreateMarketResult {
     setSyncError(null);
     const deadline = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
 
-    const hash = await writeContractAsync({
-      address: PREDICTION_MARKET_ADDRESS,
+    const hash = await mutateAsync({
+      address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "createMarket",
       args: [title, deadline],
@@ -90,10 +90,15 @@ export function useAdminCreateMarket(): CreateMarketResult {
 
     try {
       setIsSyncing(true);
-      await fetch("/api/markets", {
+      const adminWallet = address
+        ? address.toLowerCase()
+        : (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase();
+
+      const res = await fetch("/api/markets", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(adminWallet ? { "x-admin-wallet": adminWallet } : {}),
         },
         body: JSON.stringify({
           contract_market_id: contractMarketId,
@@ -107,6 +112,10 @@ export function useAdminCreateMarket(): CreateMarketResult {
           tx_hash: hash,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to sync market with database");
+      }
     } catch {
       setSyncError("Failed to sync market with database");
     } finally {

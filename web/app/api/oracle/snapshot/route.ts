@@ -4,11 +4,15 @@ import { fetchChainlinkPrice } from "@/lib/oracle/chainlink";
 
 export async function POST(req: NextRequest) {
   try {
-    const adminKeyHeader = req.headers.get("x-admin-key");
-    const authHeader = req.headers.get("authorization");
-    const configuredKey = process.env.ADMIN_API_KEY || process.env.CRON_SECRET;
+    const adminKeyHeader = req.headers.get("x-admin-key")?.trim();
+    const authHeader = req.headers.get("authorization")?.trim();
+    const configuredKey = process.env.ADMIN_API_KEY?.trim() || process.env.CRON_SECRET?.trim();
 
-    const providedKey = adminKeyHeader || (authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null);
+    const bearerToken = authHeader && authHeader.toLowerCase().startsWith("bearer ")
+      ? authHeader.slice(7).trim()
+      : null;
+
+    const providedKey = adminKeyHeader || bearerToken;
 
     if (!configuredKey || !providedKey || providedKey !== configuredKey) {
       return NextResponse.json(
@@ -17,10 +21,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ success: false, error: "Request body must be an object" }, { status: 400 });
+    }
+
     const { market_id, asset, price, snapshot_type, source, chain_id, feed_address } = body;
 
-    if (!asset || typeof asset !== "string") {
+    if (!asset || typeof asset !== "string" || asset.trim().length === 0) {
       return NextResponse.json(
         { success: false, error: "Missing required field: asset" },
         { status: 400 }
@@ -46,8 +60,8 @@ export async function POST(req: NextRequest) {
         market_id: market_id || null,
         asset: asset.toUpperCase().trim(),
         price: Number(resolvedPrice),
-        snapshot_type: snapshot_type || "DISPLAY",
-        source: source || "chainlink",
+        snapshot_type: typeof snapshot_type === "string" ? snapshot_type : "DISPLAY",
+        source: typeof source === "string" ? source : "chainlink",
         recorded_at: new Date().toISOString(),
       })
       .select()
@@ -65,8 +79,9 @@ export async function POST(req: NextRequest) {
       data: snapshot,
     });
   } catch (error: any) {
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: error?.message || "Internal server error" },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }

@@ -96,8 +96,8 @@ export default function ActivityPage() {
   });
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 animate-slide-down">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
@@ -114,7 +114,7 @@ export default function ActivityPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1 animate-slide-up stagger-1">
         <button
           type="button"
           onClick={() => setFilterCategory("all")}
@@ -161,7 +161,9 @@ export default function ActivityPage() {
         </button>
       </div>
 
-      <ActivityFeed activities={filteredActivities} isLoading={isLoading} />
+      <div className="animate-slide-up stagger-2">
+        <ActivityFeed activities={filteredActivities} isLoading={isLoading} />
+      </div>
     </div>
   );
 }

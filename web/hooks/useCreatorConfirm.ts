@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useAccount, useSignTypedData, useChainId } from "wagmi";
 import { Address } from "viem";
-import { USE_MOCK_CONTRACT, OMEN_FACTORY_ADDRESS } from "@/lib/contracts";
+import { getOmenFactoryAddress } from "@/lib/contracts";
+import { USE_MOCK_CONTRACT, getMockOmenFactoryAddress } from "@/lib/mockContracts";
 
 export interface ConfirmBeliefPayload {
   beliefId: string;
@@ -22,7 +23,7 @@ export interface UseCreatorConfirmResult {
 export function useCreatorConfirm(): UseCreatorConfirmResult {
   const { address } = useAccount();
   const chainId = useChainId();
-  const { signTypedDataAsync } = useSignTypedData();
+  const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 
   const [isSigning, setIsSigning] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -44,17 +45,24 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
 
     try {
       const creatorAddress = (address || "0x1111111111111111111111111111111111111111") as Address;
-      const timestamp = BigInt(Math.floor(Date.now() / 1000));
+      const timestampSec = Math.floor(Date.now() / 1000);
+      const timestamp = BigInt(timestampSec);
       let signedSig = "";
 
       if (USE_MOCK_CONTRACT || !signTypedDataAsync) {
         signedSig = `0xMockSignatureEIP712${Math.random().toString(16).substring(2, 10)}${"0".repeat(40)}`;
       } else {
+        const verifyingContract =
+          payload.marketAddress ||
+          (USE_MOCK_CONTRACT
+            ? getMockOmenFactoryAddress(chainId)
+            : getOmenFactoryAddress(chainId));
+
         const domain = {
           name: "Omen Belief Protocol",
           version: "1",
           chainId: chainId || 11155111,
-          verifyingContract: payload.marketAddress || OMEN_FACTORY_ADDRESS,
+          verifyingContract,
         } as const;
 
         const types = {
@@ -83,15 +91,20 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
       setIsConfirming(true);
 
       try {
-        await fetch(`/api/beliefs/${payload.beliefId}/confirm`, {
+        const res = await fetch(`/api/beliefs/${payload.beliefId}/confirm`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            beliefId: payload.beliefId,
-            creator: creatorAddress,
+            creator_address: creatorAddress,
             signature: signedSig,
+            timestamp: timestampSec,
+            chain_id: chainId || 11155111,
           }),
         });
+
+        if (!res.ok) {
+          throw new Error("Failed to confirm belief");
+        }
       } catch {
       }
 

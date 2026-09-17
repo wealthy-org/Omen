@@ -2,18 +2,66 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { verifyBeliefConfirmationSignature } from "@/lib/eip712/confirmation";
 
+const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const body = await req.json();
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Belief ID is required" },
+        { status: 400 }
+      );
+    }
+
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 }
+      );
+    }
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { success: false, error: "Request body must be an object" },
+        { status: 400 }
+      );
+    }
+
     const { creator_address, signature, timestamp, chain_id, tx_hash } = body;
 
-    if (!creator_address || !signature || timestamp === undefined) {
+    if (!creator_address || typeof creator_address !== "string" || !EVM_ADDRESS_REGEX.test(creator_address.trim())) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields: creator_address, signature, or timestamp" },
+        { success: false, error: "Invalid or missing creator_address: must be a valid 42-character EVM address" },
+        { status: 400 }
+      );
+    }
+
+    if (!signature || typeof signature !== "string") {
+      return NextResponse.json(
+        { success: false, error: "Missing required field: signature" },
+        { status: 400 }
+      );
+    }
+
+    const parsedTimestamp = Number(timestamp);
+    if (timestamp === undefined || timestamp === null || isNaN(parsedTimestamp) || parsedTimestamp <= 0) {
+      return NextResponse.json(
+        { success: false, error: "Missing or invalid field: timestamp must be a positive integer" },
+        { status: 400 }
+      );
+    }
+
+    const parsedChainId = Number(chain_id);
+    if (chain_id === undefined || chain_id === null || isNaN(parsedChainId) || parsedChainId <= 0) {
+      return NextResponse.json(
+        { success: false, error: "Missing or invalid field: chain_id must be a positive integer" },
         { status: 400 }
       );
     }
@@ -33,14 +81,12 @@ export async function POST(
       );
     }
 
-    const effectiveChainId = Number(chain_id) || 11155111;
-
     const isValid = await verifyBeliefConfirmationSignature({
       beliefId: id,
       statement: belief.statement,
-      timestamp,
-      chainId: effectiveChainId,
-      creatorAddress: creator_address,
+      timestamp: parsedTimestamp,
+      chainId: parsedChainId,
+      creatorAddress: creator_address.trim(),
       signature,
     });
 
@@ -56,7 +102,7 @@ export async function POST(
       .update({ status: "CONFIRMED" })
       .eq("id", id);
 
-    const normalizedWallet = creator_address.toLowerCase();
+    const normalizedWallet = creator_address.trim().toLowerCase();
 
     const { data: confirmation } = await supabase
       .from("creator_confirmations")
@@ -64,7 +110,7 @@ export async function POST(
         belief_id: id,
         creator_wallet: normalizedWallet,
         signature,
-        tx_hash: tx_hash || null,
+        tx_hash: typeof tx_hash === "string" ? tx_hash : null,
       })
       .select()
       .single();
