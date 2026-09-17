@@ -1,5 +1,4 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -9,10 +8,10 @@ import ConnectWalletButton from "./ConnectWalletButton";
 import NetworkSwitcherModal from "./NetworkSwitcherModal";
 
 const NAV_ITEMS = [
-  { label: "Predictions", href: "/predictions" },
-  { label: "Quests", href: "/quests" },
-  { label: "Leaderboard", href: "/leaderboard" },
-  { label: "My Bets", href: "/my-bets" },
+  { label: "Markets", href: "/markets" },
+  { label: "Beliefs", href: "/beliefs" },
+  { label: "Creators", href: "/creators" },
+  { label: "Activity", href: "/activity" },
 ];
 
 export interface NavbarProps {
@@ -141,7 +140,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
             })}
           </nav>
 
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-3.5">
             <button
               type="button"
               onClick={handleToggle}
@@ -169,6 +168,16 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
                 </>
               )}
             </button>
+
+            <Link
+              href="/create"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-primary-blue hover:bg-primary-blue-hover text-white shadow-xs transition-all active:scale-[0.98]"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Submit Belief</span>
+            </Link>
 
             {isWrongNetworkState && (
               <button
@@ -260,6 +269,16 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
                   </Link>
                 );
               })}
+              <Link
+                href="/create"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="h-12 flex items-center justify-center gap-2 px-4 rounded-xl text-base font-bold bg-primary-blue text-white shadow-xs mt-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Submit Belief</span>
+              </Link>
             </nav>
 
             <div className={`pt-3 border-t flex flex-col gap-2 ${isDark ? "border-white/10" : "border-emerald-500/10"}`}>
@@ -286,7 +305,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
         isOpen={isNetworkModalOpen}
         onClose={() => setIsNetworkModalOpen(false)}
         onSwitchNetwork={async () => {
-          await new Promise((resolve) => setTimeout(resolve, 800));
+          await new Promise((resolve) => setTimeout(resolve, 600));
           setIsWrongNetworkState(false);
           setIsNetworkModalOpen(false);
         }}
@@ -294,3 +313,4 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
     </header>
   );
 }
+

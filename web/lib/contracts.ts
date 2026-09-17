@@ -17,6 +17,10 @@ export const OMEN_FACTORY_ADDRESS_ROBINHOOD =
   (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD as `0x${string}`) ||
   ("0x2222222222222222222222222222222222222222" as `0x${string}`);
 
+export const OMEN_FACTORY_ADDRESS =
+  (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS as `0x${string}`) ||
+  OMEN_FACTORY_ADDRESS_SEPOLIA;
+
 export const getOmenFactoryAddress = (chainId?: number): `0x${string}` => {
   if (chainId === ROBINHOOD_TESTNET_CHAIN_ID) {
     return OMEN_FACTORY_ADDRESS_ROBINHOOD;

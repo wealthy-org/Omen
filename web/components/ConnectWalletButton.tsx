@@ -28,29 +28,17 @@ export default function ConnectWalletButton({
   const activeAddress = initialAddress !== undefined ? initialAddress : defaultDemo.address;
   const activeBalance = initialBalance !== undefined ? initialBalance : defaultDemo.formattedBalance;
 
-  const [status, setStatus] = useState<"disconnected" | "connecting" | "connected">(initialStatus);
-  const [address, setAddress] = useState(activeAddress);
-  const [balance, setBalance] = useState(activeBalance);
+  const [statusOverride, setStatusOverride] = useState<"disconnected" | "connecting" | "connected" | null>(null);
+  const [addressOverride, setAddressOverride] = useState<string | null>(null);
+  const [balanceOverride, setBalanceOverride] = useState<string | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const status = statusOverride ?? initialStatus;
+  const address = addressOverride ?? activeAddress;
+  const balance = balanceOverride ?? activeBalance;
+
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setStatus(initialStatus);
-  }, [initialStatus]);
-
-  useEffect(() => {
-    if (initialAddress !== undefined) {
-      setAddress(initialAddress);
-    }
-  }, [initialAddress]);
-
-  useEffect(() => {
-    if (initialBalance !== undefined) {
-      setBalance(initialBalance);
-    }
-  }, [initialBalance]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -80,7 +68,7 @@ export default function ConnectWalletButton({
   };
 
   const handleConnect = () => {
-    setStatus("connecting");
+    setStatusOverride("connecting");
     if (onConnect) {
       onConnect();
     }
@@ -89,9 +77,9 @@ export default function ConnectWalletButton({
       const demo = mockPredictionMarket.getDemoWallet();
       const finalAddr = initialAddress !== undefined ? initialAddress : demo.address;
       const finalBal = initialBalance !== undefined ? initialBalance : demo.formattedBalance;
-      setAddress(finalAddr);
-      setBalance(finalBal);
-      setStatus("connected");
+      setAddressOverride(finalAddr);
+      setBalanceOverride(finalBal);
+      setStatusOverride("connected");
       syncWalletToDatabase(finalAddr);
     }, 600);
 
@@ -100,7 +88,7 @@ export default function ConnectWalletButton({
 
   const handleDisconnect = () => {
     setIsDropdownOpen(false);
-    setStatus("disconnected");
+    setStatusOverride("disconnected");
     if (onDisconnect) {
       onDisconnect();
     }

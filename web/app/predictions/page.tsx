@@ -9,7 +9,7 @@ export default function PredictionsPage() {
   const [markets, setMarkets] = useState<MarketData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState<string>(" ");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("highest-pool");
   const [selectedOutcomeInfo, setSelectedOutcomeInfo] = useState<string | null>(null);
 
@@ -22,10 +22,6 @@ export default function PredictionsPage() {
     market: null,
     outcome: "YES",
   });
-
-  useEffect(() => {
-    setSearchQuery("");
-  }, []);
 
   useEffect(() => {
     let isMounted = true;

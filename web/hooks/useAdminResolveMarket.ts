@@ -1,6 +1,5 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import {
-  WagmiContext,
   useWriteContract,
   useWaitForTransactionReceipt,
   useAccount,
@@ -25,23 +24,6 @@ export interface ResolveMarketResult {
 }
 
 export function useAdminResolveMarket(): ResolveMarketResult {
-  const context = useContext(WagmiContext);
-  if (!context) {
-    return {
-      resolveMarket: async () => "",
-      txHash: undefined,
-      isPending: false,
-      isConfirming: false,
-      isConfirmed: false,
-      isSyncing: false,
-      error: null,
-    };
-  }
-
-  return useAdminResolveMarketInner();
-}
-
-function useAdminResolveMarketInner(): ResolveMarketResult {
   const { address } = useAccount();
   const {
     writeContractAsync,
@@ -125,3 +107,5 @@ function useAdminResolveMarketInner(): ResolveMarketResult {
     error: writeError || (syncError ? new Error(syncError) : null),
   };
 }
+
+export default useAdminResolveMarket;

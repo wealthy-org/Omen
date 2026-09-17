@@ -37,7 +37,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
         >
           <span className={`w-2 h-2 rounded-full animate-pulse ${isDark ? "bg-[#34D399]" : "bg-[#22C55E]"}`} />
           <span>
-            Decentralized Prediction Protocol • <strong className={`font-bold ${isDark ? "text-white" : "text-[#0B1F16]"}`}>Arbitrum Sepolia</strong>
+            Dual-Testnet Active • <strong className={`font-bold ${isDark ? "text-white" : "text-[#0B1F16]"}`}>Ethereum Sepolia & Robinhood Chain</strong>
           </span>
         </div>
 
@@ -46,24 +46,24 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
             isDark ? "text-white" : "text-[#0B1F16]"
           }`}
           style={{
-            fontSize: "clamp(42px, 7.5vw, 96px)",
+            fontSize: "clamp(40px, 7vw, 90px)",
             letterSpacing: "-0.025em",
           }}
         >
-          Predict Onchain. Farm Points. Dominate the Airdrop.
+          The Internet is Full of Opinions. OMEN Gives Them a Market.
         </h1>
 
         <p
-          className={`mt-6 max-w-[680px] text-base sm:text-lg leading-relaxed font-normal ${
+          className={`mt-6 max-w-[700px] text-base sm:text-lg leading-relaxed font-normal ${
             isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
           }`}
         >
-          The premier institutional binary prediction market. Bet ETH on crypto outcomes with non-custodial smart contracts, build daily gamified quest streaks, and maximize points for verified airdrop qualification.
+          Transform high-conviction social opinions from Twitter, Warpcast, and community thinkers into decentralized belief markets. Stake capital on AGREE or DISAGREE, backed by EIP-712 creator verification and dual-testnet settlements.
         </p>
 
         <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
           <Link
-            href="/predictions"
+            href="/markets"
             className={`w-full sm:w-auto px-8 py-4 rounded-[14px] text-[15px] font-bold transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2.5 group ${
               isDark
                 ? "text-[#030906]"
@@ -78,7 +78,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
                 : undefined
             }
           >
-            <span>Explore Live Markets</span>
+            <span>Explore Markets</span>
             <svg
               className="w-4 h-4 transition-transform group-hover:translate-x-1"
               fill="none"
@@ -90,14 +90,14 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
           </Link>
 
           <Link
-            href="/quests"
+            href="/create"
             className={`w-full sm:w-auto px-7 py-4 rounded-[14px] text-[15px] font-semibold backdrop-blur-md transition-all duration-200 flex items-center justify-center gap-2.5 border ${
               isDark
                 ? "text-white bg-white/5 hover:bg-white/10 border-emerald-500/20"
                 : "text-[#0B1F16] bg-white/90 hover:bg-white border-emerald-500/15 shadow-xs"
             }`}
           >
-            <span>Start Quest Farming</span>
+            <span>Submit Belief</span>
             <span
               className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full border ${
                 isDark
@@ -105,7 +105,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
                   : "bg-emerald-100 text-[#0E7A4E] border-emerald-300/40"
               }`}
             >
-              +50 PTS
+              + AI Extract
             </span>
           </Link>
         </div>

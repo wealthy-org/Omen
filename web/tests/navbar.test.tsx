@@ -22,28 +22,32 @@ describe("Navbar Component", () => {
     expect(screen.getByText("TESTNET")).toBeInTheDocument();
   });
 
-  it("renders all desktop navigation links", () => {
+  it("renders all V1 desktop navigation links", () => {
     render(<Navbar />);
 
-    expect(screen.getByRole("link", { name: /predictions/i })).toHaveAttribute("href", "/predictions");
-    expect(screen.getByRole("link", { name: /quests/i })).toHaveAttribute("href", "/quests");
-    expect(screen.getByRole("link", { name: /leaderboard/i })).toHaveAttribute("href", "/leaderboard");
-    expect(screen.getByRole("link", { name: /my bets/i })).toHaveAttribute("href", "/my-bets");
+    expect(screen.getByRole("link", { name: /markets/i })).toHaveAttribute("href", "/markets");
+    expect(screen.getByRole("link", { name: /beliefs/i })).toHaveAttribute("href", "/beliefs");
+    expect(screen.getByRole("link", { name: /creators/i })).toHaveAttribute("href", "/creators");
+    expect(screen.getByRole("link", { name: /activity/i })).toHaveAttribute("href", "/activity");
   });
 
   it("highlights the active link based on current pathname", () => {
-    vi.mocked(usePathname).mockReturnValue("/predictions");
+    vi.mocked(usePathname).mockReturnValue("/markets");
 
     render(<Navbar />);
 
-    const predictionsLink = screen.getByRole("link", { name: /predictions/i });
-    expect(predictionsLink).toHaveAttribute("aria-current", "page");
-    expect(predictionsLink.className).toContain("text-white");
-    expect(predictionsLink.className).toContain("font-bold");
+    const marketsLink = screen.getByRole("link", { name: /markets/i });
+    expect(marketsLink).toHaveAttribute("aria-current", "page");
+    expect(marketsLink.className).toContain("text-white");
+    expect(marketsLink.className).toContain("font-bold");
   });
 
-  it("renders the Connect Wallet button", () => {
+  it("renders the Submit Belief CTA button and Connect Wallet button", () => {
     render(<Navbar />);
+
+    const submitButtons = screen.getAllByRole("link", { name: /submit belief/i });
+    expect(submitButtons.length).toBeGreaterThan(0);
+    expect(submitButtons[0]).toHaveAttribute("href", "/create");
 
     const connectButtons = screen.getAllByRole("button", { name: /connect wallet/i });
     expect(connectButtons.length).toBeGreaterThan(0);
@@ -104,8 +108,8 @@ describe("Navbar Component", () => {
     const mobileMenu = screen.getByTestId("mobile-menu");
     expect(mobileMenu).toBeInTheDocument();
 
-    const mobileQuestsLink = screen.getAllByRole("link", { name: /quests/i })[1];
-    fireEvent.click(mobileQuestsLink);
+    const mobileBeliefsLink = screen.getAllByRole("link", { name: /beliefs/i })[1];
+    fireEvent.click(mobileBeliefsLink);
 
     expect(screen.queryByTestId("mobile-menu")).not.toBeInTheDocument();
   });

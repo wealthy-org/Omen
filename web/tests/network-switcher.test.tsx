@@ -25,8 +25,8 @@ describe("NetworkSwitcherModal Component", () => {
         isOpen={true}
         currentChainId={1}
         currentNetworkName="Ethereum Mainnet"
-        targetChainId={421614}
-        targetNetworkName="Arbitrum Sepolia"
+        targetChainId={11155111}
+        targetNetworkName="Ethereum Sepolia"
       />
     );
 
@@ -38,15 +38,16 @@ describe("NetworkSwitcherModal Component", () => {
 
     expect(screen.getByText("Wrong Network Detected")).toBeInTheDocument();
     expect(
-      screen.getByText(/Omen operates exclusively on Arbitrum Sepolia Testnet/i)
+      screen.getByText(/Omen operates on Ethereum Sepolia and Robinhood Chain Testnet/i)
     ).toBeInTheDocument();
     expect(screen.getByText(/Ethereum Mainnet \(1\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Arbitrum Sepolia \(421614\)/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Ethereum Sepolia/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Robinhood Chain Testnet/i).length).toBeGreaterThan(0);
   });
 
-  it("triggers onSwitchNetwork and displays loading state during network switch", async () => {
+  it("triggers onSwitchNetwork with selected chain ID and displays loading state during network switch", async () => {
     const onSwitchMock = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+      () => new Promise((resolve) => setTimeout(resolve, 50))
     );
 
     render(
@@ -56,8 +57,13 @@ describe("NetworkSwitcherModal Component", () => {
       />
     );
 
+    const robinhoodButton = screen.getByRole("button", {
+      name: /robinhood chain testnet/i,
+    });
+    fireEvent.click(robinhoodButton);
+
     const switchButton = screen.getByRole("button", {
-      name: /switch to arbitrum sepolia/i,
+      name: /switch to robinhood chain testnet/i,
     });
     expect(switchButton).toBeInTheDocument();
 
@@ -65,7 +71,7 @@ describe("NetworkSwitcherModal Component", () => {
       fireEvent.click(switchButton);
     });
 
-    expect(onSwitchMock).toHaveBeenCalledTimes(1);
+    expect(onSwitchMock).toHaveBeenCalledWith(46630);
   });
 
   it("triggers onClose when close icon or dismiss button is clicked", () => {
