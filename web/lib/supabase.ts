@@ -4,6 +4,10 @@ import { Database } from "../types/database";
 let supabaseClient: SupabaseClient<any> | null = null;
 let supabaseAdminClient: SupabaseClient<any> | null = null;
 
+const sanitizeUrl = (rawUrl: string): string => {
+  return rawUrl.trim().replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "");
+};
+
 export const getSupabaseClient = (): SupabaseClient<any> => {
   if (supabaseClient) return supabaseClient;
 
@@ -14,7 +18,7 @@ export const getSupabaseClient = (): SupabaseClient<any> => {
     throw new Error("Missing Supabase public configuration");
   }
 
-  supabaseClient = createClient(url, anonKey);
+  supabaseClient = createClient(sanitizeUrl(url), anonKey);
   return supabaseClient;
 };
 
@@ -28,7 +32,7 @@ export const getSupabaseAdminClient = (): SupabaseClient<any> => {
     throw new Error("Missing Supabase admin configuration");
   }
 
-  supabaseAdminClient = createClient(url, serviceKey, {
+  supabaseAdminClient = createClient(sanitizeUrl(url), serviceKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
