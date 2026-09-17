@@ -16,7 +16,7 @@ export interface PlacePositionParams {
 
 export function usePosition() {
   const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+  const { mutateAsync } = useWriteContract();
 
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -49,9 +49,9 @@ export function usePosition() {
       const parsedWei = parseEther(strAmount);
       let hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
 
-      if (!USE_MOCK_CONTRACT && writeContractAsync) {
+      if (!USE_MOCK_CONTRACT && mutateAsync) {
         const functionName = side === "AGREE" ? "depositAgree" : "depositDisagree";
-        hash = await writeContractAsync({
+        hash = await mutateAsync({
           address: marketAddress as Address,
           abi: OMEN_MARKET_ABI,
           functionName,

@@ -13,11 +13,29 @@ vi.mock("wagmi", async (importOriginal) => {
     ...actual,
     WagmiContext: React.createContext({}),
     useAccount: () => ({ address: "0x1234567890123456789012345678901234567890", isConnected: true }),
-    useWriteContract: () => ({ writeContractAsync: vi.fn().mockResolvedValue("0xmocktx"), isPending: false }),
+    useWriteContract: () => {
+      const mockWrite = vi.fn().mockResolvedValue("0xmocktx");
+      return {
+        writeContract: mockWrite,
+        writeContractAsync: mockWrite,
+        mutate: mockWrite,
+        mutateAsync: mockWrite,
+        isPending: false,
+      };
+    },
     useWaitForTransactionReceipt: () => ({ isLoading: false, isSuccess: false }),
     usePublicClient: () => ({ waitForTransactionReceipt: vi.fn().mockResolvedValue({ logs: [] }) }),
     useReadContract: () => ({ data: undefined, isLoading: false, refetch: vi.fn() }),
     useChainId: () => 11155111,
-    useSignTypedData: () => ({ signTypedDataAsync: vi.fn().mockResolvedValue("0xmocksignature"), isPending: false }),
+    useSignTypedData: () => {
+      const mockSign = vi.fn().mockResolvedValue("0xmocksignature");
+      return {
+        signTypedData: mockSign,
+        signTypedDataAsync: mockSign,
+        mutate: mockSign,
+        mutateAsync: mockSign,
+        isPending: false,
+      };
+    },
   };
 });

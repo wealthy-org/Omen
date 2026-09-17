@@ -23,7 +23,10 @@ vi.mock("wagmi", () => ({
   }),
   useChainId: () => mocks.chainId,
   useWriteContract: () => ({
+    writeContract: mocks.writeContractAsyncMock,
     writeContractAsync: mocks.writeContractAsyncMock,
+    mutate: mocks.writeContractAsyncMock,
+    mutateAsync: mocks.writeContractAsyncMock,
     isPending: false,
   }),
   useReadContract: () => ({
@@ -32,7 +35,10 @@ vi.mock("wagmi", () => ({
     refetch: vi.fn(),
   }),
   useSignTypedData: () => ({
+    signTypedData: mocks.signTypedDataAsyncMock,
     signTypedDataAsync: mocks.signTypedDataAsyncMock,
+    mutate: mocks.signTypedDataAsyncMock,
+    mutateAsync: mocks.signTypedDataAsyncMock,
     isPending: false,
   }),
 }));

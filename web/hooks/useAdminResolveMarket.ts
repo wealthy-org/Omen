@@ -26,7 +26,7 @@ export interface ResolveMarketResult {
 export function useAdminResolveMarket(): ResolveMarketResult {
   const { address } = useAccount();
   const {
-    writeContractAsync,
+    mutateAsync,
     data: txHash,
     isPending: isWritePending,
     error: writeError,
@@ -53,7 +53,7 @@ export function useAdminResolveMarket(): ResolveMarketResult {
     const contractAddress = getPredictionMarketAddress();
 
     if (outcome === "CANCEL") {
-      hash = await writeContractAsync({
+      hash = await mutateAsync({
         address: contractAddress,
         abi: PREDICTION_MARKET_ABI,
         functionName: "cancelMarket",
@@ -61,7 +61,7 @@ export function useAdminResolveMarket(): ResolveMarketResult {
       });
     } else {
       const result = outcome === "YES";
-      hash = await writeContractAsync({
+      hash = await mutateAsync({
         address: contractAddress,
         abi: PREDICTION_MARKET_ABI,
         functionName: "resolveMarket",

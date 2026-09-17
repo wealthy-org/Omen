@@ -31,7 +31,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
   const { address } = useAccount();
   const publicClient = usePublicClient();
   const {
-    writeContractAsync,
+    mutateAsync,
     data: txHash,
     isPending: isWritePending,
     error: writeError,
@@ -55,7 +55,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
     setSyncError(null);
     const deadline = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
 
-    const hash = await writeContractAsync({
+    const hash = await mutateAsync({
       address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "createMarket",

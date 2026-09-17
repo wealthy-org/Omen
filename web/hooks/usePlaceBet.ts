@@ -12,7 +12,7 @@ export interface PlaceBetParams {
 export function usePlaceBet() {
   const { address } = useAccount();
   const {
-    writeContractAsync,
+    mutateAsync,
     data: txHash,
     isPending: isWritePending,
     error: writeError,
@@ -31,7 +31,7 @@ export function usePlaceBet() {
     const numericMarketId = BigInt(marketId);
     const value = parseEther(amount);
 
-    const hash = await writeContractAsync({
+    const hash = await mutateAsync({
       address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "placeBet",

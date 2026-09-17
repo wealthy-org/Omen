@@ -12,7 +12,7 @@ export interface ClaimPayoutResult {
 
 export function useClaimPayout(): ClaimPayoutResult {
   const {
-    writeContractAsync,
+    mutateAsync,
     data: txHash,
     isPending: isWritePending,
     error: writeError,
@@ -25,7 +25,7 @@ export function useClaimPayout(): ClaimPayoutResult {
   const claimPayout = async (marketId: string | number): Promise<string> => {
     const numericMarketId = BigInt(marketId);
 
-    const hash = await writeContractAsync({
+    const hash = await mutateAsync({
       address: getPredictionMarketAddress(),
       abi: PREDICTION_MARKET_ABI,
       functionName: "claim",

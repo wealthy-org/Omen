@@ -17,7 +17,10 @@ const { mockWagmiContext, mockWriteContractAsync, mockUseAccount, mockUseWaitFor
 vi.mock("wagmi", () => ({
   WagmiContext: mockWagmiContext,
   useWriteContract: () => ({
+    writeContract: mockWriteContractAsync,
     writeContractAsync: mockWriteContractAsync,
+    mutate: mockWriteContractAsync,
+    mutateAsync: mockWriteContractAsync,
     data: "0xmocktxhash123",
     isPending: false,
     error: null,

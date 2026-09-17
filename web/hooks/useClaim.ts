@@ -13,7 +13,7 @@ export interface ClaimPayoutParams {
 
 export function useClaim(defaultMarketAddress?: string) {
   const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+  const { mutateAsync } = useWriteContract();
 
   const [isPending, setIsPending] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -28,8 +28,8 @@ export function useClaim(defaultMarketAddress?: string) {
     try {
       let hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
 
-      if (!USE_MOCK_CONTRACT && writeContractAsync) {
-        hash = await writeContractAsync({
+      if (!USE_MOCK_CONTRACT && mutateAsync) {
+        hash = await mutateAsync({
           address: marketAddress as Address,
           abi: OMEN_MARKET_ABI,
           functionName: "claimPayout",

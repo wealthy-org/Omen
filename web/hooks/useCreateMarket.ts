@@ -27,7 +27,7 @@ export interface UseCreateMarketResult {
 
 export function useCreateMarket(): UseCreateMarketResult {
   const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+  const { mutateAsync } = useWriteContract();
 
   const [isPending, setIsPending] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
@@ -89,7 +89,7 @@ export function useCreateMarket(): UseCreateMarketResult {
       }
 
       const factoryAddress = getOmenFactoryAddress();
-      const tx = await writeContractAsync({
+      const tx = await mutateAsync({
         address: factoryAddress,
         abi: OMEN_FACTORY_ABI,
         functionName: "createMarket",

@@ -23,7 +23,7 @@ export interface UseCreatorConfirmResult {
 export function useCreatorConfirm(): UseCreatorConfirmResult {
   const { address } = useAccount();
   const chainId = useChainId();
-  const { signTypedDataAsync } = useSignTypedData();
+  const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 
   const [isSigning, setIsSigning] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);

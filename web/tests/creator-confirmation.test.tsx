@@ -16,7 +16,10 @@ vi.mock("wagmi", () => ({
   }),
   useChainId: () => 11155111,
   useSignTypedData: () => ({
+    signTypedData: mocks.signTypedDataAsyncMock,
     signTypedDataAsync: mocks.signTypedDataAsyncMock,
+    mutate: mocks.signTypedDataAsyncMock,
+    mutateAsync: mocks.signTypedDataAsyncMock,
     isPending: false,
   }),
 }));

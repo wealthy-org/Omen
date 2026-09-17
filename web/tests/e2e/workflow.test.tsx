@@ -28,7 +28,10 @@ const {
 vi.mock("wagmi", () => ({
   WagmiContext: mockWagmiContext,
   useWriteContract: () => ({
+    writeContract: mockWriteContractAsync,
     writeContractAsync: mockWriteContractAsync,
+    mutate: mockWriteContractAsync,
+    mutateAsync: mockWriteContractAsync,
     data: "0xe2e_mock_tx_hash_001",
     isPending: false,
     error: null,
