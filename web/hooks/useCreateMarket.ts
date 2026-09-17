@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { Address, parseUnits } from "viem";
 import { getOmenFactoryAddress, OMEN_FACTORY_ABI } from "@/lib/contracts";
-import { USE_MOCK_CONTRACT } from "@/lib/mock-contracts";
+import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
 
 export interface CreateMarketParams {
   statement: string;

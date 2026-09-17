@@ -1,7 +1,6 @@
 import { StructuredBelief, StructuredBeliefSchema } from "../../types/belief";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "meta-llama/llama-3-8b-instruct:free";
 
 const SYSTEM_PROMPT = `You are a financial and crypto market belief structuring AI for the OMEN protocol.
 Your task is to analyze user-provided raw opinion/prediction text and extract a precise, measurable prediction structure.
@@ -38,8 +37,15 @@ export async function extractBeliefFromText(
   author?: string,
   sourceUrl?: string
 ): Promise<{ success: boolean; data?: StructuredBelief; error?: string; status?: number }> {
-  const apiKey = process.env.OPENROUTER_API_KEY || "mock-openrouter-key";
-  const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+  const apiKey = process.env.AI_API_KEY || process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    throw new Error("AI_API_KEY or OPENROUTER_API_KEY is not configured.");
+  }
+
+  const model = process.env.AI_MODEL || process.env.OPENROUTER_MODEL;
+  if (!model) {
+    throw new Error("AI_MODEL or OPENROUTER_MODEL is not configured.");
+  }
 
   const userPrompt = `Extract structured belief from:
 Text: "${rawText}"

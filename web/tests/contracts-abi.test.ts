@@ -14,7 +14,7 @@ import {
   MOCK_OMEN_FACTORY_ADDRESS_ROBINHOOD,
   USE_MOCK_CONTRACT,
   getMockOmenFactoryAddress,
-} from "../lib/mock-contracts";
+} from "../lib/mockContracts";
 
 describe("TICKET-71: Smart Contract ABI Exports & Separate Mock Configuration", () => {
   const originalSepolia = process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA;
@@ -36,7 +36,7 @@ describe("TICKET-71: Smart Contract ABI Exports & Separate Mock Configuration", 
   it("should adhere strictly to Zero-Comment Policy in contracts config, mock config, and deploy script", () => {
     const filesToCheck = [
       path.resolve(process.cwd(), "lib/contracts.ts"),
-      path.resolve(process.cwd(), "lib/mock-contracts.ts"),
+      path.resolve(process.cwd(), "lib/mockContracts.ts"),
       path.resolve(process.cwd(), "../contracts/script/DeploySepolia.s.sol"),
     ];
 
@@ -98,7 +98,7 @@ describe("TICKET-71: Smart Contract ABI Exports & Separate Mock Configuration", 
     expect(marketNames).toContain("depositDisagree");
   });
 
-  it("should isolate mock fallback addresses into mock-contracts.ts and preserve production contracts.ts purity", () => {
+  it("should isolate mock fallback addresses into mockContracts.ts and preserve production contracts.ts purity", () => {
     const contractsFileContent = fs.readFileSync(path.resolve(process.cwd(), "lib/contracts.ts"), "utf-8");
     expect(contractsFileContent).not.toContain("0x1111111111111111111111111111111111111111");
     expect(contractsFileContent).not.toContain("0x2222222222222222222222222222222222222222");

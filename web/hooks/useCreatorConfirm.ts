@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAccount, useSignTypedData, useChainId } from "wagmi";
 import { Address } from "viem";
 import { getOmenFactoryAddress } from "@/lib/contracts";
-import { USE_MOCK_CONTRACT, getMockOmenFactoryAddress } from "@/lib/mock-contracts";
+import { USE_MOCK_CONTRACT, getMockOmenFactoryAddress } from "@/lib/mockContracts";
 
 export interface ConfirmBeliefPayload {
   beliefId: string;

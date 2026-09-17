@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Address } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 import { OMEN_MARKET_ABI } from "@/lib/contracts";
-import { USE_MOCK_CONTRACT } from "@/lib/mock-contracts";
+import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
 
 export interface ClaimPayoutParams {
   marketAddress: string;
