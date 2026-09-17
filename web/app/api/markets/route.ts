@@ -6,11 +6,15 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseAdminClient();
     const { searchParams } = req.nextUrl;
 
+    const tabParam = (searchParams.get("tab") || "").toLowerCase();
     const statusParam = (searchParams.get("status") || "all").toLowerCase();
     const categoryParam = (searchParams.get("category") || "all").toLowerCase();
-    const sortParam = (searchParams.get("sort") || "newest").toLowerCase();
+    const sortParam = (searchParams.get("sort") || "").toLowerCase();
+    const searchParam = searchParams.get("q") || searchParams.get("search") || "";
+    const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "20", 10) || 20, 1), 100);
+    const offset = Math.max(parseInt(searchParams.get("offset") || "0", 10) || 0, 0);
 
-    let query = supabase.from("markets").select("*");
+    let query: any = supabase.from("markets").select("*, beliefs(*, belief_sources(*))");
 
     if (statusParam === "active") {
       query = query.eq("status", "active");
@@ -18,43 +22,73 @@ export async function GET(req: NextRequest) {
       query = query.in("status", ["resolved_yes", "resolved_no"]);
     } else if (statusParam === "cancelled") {
       query = query.eq("status", "cancelled");
+    } else if (statusParam === "open") {
+      query = query.in("status", ["OPEN", "open", "active"]);
     }
 
     if (categoryParam !== "all") {
       query = query.ilike("category", categoryParam);
     }
 
-    if (sortParam === "highest_pool") {
-      query = query.order("total_pool_yes", { ascending: false });
+    if (searchParam.trim()) {
+      query = query.or(`title.ilike.%${searchParam}%,description.ilike.%${searchParam}%`);
+    }
+
+    if (tabParam === "ending_soon") {
+      query = query.order("close_time", { ascending: true });
     } else if (sortParam === "ending_soon") {
       query = query.order("deadline", { ascending: true });
+    } else if (tabParam === "most_volume") {
+      query = query.order("agree_pool", { ascending: false });
+    } else if (sortParam === "highest_pool") {
+      query = query.order("total_pool_yes", { ascending: false });
+    } else if (tabParam === "confirmed") {
+      query = query.order("created_at", { ascending: false });
     } else {
       query = query.order("created_at", { ascending: false });
     }
 
-    const { data: markets, error } = await query;
+    const result = typeof query.range === "function"
+      ? await query.range(offset, offset + limit - 1)
+      : await query;
+
+    const { data: markets, error, count } = result;
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    const formattedMarkets = (markets || []).map((m) => {
-      const yesPool = Number(m.total_pool_yes ?? m.yes_pool ?? 0);
-      const noPool = Number(m.total_pool_no ?? m.no_pool ?? 0);
+    const formattedMarkets = (markets || []).map((m: any) => {
+      const agreePool = Number(m.agree_pool ?? m.total_pool_yes ?? m.yes_pool ?? 0);
+      const disagreePool = Number(m.disagree_pool ?? m.total_pool_no ?? m.no_pool ?? 0);
+      const totalPool = agreePool + disagreePool;
+      const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 50;
+
       return {
         id: m.id,
         contract_market_id: m.contract_market_id,
-        title: m.title,
+        contract_address: m.contract_address,
+        chain_id: m.chain_id || 11155111,
+        belief_id: m.belief_id,
+        title: m.title || m.beliefs?.statement || "Belief Market",
         description: m.description,
         category: m.category || "crypto",
-        deadline: m.deadline,
+        deadline: m.close_time || m.deadline,
+        open_time: m.open_time,
+        close_time: m.close_time || m.deadline,
         status: m.status,
-        yes_pool: yesPool,
-        no_pool: noPool,
-        total_pool_yes: yesPool,
-        total_pool_no: noPool,
-        total_pool: yesPool + noPool,
+        winner: m.winner,
+        agree_pool: agreePool,
+        disagree_pool: disagreePool,
+        total_pool_yes: agreePool,
+        total_pool_no: disagreePool,
+        total_pool: totalPool,
+        capital_consensus: Math.round(capitalConsensus * 100) / 100,
+        resolution_type: m.resolution_type,
+        resolution_config: m.resolution_config,
         resolution_source: m.resolution_source,
+        metadata_hash: m.metadata_hash,
+        beliefs: m.beliefs,
         created_at: m.created_at,
       };
     });
@@ -62,11 +96,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       count: formattedMarkets.length,
+      total: count || formattedMarkets.length,
       markets: formattedMarkets,
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Internal Server Error";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }
 
@@ -125,6 +160,9 @@ export async function POST(req: NextRequest) {
       deadline,
       category,
       resolution_source,
+      belief_id,
+      contract_address,
+      chain_id,
     } = body;
 
     const parsedMarketId = Number(contract_market_id);
@@ -188,11 +226,17 @@ export async function POST(req: NextRequest) {
       .from("markets")
       .insert({
         contract_market_id: parsedMarketId,
+        belief_id: belief_id || null,
+        contract_address: contract_address || null,
+        chain_id: chain_id || 11155111,
         title: title.trim(),
         description: sanitizedDescription,
         category: sanitizedCategory,
         deadline: new Date(deadline).toISOString(),
+        close_time: new Date(deadline).toISOString(),
         status: "active",
+        agree_pool: 0,
+        disagree_pool: 0,
         total_pool_yes: 0,
         total_pool_no: 0,
         resolution_source: sanitizedResolutionSource,
@@ -204,8 +248,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const yesPool = Number(createdMarket.total_pool_yes ?? createdMarket.yes_pool ?? 0);
-    const noPool = Number(createdMarket.total_pool_no ?? createdMarket.no_pool ?? 0);
+    const yesPool = Number(createdMarket.agree_pool ?? createdMarket.total_pool_yes ?? 0);
+    const noPool = Number(createdMarket.disagree_pool ?? createdMarket.total_pool_no ?? 0);
 
     return NextResponse.json(
       {
@@ -213,6 +257,9 @@ export async function POST(req: NextRequest) {
         market: {
           id: createdMarket.id,
           contract_market_id: createdMarket.contract_market_id,
+          contract_address: createdMarket.contract_address,
+          chain_id: createdMarket.chain_id,
+          belief_id: createdMarket.belief_id,
           title: createdMarket.title,
           description: createdMarket.description,
           category: createdMarket.category,
@@ -220,8 +267,8 @@ export async function POST(req: NextRequest) {
           status: createdMarket.status,
           yes_pool: yesPool,
           no_pool: noPool,
-          total_pool_yes: yesPool,
-          total_pool_no: noPool,
+          agree_pool: yesPool,
+          disagree_pool: noPool,
           total_pool: yesPool + noPool,
           resolution_source: createdMarket.resolution_source,
           created_at: createdMarket.created_at,
