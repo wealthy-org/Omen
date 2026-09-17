@@ -1,6 +1,7 @@
 import { formatEther, Address } from "viem";
 import { useReadContract } from "wagmi";
-import { OMEN_MARKET_ABI, USE_MOCK_CONTRACT } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
+import { USE_MOCK_CONTRACT } from "@/lib/mock-contracts";
 
 export interface UseMarketResult {
   agreePool: number;
