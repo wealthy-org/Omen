@@ -13,6 +13,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Request body must be an object" }, { status: 400 });
+    }
+
     const { tx_hash, contract_market_id, wallet_address, side, amount } = body;
 
     if (!tx_hash || typeof tx_hash !== "string" || !TX_HASH_REGEX.test(tx_hash.trim())) {
@@ -35,14 +39,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!walletAddressIsValid(wallet_address)) {
+    if (!wallet_address || typeof wallet_address !== "string" || !EVM_ADDRESS_REGEX.test(wallet_address.trim())) {
       return NextResponse.json(
         { error: "Invalid or missing wallet_address: must be a valid 42-character EVM address" },
         { status: 400 }
       );
     }
 
-    if (!side || typeof side !== "string" || !["yes", "no"].includes(side.trim().toLowerCase())) {
+    if (typeof side !== "string" || (side.trim().toLowerCase() !== "yes" && side.trim().toLowerCase() !== "no")) {
       return NextResponse.json(
         { error: "Invalid or missing side: must be 'yes' or 'no'" },
         { status: 400 }
@@ -114,8 +118,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: insertBetError.message }, { status: 500 });
     }
 
-    const currentYesPool = Number(market.total_pool_yes ?? market.yes_pool ?? 0);
-    const currentNoPool = Number(market.total_pool_no ?? market.no_pool ?? 0);
+    const currentYesPool = Number(market.total_pool_yes ?? 0);
+    const currentNoPool = Number(market.total_pool_no ?? 0);
     const updatedYesPool = normalizedSide === "yes" ? currentYesPool + numericAmount : currentYesPool;
     const updatedNoPool = normalizedSide === "no" ? currentNoPool + numericAmount : currentNoPool;
 
@@ -139,7 +143,7 @@ export async function POST(req: NextRequest) {
       .eq("wallet_address", normalizedAddress)
       .maybeSingle();
 
-    const currentPoints = userRecord?.total_points ?? 0;
+    const currentPoints = userRecord ? Number(userRecord.total_points) : 0;
     const updatedPoints = currentPoints + awardedPoints;
 
     await supabase
@@ -190,11 +194,4 @@ export async function POST(req: NextRequest) {
     const errorMessage = err instanceof Error ? err.message : "Internal Server Error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
-}
-
-function walletAddressIsValid(address: unknown): boolean {
-  if (!address || typeof address !== "string") {
-    return false;
-  }
-  return EVM_ADDRESS_REGEX.test(address.trim());
 }

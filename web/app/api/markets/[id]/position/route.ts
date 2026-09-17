@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 
+const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -24,12 +26,18 @@ export async function POST(
       );
     }
 
-    const { wallet_address, side, amount_eth, amount, tx_hash, block_number } = body;
-    const parsedAmount = Number(amount_eth ?? amount);
-
-    if (!wallet_address || typeof wallet_address !== "string" || !wallet_address.startsWith("0x")) {
+    if (!body || typeof body !== "object") {
       return NextResponse.json(
-        { success: false, error: "Invalid or missing wallet_address" },
+        { success: false, error: "Request body must be an object" },
+        { status: 400 }
+      );
+    }
+
+    const { wallet_address, side, amount, tx_hash, block_number } = body;
+
+    if (!wallet_address || typeof wallet_address !== "string" || !EVM_ADDRESS_REGEX.test(wallet_address.trim())) {
+      return NextResponse.json(
+        { success: false, error: "Invalid or missing wallet_address: must be a valid 42-character EVM address" },
         { status: 400 }
       );
     }
@@ -41,7 +49,8 @@ export async function POST(
       );
     }
 
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    const parsedAmount = Number(amount);
+    if (amount === undefined || amount === null || isNaN(parsedAmount) || parsedAmount <= 0) {
       return NextResponse.json(
         { success: false, error: "Amount must be a positive number" },
         { status: 400 }
@@ -50,7 +59,7 @@ export async function POST(
 
     if (!tx_hash || typeof tx_hash !== "string") {
       return NextResponse.json(
-        { success: false, error: "tx_hash is required" },
+        { success: false, error: "tx_hash is required and must be a string" },
         { status: 400 }
       );
     }
@@ -94,7 +103,7 @@ export async function POST(
       .from("market_positions")
       .insert({
         market_id: market.id,
-        wallet_address: wallet_address.toLowerCase(),
+        wallet_address: wallet_address.trim().toLowerCase(),
         side,
         amount: parsedAmount,
         tx_hash,
@@ -113,7 +122,7 @@ export async function POST(
     await supabase.from("market_events").insert({
       market_id: market.id,
       event_type: "PositionTaken",
-      wallet_address: wallet_address.toLowerCase(),
+      wallet_address: wallet_address.trim().toLowerCase(),
       amount: parsedAmount,
       tx_hash,
       block_number: block_number ? Number(block_number) : null,

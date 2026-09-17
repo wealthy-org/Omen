@@ -41,19 +41,23 @@ export function usePlaceBet() {
 
     try {
       setIsIndexing(true);
-      await fetch("/api/bets/index", {
+      const res = await fetch("/api/bets/index", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          market_id: String(marketId),
+          contract_market_id: Number(marketId),
           wallet_address: address,
-          side: outcome,
+          side: outcome.toLowerCase(),
           amount: parseFloat(amount),
           tx_hash: hash,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to index bet off-chain");
+      }
     } catch {
       setIndexerError("Failed to index bet off-chain");
     } finally {

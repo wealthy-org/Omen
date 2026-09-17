@@ -19,8 +19,6 @@ export interface AdminDashboardProps {
 }
 
 const AUTHORIZED_ADMIN_ADDRESSES = [
-  "0x1234567890abcdef1234567890abcdef12345678".toLowerCase(),
-  "0xAdmin99999999999999999999999999999999999".toLowerCase(),
   (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase(),
 ].filter(Boolean);
 

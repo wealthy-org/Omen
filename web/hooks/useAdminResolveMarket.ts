@@ -71,10 +71,15 @@ export function useAdminResolveMarket(): ResolveMarketResult {
 
     try {
       setIsSyncing(true);
-      await fetch(`/api/markets/${marketId}/resolve`, {
+      const adminWallet = address
+        ? address.toLowerCase()
+        : (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase();
+
+      const res = await fetch(`/api/markets/${marketId}/resolve`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(adminWallet ? { "x-admin-wallet": adminWallet } : {}),
         },
         body: JSON.stringify({
           status:
@@ -89,6 +94,10 @@ export function useAdminResolveMarket(): ResolveMarketResult {
           tx_hash: hash,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to update market resolution status in database");
+      }
     } catch {
       setSyncError("Failed to update market resolution status in database");
     } finally {

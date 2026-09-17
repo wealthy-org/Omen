@@ -4,14 +4,45 @@ import { computeBeliefHashes, createOnChainMarket } from "@/lib/market/factory-c
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ success: false, error: "Request body must be an object" }, { status: 400 });
+    }
+
+    const { belief_id, contract_address, tx_hash } = body;
+
+    if (belief_id && contract_address) {
+      const supabase = getSupabaseAdminClient();
+      await supabase
+        .from("markets")
+        .update({
+          contract_address,
+        })
+        .eq("belief_id", belief_id);
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          belief_id,
+          contract_address,
+          tx_hash: tx_hash || null,
+        },
+      });
+    }
+
     const {
       statement,
+      raw_text,
       author,
       source_url,
       source_platform,
       source_timestamp,
-      raw_text,
       submitted_by_wallet,
       ai_confidence,
       open_time,
@@ -36,14 +67,14 @@ export async function POST(req: NextRequest) {
     }
 
     const nowSec = Math.floor(Date.now() / 1000);
-    const effectiveOpenTime = open_time ? Number(open_time) : nowSec;
-    const effectiveCloseTime = close_time ? Number(close_time) : (nowSec + 7 * 86400);
-    const effectiveChainId = Number(chain_id) || 11155111;
+    const effectiveOpenTime = open_time !== undefined && open_time !== null ? Number(open_time) : nowSec;
+    const effectiveCloseTime = close_time !== undefined && close_time !== null ? Number(close_time) : (nowSec + 7 * 86400);
+    const effectiveChainId = chain_id !== undefined && chain_id !== null ? Number(chain_id) : 11155111;
 
     const { beliefHash, sourceHash, resolutionHash } = computeBeliefHashes(
       statement,
       raw_text,
-      resolution_config
+      resolution_config || null
     );
 
     const supabase = getSupabaseAdminClient();
@@ -56,7 +87,7 @@ export async function POST(req: NextRequest) {
         source_url: source_url || null,
         source_platform: source_platform || null,
         source_timestamp: source_timestamp || null,
-        ai_confidence: ai_confidence !== undefined ? Number(ai_confidence) : null,
+        ai_confidence: ai_confidence !== undefined && ai_confidence !== null ? Number(ai_confidence) : null,
         status: "DETECTED",
       })
       .select()
@@ -85,7 +116,7 @@ export async function POST(req: NextRequest) {
       resolutionHash,
       openTime: effectiveOpenTime,
       closeTime: effectiveCloseTime,
-      config: resolution_config,
+      config: resolution_config || null,
       chainId: effectiveChainId,
     });
 
@@ -128,6 +159,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      marketId: market.id,
       data: {
         belief_id: belief.id,
         market_id: market.id,

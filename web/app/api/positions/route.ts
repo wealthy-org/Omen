@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 
+const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
-    const walletParam = searchParams.get("wallet") || searchParams.get("wallet_address");
+    const walletAddress = searchParams.get("wallet_address")?.trim();
 
-    if (!walletParam || !walletParam.trim()) {
+    if (!walletAddress || !EVM_ADDRESS_REGEX.test(walletAddress)) {
       return NextResponse.json(
-        { success: false, error: "Wallet address is required" },
+        { success: false, error: "Invalid or missing wallet_address query parameter: must be a valid 42-character EVM address" },
         { status: 400 }
       );
     }
 
+    const normalizedAddress = walletAddress.toLowerCase();
     const supabase = getSupabaseAdminClient();
+
     const { data: positions, error } = await supabase
       .from("market_positions")
       .select("*, markets(*, beliefs(*))")
-      .eq("wallet_address", walletParam.trim().toLowerCase())
+      .eq("wallet_address", normalizedAddress)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -29,8 +33,8 @@ export async function GET(req: NextRequest) {
 
     const formattedPositions = (positions || []).map((p: any) => {
       const market = p.markets || {};
-      const agreePool = Number(market.agree_pool ?? market.total_pool_yes ?? 0);
-      const disagreePool = Number(market.disagree_pool ?? market.total_pool_no ?? 0);
+      const agreePool = Number(market.total_pool_yes || market.agree_pool || market.yes_pool || 0);
+      const disagreePool = Number(market.total_pool_no || market.disagree_pool || market.no_pool || 0);
       const totalPool = agreePool + disagreePool;
       const userAmount = Number(p.amount);
 

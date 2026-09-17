@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
 import { QuestCategory } from "./QuestCard";
 
@@ -55,6 +55,10 @@ export default function AdminQuestManagementForm({
 
   const [deleteModalQuest, setDeleteModalQuest] = useState<AdminQuestItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    setQuests(initialQuests);
+  }, [initialQuests]);
 
   const getCategoryBadgeClass = (cat: QuestCategory) => {
     switch (cat) {
@@ -120,39 +124,48 @@ export default function AdminQuestManagementForm({
 
     try {
       const pointsNum = parseInt(points, 10);
-      const newQuest: AdminQuestItem = {
-        id: `quest-${Date.now()}`,
-        title: title.trim(),
-        description: description.trim(),
-        category,
+      const res = await fetch("/api/admin/quests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          category,
+          points_reward: pointsNum,
+          action_url: actionUrl.trim() || null,
+        }),
+      });
+
+      if (!res.ok) {
+        let errMessage = "Failed to create quest";
+        try {
+          const errData = await res.json();
+          if (errData?.error) errMessage = errData.error;
+        } catch {}
+        throw new Error(errMessage);
+      }
+
+      const resData = await res.json();
+      const savedQuestData = resData.quest;
+
+      const createdQuest: AdminQuestItem = {
+        id: savedQuestData?.id || `quest-${Date.now()}`,
+        title: savedQuestData?.title || title.trim(),
+        description: savedQuestData?.description || description.trim(),
+        category: (savedQuestData?.category || category).toUpperCase() as QuestCategory,
         recurrence,
-        points: pointsNum,
-        actionUrl: actionUrl.trim() || undefined,
-        isActive: true,
-        completionsCount: 0,
-        createdAt: new Date().toISOString().split("T")[0],
+        points: Number(savedQuestData?.points_reward ?? pointsNum),
+        actionUrl: savedQuestData?.action_url || actionUrl.trim() || undefined,
+        isActive: Boolean(savedQuestData?.is_active ?? true),
+        completionsCount: Number(savedQuestData?.completions_count ?? 0),
+        createdAt: savedQuestData?.created_at || new Date().toISOString().split("T")[0],
       };
 
       if (onCreateQuest) {
-        await onCreateQuest(newQuest);
-      } else {
-        try {
-          await fetch("/api/admin/quests", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              title: newQuest.title,
-              description: newQuest.description,
-              category: newQuest.category,
-              points_reward: newQuest.points,
-              action_url: newQuest.actionUrl,
-            }),
-          });
-        } catch {
-        }
+        await onCreateQuest(createdQuest);
       }
 
-      setQuests((prev) => [newQuest, ...prev]);
+      setQuests((prev) => [createdQuest, ...prev]);
       setTitle("");
       setDescription("");
       setCategory("ONBOARDING");
@@ -160,9 +173,9 @@ export default function AdminQuestManagementForm({
       setPoints("100");
       setActionUrl("");
       setFieldErrors({});
-      setSuccessMessage(`Quest "${newQuest.title}" created successfully!`);
-    } catch {
-      setFormError("Failed to create quest. Please check parameters and retry.");
+      setSuccessMessage(`Quest "${createdQuest.title}" created successfully!`);
+    } catch (err: any) {
+      setFormError(err?.message || "Failed to create quest. Please check parameters and retry.");
     } finally {
       setIsSubmitting(false);
     }
@@ -173,17 +186,18 @@ export default function AdminQuestManagementForm({
     const newActiveState = !currentActive;
 
     try {
+      const res = await fetch(`/api/admin/quests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_active: newActiveState }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to update status for quest ${id}.`);
+      }
+
       if (onToggleQuestStatus) {
         await onToggleQuestStatus(id, newActiveState);
-      } else {
-        try {
-          await fetch(`/api/admin/quests/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ is_active: newActiveState }),
-          });
-        } catch {
-        }
       }
 
       setQuests((prev) =>
@@ -201,15 +215,16 @@ export default function AdminQuestManagementForm({
 
     setIsDeleting(true);
     try {
+      const res = await fetch(`/api/admin/quests/${deleteModalQuest.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete quest ${deleteModalQuest.id}.`);
+      }
+
       if (onDeleteQuest) {
         await onDeleteQuest(deleteModalQuest.id);
-      } else {
-        try {
-          await fetch(`/api/admin/quests/${deleteModalQuest.id}`, {
-            method: "DELETE",
-          });
-        } catch {
-        }
       }
 
       setQuests((prev) => prev.filter((q) => q.id !== deleteModalQuest.id));

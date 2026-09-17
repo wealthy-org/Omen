@@ -73,7 +73,10 @@ describe("useAdminResolveMarket Hook", () => {
     expect(txHash).toBe("0xmockresolvetx123");
     expect(global.fetch).toHaveBeenCalledWith("/api/markets/market-101/resolve", expect.objectContaining({
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: expect.objectContaining({
+        "Content-Type": "application/json",
+        "x-admin-wallet": "0xadminaddress111111111111111111111111111",
+      }),
     }));
   });
 

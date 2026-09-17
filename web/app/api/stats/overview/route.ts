@@ -10,29 +10,27 @@ export async function GET() {
       supabase.from("users").select("total_points"),
     ]);
 
-    let totalTvl = 148.5;
-    let activeMarketsCount = 24;
-    let totalPoints = 1420000;
-    let activeWalletsCount = 890;
-
-    if (!marketsRes.error && marketsRes.data && marketsRes.data.length > 0) {
-      const liveMarkets = marketsRes.data;
-      activeMarketsCount = liveMarkets.filter((m) => m.status === "active").length;
-      const sumPool = liveMarkets.reduce(
-        (sum, m) => sum + (Number(m.yes_pool || 0) + Number(m.no_pool || 0)),
-        0
-      );
-      if (sumPool > 0) totalTvl = sumPool;
+    if (marketsRes.error) {
+      return NextResponse.json({ success: false, error: marketsRes.error.message }, { status: 500 });
     }
 
-    if (!usersRes.error && usersRes.data && usersRes.data.length > 0) {
-      activeWalletsCount = usersRes.data.length;
-      const sumPoints = usersRes.data.reduce(
-        (sum, u) => sum + Number(u.total_points || 0),
-        0
-      );
-      if (sumPoints > 0) totalPoints = sumPoints;
+    if (usersRes.error) {
+      return NextResponse.json({ success: false, error: usersRes.error.message }, { status: 500 });
     }
+
+    const liveMarkets = marketsRes.data || [];
+    const activeMarketsCount = liveMarkets.filter((m) => m.status === "active" || m.status === "OPEN").length;
+    const totalTvl = liveMarkets.reduce(
+      (sum, m) => sum + (Number(m.total_pool_yes || m.agree_pool || m.yes_pool || 0) + Number(m.total_pool_no || m.disagree_pool || m.no_pool || 0)),
+      0
+    );
+
+    const usersData = usersRes.data || [];
+    const activeWalletsCount = usersData.length;
+    const totalPoints = usersData.reduce(
+      (sum, u) => sum + Number(u.total_points || 0),
+      0
+    );
 
     return NextResponse.json({
       success: true,
@@ -44,14 +42,7 @@ export async function GET() {
       },
     });
   } catch (err: any) {
-    return NextResponse.json({
-      success: true,
-      stats: {
-        total_tvl_eth: "148.50",
-        active_markets: 24,
-        total_points: 1420000,
-        active_wallets: 890,
-      },
-    });
+    const errorMessage = err instanceof Error ? err.message : "Internal Server Error";
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }

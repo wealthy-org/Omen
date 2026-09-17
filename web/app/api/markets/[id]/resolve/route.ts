@@ -14,13 +14,11 @@ function isAuthorizedAdmin(req: NextRequest): boolean {
     process.env.ADMIN_SECRET_KEY?.trim(),
     process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY?.trim(),
     process.env.ADMIN_API_KEY?.trim(),
-    "omen-admin-2026",
   ].filter(Boolean) as string[];
 
   const validAdminWallets = [
     process.env.ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
     process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
-    "0xadmin99999999999999999999999999999999999",
   ].filter(Boolean) as string[];
 
   if (adminKeyHeader && validAdminKeys.includes(adminKeyHeader)) {
@@ -59,7 +57,11 @@ export async function POST(
       return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const rawOutcome = body.outcome || body.status;
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ success: false, error: "Request body must be an object" }, { status: 400 });
+    }
+
+    const rawOutcome = typeof body.outcome === "string" ? body.outcome : (typeof body.status === "string" ? body.status : "");
     const outcome = normalizeOutcome(rawOutcome);
 
     if (!outcome) {
@@ -108,9 +110,12 @@ export async function POST(
       winner: outcome,
     };
 
-    const effectiveSource = oracle_source || resolution_source;
-    if (typeof effectiveSource === "string" && effectiveSource.trim().length > 0) {
-      updatePayload.resolution_source = effectiveSource.trim();
+    const effectiveSource = typeof oracle_source === "string" && oracle_source.trim().length > 0
+      ? oracle_source.trim()
+      : (typeof resolution_source === "string" && resolution_source.trim().length > 0 ? resolution_source.trim() : null);
+
+    if (effectiveSource) {
+      updatePayload.resolution_source = effectiveSource;
     }
 
     const { data: updatedMarket, error: updateError } = await supabase

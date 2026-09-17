@@ -34,7 +34,7 @@ export function usePosition() {
     setIsSuccess(false);
     setError(null);
 
-    const rawAmount = amount ?? amountEth;
+    const rawAmount = amount !== undefined && amount !== null ? amount : amountEth;
     const strAmount = rawAmount !== undefined && rawAmount !== null ? String(rawAmount) : "";
     const numAmount = parseFloat(strAmount);
 
@@ -62,18 +62,22 @@ export function usePosition() {
       setTxHash(hash);
 
       const syncId = marketId || marketAddress;
+      const userAddr = address || "0x1111111111111111111111111111111111111111";
       try {
-        await fetch(`/api/markets/${syncId}/position`, {
+        const res = await fetch(`/api/markets/${syncId}/position`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userAddress: address || "0x1111111111111111111111111111111111111111",
-            marketId: syncId,
+            wallet_address: userAddr,
             side,
             amount: numAmount,
-            txHash: hash,
+            tx_hash: hash,
           }),
         });
+
+        if (!res.ok) {
+          throw new Error("Failed to record position in database");
+        }
       } catch {
       }
 

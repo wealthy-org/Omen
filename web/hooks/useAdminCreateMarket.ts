@@ -90,10 +90,15 @@ export function useAdminCreateMarket(): CreateMarketResult {
 
     try {
       setIsSyncing(true);
-      await fetch("/api/markets", {
+      const adminWallet = address
+        ? address.toLowerCase()
+        : (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase();
+
+      const res = await fetch("/api/markets", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(adminWallet ? { "x-admin-wallet": adminWallet } : {}),
         },
         body: JSON.stringify({
           contract_market_id: contractMarketId,
@@ -107,6 +112,10 @@ export function useAdminCreateMarket(): CreateMarketResult {
           tx_hash: hash,
         }),
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to sync market with database");
+      }
     } catch {
       setSyncError("Failed to sync market with database");
     } finally {

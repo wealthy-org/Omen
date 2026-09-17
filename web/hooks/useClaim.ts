@@ -39,16 +39,20 @@ export function useClaim(defaultMarketAddress?: string) {
       setTxHash(hash);
 
       const syncId = marketId || marketAddress;
+      const userAddr = address || "0x1111111111111111111111111111111111111111";
       try {
-        await fetch(`/api/markets/${syncId}/claim`, {
+        const res = await fetch(`/api/markets/${syncId}/claim`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userAddress: address || "0x1111111111111111111111111111111111111111",
-            marketId: syncId,
-            txHash: hash,
+            wallet_address: userAddr,
+            tx_hash: hash,
           }),
         });
+
+        if (!res.ok) {
+          throw new Error("Failed to record claim in database");
+        }
       } catch {
       }
 

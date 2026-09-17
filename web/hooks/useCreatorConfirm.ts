@@ -45,7 +45,8 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
 
     try {
       const creatorAddress = (address || "0x1111111111111111111111111111111111111111") as Address;
-      const timestamp = BigInt(Math.floor(Date.now() / 1000));
+      const timestampSec = Math.floor(Date.now() / 1000);
+      const timestamp = BigInt(timestampSec);
       let signedSig = "";
 
       if (USE_MOCK_CONTRACT || !signTypedDataAsync) {
@@ -90,15 +91,20 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
       setIsConfirming(true);
 
       try {
-        await fetch(`/api/beliefs/${payload.beliefId}/confirm`, {
+        const res = await fetch(`/api/beliefs/${payload.beliefId}/confirm`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            beliefId: payload.beliefId,
-            creator: creatorAddress,
+            creator_address: creatorAddress,
             signature: signedSig,
+            timestamp: timestampSec,
+            chain_id: chainId || 11155111,
           }),
         });
+
+        if (!res.ok) {
+          throw new Error("Failed to confirm belief");
+        }
       } catch {
       }
 

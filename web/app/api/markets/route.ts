@@ -6,13 +6,16 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseAdminClient();
     const { searchParams } = req.nextUrl;
 
-    const tabParam = (searchParams.get("tab") || "").toLowerCase();
-    const statusParam = (searchParams.get("status") || "all").toLowerCase();
-    const categoryParam = (searchParams.get("category") || "all").toLowerCase();
-    const sortParam = (searchParams.get("sort") || "").toLowerCase();
-    const searchParam = searchParams.get("q") || searchParams.get("search") || "";
-    const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "20", 10) || 20, 1), 100);
-    const offset = Math.max(parseInt(searchParams.get("offset") || "0", 10) || 0, 0);
+    const tabParam = searchParams.get("tab")?.toLowerCase();
+    const statusParam = searchParams.get("status")?.toLowerCase();
+    const categoryParam = searchParams.get("category")?.toLowerCase();
+    const sortParam = searchParams.get("sort")?.toLowerCase();
+    const searchParam = searchParams.get("search") || searchParams.get("q") || "";
+    const rawLimit = searchParams.get("limit");
+    const rawOffset = searchParams.get("offset");
+
+    const limit = rawLimit ? Math.min(Math.max(parseInt(rawLimit, 10) || 20, 1), 100) : 20;
+    const offset = rawOffset ? Math.max(parseInt(rawOffset, 10) || 0, 0) : 0;
 
     let query: any = supabase.from("markets").select("*, beliefs(*, belief_sources(*))");
 
@@ -26,7 +29,7 @@ export async function GET(req: NextRequest) {
       query = query.in("status", ["OPEN", "open", "active"]);
     }
 
-    if (categoryParam !== "all") {
+    if (categoryParam && categoryParam !== "all") {
       query = query.ilike("category", categoryParam);
     }
 
@@ -42,8 +45,6 @@ export async function GET(req: NextRequest) {
       query = query.order("agree_pool", { ascending: false });
     } else if (sortParam === "highest_pool") {
       query = query.order("total_pool_yes", { ascending: false });
-    } else if (tabParam === "confirmed") {
-      query = query.order("created_at", { ascending: false });
     } else {
       query = query.order("created_at", { ascending: false });
     }
@@ -59,8 +60,8 @@ export async function GET(req: NextRequest) {
     }
 
     const formattedMarkets = (markets || []).map((m: any) => {
-      const agreePool = Number(m.agree_pool ?? m.total_pool_yes ?? m.yes_pool ?? 0);
-      const disagreePool = Number(m.disagree_pool ?? m.total_pool_no ?? m.no_pool ?? 0);
+      const agreePool = Number(m.total_pool_yes || m.agree_pool || m.yes_pool || 0);
+      const disagreePool = Number(m.total_pool_no || m.disagree_pool || m.no_pool || 0);
       const totalPool = agreePool + disagreePool;
       const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 50;
 
@@ -116,13 +117,12 @@ function isAuthorizedAdmin(req: NextRequest): boolean {
   const validAdminKeys = [
     process.env.ADMIN_SECRET_KEY?.trim(),
     process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY?.trim(),
-    "omen-admin-2026",
+    process.env.ADMIN_API_KEY?.trim(),
   ].filter(Boolean) as string[];
 
   const validAdminWallets = [
     process.env.ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
     process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
-    "0xadmin99999999999999999999999999999999999",
   ].filter(Boolean) as string[];
 
   if (adminKeyHeader && validAdminKeys.includes(adminKeyHeader)) {
@@ -151,6 +151,10 @@ export async function POST(req: NextRequest) {
       body = await req.json();
     } catch {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Request body must be an object" }, { status: 400 });
     }
 
     const {
@@ -228,7 +232,7 @@ export async function POST(req: NextRequest) {
         contract_market_id: parsedMarketId,
         belief_id: belief_id || null,
         contract_address: contract_address || null,
-        chain_id: chain_id || 11155111,
+        chain_id: chain_id ? Number(chain_id) : 11155111,
         title: title.trim(),
         description: sanitizedDescription,
         category: sanitizedCategory,
@@ -248,8 +252,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const yesPool = Number(createdMarket.agree_pool ?? createdMarket.total_pool_yes ?? 0);
-    const noPool = Number(createdMarket.disagree_pool ?? createdMarket.total_pool_no ?? 0);
+    const yesPool = Number(createdMarket.total_pool_yes ?? 0);
+    const noPool = Number(createdMarket.total_pool_no ?? 0);
 
     return NextResponse.json(
       {
