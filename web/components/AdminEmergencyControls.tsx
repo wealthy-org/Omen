@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTheme } from "./ThemeProvider";
 
 export interface EmergencyActionLog {
@@ -36,6 +37,11 @@ export default function AdminEmergencyControls() {
   const [logs, setLogs] = useState<EmergencyActionLog[]>(INITIAL_LOGS);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (showConfirmModal) {
@@ -364,8 +370,12 @@ export default function AdminEmergencyControls() {
         </div>
       </div>
 
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden animate-fade-in">
+      {mounted && showConfirmModal && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden animate-fade-in"
+        >
           <div
             className={`w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden ${
               isDark ? "bg-[#0A0F0C] border-rose-500/30 text-white" : "bg-white border-rose-500/30 text-accent-navy"
@@ -418,7 +428,8 @@ export default function AdminEmergencyControls() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

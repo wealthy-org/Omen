@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTheme } from "./ThemeProvider";
 import { useAdminResolveMarket } from "@/hooks/useAdminResolveMarket";
 
@@ -96,6 +97,11 @@ export default function AdminMarketResolutionTable({
   const [isResolving, setIsResolving] = useState(false);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (activeModal || detailsModalMarket) {
@@ -484,7 +490,7 @@ export default function AdminMarketResolutionTable({
         </div>
       </div>
 
-      {activeModal && (
+      {mounted && activeModal && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -729,10 +735,11 @@ export default function AdminMarketResolutionTable({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {detailsModalMarket && (
+      {mounted && detailsModalMarket && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -810,7 +817,8 @@ export default function AdminMarketResolutionTable({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

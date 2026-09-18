@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTheme } from "./ThemeProvider";
 
 export interface NetworkSwitcherModalProps {
@@ -26,6 +27,11 @@ export default function NetworkSwitcherModal({
 
   const [selectedChainId, setSelectedChainId] = useState<number>(targetChainId);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -37,7 +43,7 @@ export default function NetworkSwitcherModal({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const supportedNetworks = [
     { id: 11155111, name: "Ethereum Sepolia" },
@@ -63,7 +69,7 @@ export default function NetworkSwitcherModal({
       name: targetNetworkName,
     };
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -212,7 +218,8 @@ export default function NetworkSwitcherModal({
           </button>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

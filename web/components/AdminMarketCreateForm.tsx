@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { MarketCard, MarketData } from "./MarketCard";
 import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
 
@@ -43,6 +44,11 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (showReviewModal) {
@@ -516,7 +522,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
         )}
       </div>
 
-      {showReviewModal && (
+      {mounted && showReviewModal && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -624,7 +630,8 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

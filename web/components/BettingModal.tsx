@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { MarketData, MarketOutcome } from "./MarketCard";
 import { usePlaceBet } from "@/hooks/usePlaceBet";
 
@@ -32,6 +33,11 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   const [amount, setAmount] = useState<string>("0.05");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [prevInitialOutcome, setPrevInitialOutcome] = useState(initialOutcome);
 
@@ -62,7 +68,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
     }
   }, [isOpen]);
 
-  if (!isOpen || !market) return null;
+  if (!isOpen || !market || !mounted) return null;
 
   const odds = selectedOutcome === "YES" ? market.yesPercentage : market.noPercentage;
   const numAmount = parseFloat(amount) || 0;
@@ -128,7 +134,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
     }
   };
 
-  return (
+  return createPortal(
     <div
       data-testid="betting-modal-backdrop"
       className="fixed inset-0 z-50 bg-black/40 dark:bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-hidden"
@@ -309,6 +315,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

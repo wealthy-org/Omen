@@ -402,7 +402,7 @@ export default function AdminDashboardPage({
         </button>
       </div>
 
-      <main className="pt-2 animate-slide-up">
+      <main className="pt-2">
         {activeTab === "create-market" && (
           <AdminMarketCreateForm onSubmitMarket={handleMarketCreated} />
         )}
