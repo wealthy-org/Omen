@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
 
 export interface NetworkSwitcherModalProps {
@@ -26,6 +26,16 @@ export default function NetworkSwitcherModal({
 
   const [selectedChainId, setSelectedChainId] = useState<number>(targetChainId);
   const [isSwitching, setIsSwitching] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -59,10 +69,10 @@ export default function NetworkSwitcherModal({
       aria-modal="true"
       aria-labelledby="network-modal-title"
       aria-describedby="network-modal-desc"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden animate-in fade-in duration-200"
     >
       <div
-        className={`relative w-full max-w-md p-6 sm:p-7 rounded-2xl border shadow-2xl transition-all animate-in zoom-in-95 duration-200 text-center ${
+        className={`relative w-full max-w-md max-h-[85vh] flex flex-col p-5 sm:p-6 rounded-2xl border shadow-2xl overflow-y-auto text-center ${
           isDark
             ? "bg-[#0A0F0C] border-white/10 text-white shadow-[0_16px_48px_rgba(0,0,0,0.8)]"
             : "bg-white border-emerald-500/10 text-[#0B1F16] shadow-[0_16px_40px_rgba(14,122,78,0.12)]"

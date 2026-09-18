@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
 import { useAdminResolveMarket } from "@/hooks/useAdminResolveMarket";
 
@@ -96,6 +96,16 @@ export default function AdminMarketResolutionTable({
   const [isResolving, setIsResolving] = useState(false);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
   const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeModal || detailsModalMarket) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [activeModal, detailsModalMarket]);
 
   const handleOpenResolutionModal = (
     market: ResolvableMarketItem,
@@ -479,10 +489,10 @@ export default function AdminMarketResolutionTable({
           role="dialog"
           aria-modal="true"
           aria-labelledby="resolution-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden"
         >
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border p-5 sm:p-8 transition-all shadow-2xl bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-white/10">
+          <div className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white shadow-2xl overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center font-bold ${
@@ -515,7 +525,7 @@ export default function AdminMarketResolutionTable({
                 onClick={handleCloseModal}
                 disabled={isResolving}
                 aria-label="Close dialog"
-                className="text-text-muted hover:text-accent-navy dark:hover:text-white p-1 cursor-pointer"
+                className="text-text-muted hover:text-accent-navy dark:hover:text-white p-1 cursor-pointer shrink-0"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -523,7 +533,7 @@ export default function AdminMarketResolutionTable({
               </button>
             </div>
 
-            <div className="mt-5 space-y-4">
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3.5">
               <div className="p-4 rounded-xl border bg-zinc-50 dark:bg-[#121815] border-zinc-200 dark:border-white/10">
                 <div className="text-[10px] font-mono uppercase font-bold text-text-muted dark:text-[#A9B3AD]">
                   Target Market
@@ -678,7 +688,7 @@ export default function AdminMarketResolutionTable({
               )}
             </div>
 
-            <div className="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-white/10">
+            <div className="p-4 sm:p-5 border-t border-zinc-200 dark:border-white/10 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0 bg-zinc-50/50 dark:bg-white/[0.02]">
               <button
                 type="button"
                 onClick={handleCloseModal}
@@ -727,10 +737,10 @@ export default function AdminMarketResolutionTable({
           role="dialog"
           aria-modal="true"
           aria-labelledby="details-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden"
         >
-          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border p-5 sm:p-8 transition-all shadow-2xl space-y-4 bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-white/10">
+          <div className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white shadow-2xl overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between shrink-0">
               <div>
                 <h3 id="details-dialog-title" className="text-base sm:text-lg font-bold">
                   Resolution Record & Details
@@ -742,7 +752,8 @@ export default function AdminMarketResolutionTable({
               <button
                 type="button"
                 onClick={() => setDetailsModalMarket(null)}
-                className="text-text-muted hover:text-accent-navy dark:hover:text-white p-1 cursor-pointer"
+                aria-label="Close dialog"
+                className="text-text-muted hover:text-accent-navy dark:hover:text-white p-1 cursor-pointer shrink-0"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -750,7 +761,7 @@ export default function AdminMarketResolutionTable({
               </button>
             </div>
 
-            <div className="space-y-3 text-xs font-mono">
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3 text-xs font-mono">
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10">
                 <div className="text-[10px] uppercase font-bold text-text-muted">Market Title</div>
                 <div className="font-bold text-sm text-accent-navy dark:text-white font-sans mt-0.5">
@@ -789,7 +800,7 @@ export default function AdminMarketResolutionTable({
               )}
             </div>
 
-            <div className="pt-2 flex justify-end">
+            <div className="p-4 sm:p-5 border-t border-zinc-200 dark:border-white/10 flex justify-end shrink-0 bg-zinc-50/50 dark:bg-white/[0.02]">
               <button
                 type="button"
                 onClick={() => setDetailsModalMarket(null)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "./ThemeProvider";
 
 export interface EmergencyActionLog {
@@ -36,6 +36,17 @@ export default function AdminEmergencyControls() {
   const [logs, setLogs] = useState<EmergencyActionLog[]>(INITIAL_LOGS);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (showConfirmModal) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [showConfirmModal]);
+
   const [pendingAction, setPendingAction] = useState<"VOID" | "TOGGLE_PAUSE" | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -354,20 +365,20 @@ export default function AdminEmergencyControls() {
       </div>
 
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden animate-fade-in">
           <div
-            className={`w-full max-w-md p-6 rounded-2xl border shadow-2xl space-y-4 ${
+            className={`w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden ${
               isDark ? "bg-[#0A0F0C] border-rose-500/30 text-white" : "bg-white border-rose-500/30 text-accent-navy"
             }`}
           >
-            <div className="flex items-center gap-3">
-              <span className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="p-4 sm:p-5 border-b border-rose-500/20 flex items-center gap-3 shrink-0">
+              <span className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 shrink-0">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </span>
               <div>
-                <h3 className="text-base font-black">
+                <h3 className="text-base font-black leading-tight">
                   Confirm Emergency Governance Execution
                 </h3>
                 <p className="text-xs text-rose-500 font-bold font-mono">
@@ -376,20 +387,22 @@ export default function AdminEmergencyControls() {
               </div>
             </div>
 
-            <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
-              You are about to execute a high-privilege governance override. This action is permanently recorded on the audit log.
-            </p>
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3">
+              <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
+                You are about to execute a high-privilege governance override. This action is permanently recorded on the audit log.
+              </p>
 
-            <div className="p-3 rounded-xl bg-black/10 dark:bg-white/5 border border-white/10 text-xs font-mono space-y-1">
-              <div><strong>Reason:</strong> {emergencyReason}</div>
-              {targetMarketId && <div><strong>Target:</strong> {targetMarketId}</div>}
+              <div className="p-3 rounded-xl bg-black/10 dark:bg-white/5 border border-white/10 text-xs font-mono space-y-1">
+                <div><strong>Reason:</strong> {emergencyReason}</div>
+                {targetMarketId && <div><strong>Target:</strong> {targetMarketId}</div>}
+              </div>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="p-4 sm:p-5 border-t border-rose-500/20 flex gap-3 shrink-0 bg-zinc-50/50 dark:bg-white/[0.02]">
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                   isDark ? "border-white/10 hover:bg-white/5" : "border-border-subtle hover:bg-gray-100"
                 }`}
               >
@@ -399,7 +412,7 @@ export default function AdminEmergencyControls() {
                 type="button"
                 onClick={handleExecuteEmergencyAction}
                 disabled={isExecuting}
-                className="flex-1 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors cursor-pointer"
               >
                 {isExecuting ? "Executing..." : "Confirm & Execute"}
               </button>

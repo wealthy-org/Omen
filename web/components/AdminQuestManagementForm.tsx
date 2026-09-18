@@ -55,6 +55,17 @@ export default function AdminQuestManagementForm({
 
   const [deleteModalQuest, setDeleteModalQuest] = useState<AdminQuestItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (deleteModalQuest) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [deleteModalQuest]);
+
   const [prevInitialQuests, setPrevInitialQuests] = useState(initialQuests);
   if (initialQuests !== prevInitialQuests) {
     setPrevInitialQuests(initialQuests);
@@ -705,17 +716,17 @@ export default function AdminQuestManagementForm({
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden"
         >
-          <div className="w-full max-w-md rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl space-y-4 bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white">
-            <div className="flex items-center gap-3 pb-3 border-b border-zinc-200 dark:border-white/10">
-              <div className="w-10 h-10 rounded-xl bg-no-red-soft dark:bg-no-red/20 text-no-red flex items-center justify-center font-bold">
+          <div className="w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white shadow-2xl overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-white/10 flex items-center gap-3 shrink-0">
+              <div className="w-10 h-10 shrink-0 rounded-xl bg-no-red-soft dark:bg-no-red/20 text-no-red flex items-center justify-center font-bold">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
               <div>
-                <h3 id="delete-dialog-title" className="text-lg font-bold">
+                <h3 id="delete-dialog-title" className="text-base sm:text-lg font-bold leading-tight">
                   Archive Quest
                 </h3>
                 <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
@@ -724,11 +735,13 @@ export default function AdminQuestManagementForm({
               </div>
             </div>
 
-            <p className="text-xs text-text-muted dark:text-zinc-300 leading-relaxed font-sans">
-              Are you sure you want to archive quest <strong>&ldquo;{deleteModalQuest.title}&rdquo;</strong>? Users will no longer be able to complete this task.
-            </p>
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1">
+              <p className="text-xs text-text-muted dark:text-zinc-300 leading-relaxed font-sans">
+                Are you sure you want to archive quest <strong>&ldquo;{deleteModalQuest.title}&rdquo;</strong>? Users will no longer be able to complete this task.
+              </p>
+            </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-200 dark:border-white/10">
+            <div className="p-4 sm:p-5 border-t border-zinc-200 dark:border-white/10 flex items-center justify-end gap-3 shrink-0 bg-zinc-50/50 dark:bg-white/[0.02]">
               <button
                 type="button"
                 onClick={() => setDeleteModalQuest(null)}

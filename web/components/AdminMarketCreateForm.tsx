@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { MarketCard, MarketData } from "./MarketCard";
 import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
 
@@ -43,6 +43,16 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showReviewModal, setShowReviewModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (showReviewModal) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [showReviewModal]);
 
   const isSubmitting = isLoading || internalLoading || isTxPending || isConfirming || isSyncing;
 
@@ -511,10 +521,10 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="review-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden"
         >
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 p-5 sm:p-8 text-accent-navy dark:text-white shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-white/10">
+          <div className="w-full max-w-lg max-h-[85vh] flex flex-col rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white shadow-2xl overflow-hidden">
+            <div className="p-4 sm:p-5 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 shrink-0 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -522,7 +532,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
                   </svg>
                 </div>
                 <div>
-                  <h3 id="review-dialog-title" className="text-base sm:text-lg font-bold">
+                  <h3 id="review-dialog-title" className="text-base sm:text-lg font-bold leading-tight">
                     Confirm Prediction Market Deployment
                   </h3>
                   <p className="text-xs text-text-muted dark:text-[#A9B3AD]">
@@ -534,7 +544,8 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
                 type="button"
                 onClick={() => setShowReviewModal(false)}
                 disabled={isSubmitting}
-                className="text-text-muted hover:text-accent-navy dark:hover:text-white p-1 cursor-pointer"
+                aria-label="Close dialog"
+                className="text-text-muted hover:text-accent-navy dark:hover:text-white p-1 cursor-pointer shrink-0"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -542,19 +553,19 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
               </button>
             </div>
 
-            {errorMessage && (
-              <div
-                role="alert"
-                className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-500/20 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-2"
-              >
-                <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>{errorMessage}</span>
-              </div>
-            )}
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3.5 text-xs font-mono">
+              {errorMessage && (
+                <div
+                  role="alert"
+                  className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-500/20 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>{errorMessage}</span>
+                </div>
+              )}
 
-            <div className="space-y-3.5 text-xs font-mono">
               <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-[#121815] border border-zinc-200 dark:border-white/10 space-y-2">
                 <div className="text-[10px] uppercase font-bold text-text-muted">Market Title</div>
                 <div className="font-bold text-sm text-accent-navy dark:text-white font-sans">{title}</div>
@@ -582,7 +593,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
               )}
             </div>
 
-            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-white/10">
+            <div className="p-4 sm:p-5 border-t border-zinc-200 dark:border-white/10 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0 bg-zinc-50/50 dark:bg-white/[0.02]">
               <button
                 type="button"
                 onClick={() => setShowReviewModal(false)}
