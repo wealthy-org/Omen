@@ -5,45 +5,8 @@ import ActivityFeed, { ActivityItem, ActivityType } from "@/components/ActivityF
 
 export type ActivityFilterCategory = "all" | "stakes" | "confirmations" | "payouts";
 
-const INITIAL_ACTIVITIES: ActivityItem[] = [
-  {
-    id: "act-1",
-    type: "AGREE",
-    actorAddress: "0x1111111111111111111111111111111111111111",
-    actorName: "CryptoWhale",
-    marketId: "market-101",
-    marketStatement: "Will Ethereum exceed $4000 in Q4?",
-    amountEth: 0.5,
-    txHash: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    chainId: 11155111,
-    timestamp: new Date().toISOString(),
-  },
-  {
-    id: "act-2",
-    type: "CONFIRM_EIP712",
-    actorAddress: "0x2222222222222222222222222222222222222222",
-    actorName: "Vitalik",
-    marketId: "market-102",
-    marketStatement: "AI agents will handle 50% DEX volume.",
-    txHash: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    chainId: 46630,
-    timestamp: new Date().toISOString(),
-  },
-  {
-    id: "act-3",
-    type: "CLAIM",
-    actorAddress: "0x3333333333333333333333333333333333333333",
-    marketId: "market-101",
-    marketStatement: "Will Ethereum exceed $4000 in Q4?",
-    amountEth: 1.25,
-    txHash: "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-    chainId: 11155111,
-    timestamp: new Date().toISOString(),
-  },
-];
-
 export default function ActivityPage() {
-  const [activities, setActivities] = useState<ActivityItem[]>(INITIAL_ACTIVITIES);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [filterCategory, setFilterCategory] = useState<ActivityFilterCategory>("all");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
