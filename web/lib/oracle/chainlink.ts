@@ -1,9 +1,9 @@
-import { createPublicClient, http, Address } from "viem";
+import { createPublicClient, http, type Address } from "viem";
 import { sepolia, arbitrumSepolia } from "viem/chains";
 
 export const CHAINLINK_SEPOLIA_FEEDS = {
   ETH_USD: "0x694AA1769357215DE4FAC081bf1f309aDC325306" as Address,
-  BTC_USD: "0x1b44F351481741356631470557718056e04445DD" as Address,
+  BTC_USD: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43" as Address,
   SOL_USD: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d" as Address,
 };
 

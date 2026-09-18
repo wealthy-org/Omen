@@ -185,4 +185,58 @@ describe("TICKET-91: Oracle Price Snapshot API & Chainlink Helper", () => {
     expect(body.success).toBe(true);
     expect(body.data.price).toBe(65432.1);
   });
+
+  it("should return snapshots on GET /api/oracle/snapshot", async () => {
+    const mockSnapshots = [
+      {
+        id: "snap-1",
+        asset: "ETH",
+        price: 2454.54,
+        snapshot_type: "DISPLAY",
+        source: "chainlink",
+        recorded_at: "2026-09-18T00:00:00Z",
+      },
+    ];
+
+    const mockQuery: any = {};
+    mockQuery.order = vi.fn().mockReturnValue(mockQuery);
+    mockQuery.limit = vi.fn().mockResolvedValue({
+      data: mockSnapshots,
+      error: null,
+    });
+
+    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
+      from: vi.fn(() => ({
+        select: vi.fn().mockReturnValue(mockQuery),
+      })),
+    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
+
+    const { GET: getOracleSnapshots } = await import("../app/api/oracle/snapshot/route");
+    const req = new NextRequest("http://localhost:3000/api/oracle/snapshot?limit=5");
+    const res = await getOracleSnapshots(req);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.snapshots).toHaveLength(1);
+    expect(body.snapshots[0].price).toBe(2454.54);
+  });
+
+  it("should return configured feeds on GET /api/oracle/feeds", async () => {
+    vi.spyOn(chainlinkLib, "fetchChainlinkPrice").mockResolvedValue({
+      price: 2454.54,
+      roundId: BigInt("18446744073709587751"),
+      updatedAt: BigInt(Math.floor(Date.now() / 1000)),
+    });
+
+    const { GET: getOracleFeeds } = await import("../app/api/oracle/feeds/route");
+    const res = await getOracleFeeds();
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.feeds).toBeInstanceOf(Array);
+    expect(body.feeds.length).toBeGreaterThanOrEqual(3);
+    expect(body.feeds[0].symbol).toBe("ETH/USD");
+  });
 });

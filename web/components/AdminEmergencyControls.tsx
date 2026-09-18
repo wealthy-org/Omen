@@ -354,7 +354,7 @@ export default function AdminEmergencyControls() {
       </div>
 
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm animate-fade-in">
           <div
             className={`w-full max-w-md p-6 rounded-2xl border shadow-2xl space-y-4 ${
               isDark ? "bg-[#0A0F0C] border-rose-500/30 text-white" : "bg-white border-rose-500/30 text-accent-navy"

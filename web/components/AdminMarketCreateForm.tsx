@@ -511,7 +511,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="review-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm"
         >
           <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl border bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 p-5 sm:p-8 text-accent-navy dark:text-white shadow-2xl space-y-5">
             <div className="flex items-center justify-between pb-4 border-b border-zinc-200 dark:border-white/10">

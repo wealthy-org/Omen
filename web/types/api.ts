@@ -155,3 +155,41 @@ export interface ActivityApiResponse {
   offset: number;
   error?: string;
 }
+
+export interface OracleFeedState {
+  symbol: string;
+  name: string;
+  price: number;
+  decimals: number;
+  roundId: string;
+  updatedAt: string;
+  heartbeatSec: number;
+  contractAddress: string;
+  chainId: number;
+  status: "HEALTHY" | "DEGRADED" | "OFFLINE";
+}
+
+export interface OracleSnapshotRecord {
+  id: string;
+  market_id?: string | null;
+  asset: string;
+  price: number;
+  snapshot_type: string;
+  source: string;
+  recorded_at: string;
+}
+
+export interface OracleFeedsApiResponse {
+  success: boolean;
+  feeds: OracleFeedState[];
+  data: OracleFeedState[];
+  error?: string;
+}
+
+export interface OracleSnapshotsApiResponse {
+  success: boolean;
+  snapshots: OracleSnapshotRecord[];
+  data: OracleSnapshotRecord[];
+  total: number;
+  error?: string;
+}

@@ -705,7 +705,7 @@ export default function AdminQuestManagementForm({
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-dialog-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm"
         >
           <div className="w-full max-w-md rounded-2xl border p-6 sm:p-8 transition-all shadow-2xl space-y-4 bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-accent-navy dark:text-white">
             <div className="flex items-center gap-3 pb-3 border-b border-zinc-200 dark:border-white/10">

@@ -59,7 +59,7 @@ export default function NetworkSwitcherModal({
       aria-modal="true"
       aria-labelledby="network-modal-title"
       aria-describedby="network-modal-desc"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
     >
       <div
         className={`relative w-full max-w-md p-6 sm:p-7 rounded-2xl border shadow-2xl transition-all animate-in zoom-in-95 duration-200 text-center ${

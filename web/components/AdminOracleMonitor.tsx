@@ -1,37 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTheme } from "./ThemeProvider";
+import { OracleFeedState, OracleSnapshotRecord } from "@/types/api";
 
-export interface OracleFeedState {
-  symbol: string;
-  name: string;
-  price: number;
-  decimals: number;
-  roundId: string;
-  updatedAt: string;
-  heartbeatSec: number;
-  contractAddress: string;
-  chainId: number;
-  status: "HEALTHY" | "DEGRADED" | "OFFLINE";
-}
-
-export interface OracleSnapshotRecord {
-  id: string;
-  asset: string;
-  price: number;
-  snapshot_type: string;
-  source: string;
-  recorded_at: string;
-}
+export type { OracleFeedState, OracleSnapshotRecord };
 
 const DEFAULT_FEEDS: OracleFeedState[] = [
   {
     symbol: "ETH/USD",
     name: "Ethereum / US Dollar",
-    price: 3450.75,
+    price: 2454.54,
     decimals: 8,
-    roundId: "18446744073709555123",
+    roundId: "18446744073709587751",
     updatedAt: "2026-09-18T00:00:00.000Z",
     heartbeatSec: 3600,
     contractAddress: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
@@ -41,9 +22,9 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
   {
     symbol: "BTC/USD",
     name: "Bitcoin / US Dollar",
-    price: 91240.5,
+    price: 76935.85,
     decimals: 8,
-    roundId: "18446744073709554988",
+    roundId: "18446744073709585500",
     updatedAt: "2026-09-18T00:00:00.000Z",
     heartbeatSec: 3600,
     contractAddress: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
@@ -55,12 +36,12 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
     name: "Solana / US Dollar",
     price: 184.2,
     decimals: 8,
-    roundId: "18446744073709554102",
+    roundId: "0",
     updatedAt: "2026-09-18T00:00:00.000Z",
     heartbeatSec: 3600,
     contractAddress: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
     chainId: 11155111,
-    status: "HEALTHY",
+    status: "DEGRADED",
   },
 ];
 
@@ -68,7 +49,7 @@ const INITIAL_SNAPSHOT_LOGS: OracleSnapshotRecord[] = [
   {
     id: "snap-101",
     asset: "ETH",
-    price: 3450.75,
+    price: 2454.54,
     snapshot_type: "DISPLAY",
     source: "chainlink_sepolia",
     recorded_at: "2026-09-18T00:00:00.000Z",
@@ -76,7 +57,7 @@ const INITIAL_SNAPSHOT_LOGS: OracleSnapshotRecord[] = [
   {
     id: "snap-102",
     asset: "BTC",
-    price: 91240.5,
+    price: 76935.85,
     snapshot_type: "RESOLUTION",
     source: "chainlink_sepolia",
     recorded_at: "2026-09-18T00:00:00.000Z",
@@ -91,9 +72,52 @@ export default function AdminOracleMonitor() {
   const [selectedAsset, setSelectedAsset] = useState<string>("ETH");
   const [snapshotType, setSnapshotType] = useState<string>("RESOLUTION");
   const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [adminKey, setAdminKey] = useState<string>(process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY || "dev-admin-secret");
   const [snapshotLogs, setSnapshotLogs] = useState<OracleSnapshotRecord[]>(INITIAL_SNAPSHOT_LOGS);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const fetchLiveFeeds = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/oracle/feeds");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.feeds) && json.feeds.length > 0) {
+          setFeeds(json.feeds);
+          setNotification({
+            message: "Chainlink live aggregator round state refreshed directly from on-chain RPC.",
+            type: "success",
+          });
+        }
+      }
+    } catch {
+      setNotification({
+        message: "Failed to connect to Oracle RPC feed endpoint.",
+        type: "error",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  const fetchLiveSnapshots = useCallback(async () => {
+    try {
+      const res = await fetch("/api/oracle/snapshot?limit=10");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.snapshots) && json.snapshots.length > 0) {
+          setSnapshotLogs(json.snapshots);
+        }
+      }
+    } catch {
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveFeeds();
+    fetchLiveSnapshots();
+  }, [fetchLiveFeeds, fetchLiveSnapshots]);
 
   const handleRecordSnapshot = async () => {
     setIsRecording(true);
@@ -121,35 +145,38 @@ export default function AdminOracleMonitor() {
         if (json.data) {
           setSnapshotLogs((prev) => [json.data, ...prev]);
         }
+        fetchLiveFeeds();
       } else {
-        const mockPrice = selectedAsset === "ETH" ? 3450.75 : selectedAsset === "BTC" ? 91240.5 : 184.2;
+        const selectedFeed = feeds.find((f) => f.symbol.startsWith(selectedAsset));
+        const currentPrice = selectedFeed ? selectedFeed.price : (selectedAsset === "ETH" ? 2454.54 : selectedAsset === "BTC" ? 76935.85 : 184.2);
         const fallbackRecord: OracleSnapshotRecord = {
           id: `snap-${Date.now()}`,
           asset: selectedAsset,
-          price: mockPrice,
+          price: currentPrice,
           snapshot_type: snapshotType,
           source: "chainlink_oracle_simulated",
           recorded_at: new Date().toISOString(),
         };
         setSnapshotLogs((prev) => [fallbackRecord, ...prev]);
         setNotification({
-          message: `Local simulated snapshot recorded for ${selectedAsset} ($${mockPrice}). [API note: ${json.error || "Simulated"}]`,
+          message: `Local simulated snapshot recorded for ${selectedAsset} ($${currentPrice}). [API note: ${json.error || "Simulated"}]`,
           type: "success",
         });
       }
     } catch {
-      const mockPrice = selectedAsset === "ETH" ? 3450.75 : selectedAsset === "BTC" ? 91240.5 : 184.2;
+      const selectedFeed = feeds.find((f) => f.symbol.startsWith(selectedAsset));
+      const currentPrice = selectedFeed ? selectedFeed.price : (selectedAsset === "ETH" ? 2454.54 : selectedAsset === "BTC" ? 76935.85 : 184.2);
       const fallbackRecord: OracleSnapshotRecord = {
         id: `snap-${Date.now()}`,
         asset: selectedAsset,
-        price: mockPrice,
+        price: currentPrice,
         snapshot_type: snapshotType,
         source: "chainlink_oracle_client",
         recorded_at: new Date().toISOString(),
       };
       setSnapshotLogs((prev) => [fallbackRecord, ...prev]);
       setNotification({
-        message: `Offline snapshot logged for ${selectedAsset} ($${mockPrice}).`,
+        message: `Offline snapshot logged for ${selectedAsset} ($${currentPrice}).`,
         type: "success",
       });
     } finally {
@@ -158,17 +185,7 @@ export default function AdminOracleMonitor() {
   };
 
   const handleRefreshFeeds = () => {
-    setFeeds((prev) =>
-      prev.map((f) => ({
-        ...f,
-        price: +(f.price * (1 + (Math.random() * 0.004 - 0.002))).toFixed(2),
-        updatedAt: new Date().toISOString(),
-      }))
-    );
-    setNotification({
-      message: "Chainlink live aggregator round state refreshed.",
-      type: "success",
-    });
+    fetchLiveFeeds();
   };
 
   return (
@@ -191,14 +208,18 @@ export default function AdminOracleMonitor() {
 
         <button
           type="button"
+          aria-label="Refresh Round Data"
           onClick={handleRefreshFeeds}
+          disabled={isRefreshing}
           className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-2 border ${
+            isRefreshing ? "opacity-60 cursor-not-allowed" : ""
+          } ${
             isDark
               ? "bg-white/5 hover:bg-white/10 border-white/10 text-white"
               : "bg-white hover:bg-emerald-50/50 border-emerald-500/20 text-accent-navy shadow-xs"
           }`}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           <span>Refresh Round Data</span>

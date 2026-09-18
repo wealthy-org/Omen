@@ -86,3 +86,45 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const asset = searchParams.get("asset")?.toUpperCase().trim();
+    const limitParam = parseInt(searchParams.get("limit") || "20", 10);
+    const limit = isNaN(limitParam) ? 20 : Math.min(Math.max(limitParam, 1), 100);
+
+    const supabase = getSupabaseAdminClient();
+    let query = supabase
+      .from("oracle_snapshots")
+      .select("*")
+      .order("recorded_at", { ascending: false })
+      .limit(limit);
+
+    if (asset) {
+      query = query.eq("asset", asset);
+    }
+
+    const { data: snapshots, error } = await query;
+
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      snapshots: snapshots || [],
+      data: snapshots || [],
+      total: snapshots ? snapshots.length : 0,
+    });
+  } catch (error: any) {
+    const errorMessage = error instanceof Error ? error.message : "Internal server error";
+    return NextResponse.json(
+      { success: false, error: errorMessage },
+      { status: 500 }
+    );
+  }
+}

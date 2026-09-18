@@ -51,7 +51,28 @@ describe("AdminOracleMonitor Component", () => {
     });
   });
 
-  it("refreshes round data when clicking refresh button", () => {
+  it("refreshes round data when clicking refresh button", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        success: true,
+        feeds: [
+          {
+            symbol: "ETH/USD",
+            name: "Ethereum / US Dollar",
+            price: 2454.54,
+            decimals: 8,
+            roundId: "18446744073709587751",
+            updatedAt: "2026-09-18T00:00:00.000Z",
+            heartbeatSec: 3600,
+            contractAddress: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+            chainId: 11155111,
+            status: "HEALTHY",
+          },
+        ],
+      }),
+    } as any);
+
     render(<AdminOracleMonitor />);
 
     const refreshBtn = screen.getByRole("button", {
@@ -59,8 +80,10 @@ describe("AdminOracleMonitor Component", () => {
     });
     fireEvent.click(refreshBtn);
 
-    expect(
-      screen.getByText(/chainlink live aggregator round state refreshed/i)
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText(/chainlink live aggregator round state refreshed/i)
+      ).toBeInTheDocument();
+    });
   });
 });
