@@ -421,7 +421,7 @@ export default function AdminMarketResolutionTable({
                         </span>
                       ) : market.status === "RESOLVED" ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold font-mono bg-yes-green-soft dark:bg-yes-green/15 text-yes-green border border-yes-green/30">
-                          Resolved: {market.resolvedOutcome}
+                          Resolved: {market.resolvedOutcome || "SETTLED"}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold font-mono bg-amber-500/10 text-warning-amber border border-amber-500/30">

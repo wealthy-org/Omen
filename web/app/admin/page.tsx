@@ -68,39 +68,48 @@ export default function AdminDashboardPage({
           if (isMounted && mData.markets && Array.isArray(mData.markets)) {
             setTotalMarketsCreated(mData.markets.length);
             const pending = mData.markets.filter(
-              (m: any) => m.status === "active" && m.deadline && new Date(m.deadline) <= new Date()
+              (m: any) =>
+                m.status === "active" ||
+                m.status === "OPEN" ||
+                m.status === "CONFIRMED" ||
+                m.status === "DETECTED"
             );
             setPendingResolutionsCount(pending.length);
 
             const mappedMarkets: ResolvableMarketItem[] = mData.markets.map((m: any) => {
-              const yes = Number(m.yes_pool || m.total_pool_yes || m.agree_pool || 0);
-              const no = Number(m.no_pool || m.total_pool_no || m.disagree_pool || 0);
+              const yes = Number(m.yes_pool ?? m.total_pool_yes ?? m.agree_pool ?? 0);
+              const no = Number(m.no_pool ?? m.total_pool_no ?? m.disagree_pool ?? 0);
               const total = yes + no;
               const yesPct = total > 0 ? Math.round((yes / total) * 100) : 50;
-              const noPct = 100 - yesPct;
+              const noPct = total > 0 ? 100 - yesPct : 50;
+              const isPending =
+                m.status === "active" ||
+                m.status === "OPEN" ||
+                m.status === "CONFIRMED" ||
+                m.status === "DETECTED";
+              const isCancelled = m.status === "cancelled" || m.status === "VOID";
+              const outcome =
+                m.status === "resolved_yes" || m.winner === "AGREE"
+                  ? "YES"
+                  : m.status === "resolved_no" || m.winner === "DISAGREE"
+                  ? "NO"
+                  : isCancelled
+                  ? "CANCEL"
+                  : undefined;
+
               return {
                 id: m.id || `market-${m.contract_market_id}`,
-                title: m.title,
+                title: m.title || m.statement,
                 category: (m.category || "CRYPTO").toUpperCase(),
                 totalPool: total,
                 volume: total,
                 yesPercentage: yesPct,
                 noPercentage: noPct,
-                endTime: m.deadline || new Date().toISOString(),
+                endTime: m.deadline || m.close_time || new Date().toISOString(),
                 resolutionSourceUrl: m.resolution_source || "https://omen.market",
-                resolutionCriteria: m.description,
-                status:
-                  m.status === "active"
-                    ? "PENDING_RESOLUTION"
-                    : m.status === "cancelled"
-                    ? "CANCELLED"
-                    : "RESOLVED",
-                resolvedOutcome:
-                  m.status === "resolved_yes"
-                    ? "YES"
-                    : m.status === "resolved_no"
-                    ? "NO"
-                    : undefined,
+                resolutionCriteria: m.description || m.statement,
+                status: isPending ? "PENDING_RESOLUTION" : isCancelled ? "CANCELLED" : "RESOLVED",
+                resolvedOutcome: outcome,
               };
             });
             setResolvableMarkets(mappedMarkets);
