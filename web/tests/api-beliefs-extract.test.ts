@@ -6,19 +6,19 @@ import path from "node:path";
 
 describe("TICKET-84: POST /api/beliefs/extract", () => {
   const originalFetch = global.fetch;
-  const originalApiKey = process.env.AI_API_KEY;
-  const originalModel = process.env.AI_MODEL;
+  const originalApiKey = process.env.OPENROUTER_API_KEY;
+  const originalModel = process.env.OPENROUTER_MODEL;
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    process.env.AI_API_KEY = "test-openrouter-key";
-    process.env.AI_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
+    process.env.OPENROUTER_API_KEY = "test-openrouter-key";
+    process.env.OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
   });
 
   afterEach(() => {
     global.fetch = originalFetch;
-    process.env.AI_API_KEY = originalApiKey;
-    process.env.AI_MODEL = originalModel;
+    process.env.OPENROUTER_API_KEY = originalApiKey;
+    process.env.OPENROUTER_MODEL = originalModel;
   });
 
   it("should adhere strictly to Zero-Comment Policy in route, lib, and type files", () => {
@@ -43,22 +43,21 @@ describe("TICKET-84: POST /api/beliefs/extract", () => {
     }
   });
 
-  it("should throw an explicit error when AI_API_KEY is not configured", async () => {
-    delete process.env.AI_API_KEY;
+  it("should throw an explicit error when OPENROUTER_API_KEY is not configured", async () => {
     delete process.env.OPENROUTER_API_KEY;
 
     await expect(extractBeliefFromText("ETH to 5000")).rejects.toThrow(
-      "AI_API_KEY or OPENROUTER_API_KEY is not configured."
+      "OPENROUTER_API_KEY is not configured."
     );
   });
 
-  it("should throw an explicit error when AI_MODEL is not configured", async () => {
-    process.env.AI_API_KEY = "valid-key";
+  it("should throw an explicit error when OPENROUTER_MODEL is not configured", async () => {
+    process.env.OPENROUTER_API_KEY = "valid-key";
     delete process.env.AI_MODEL;
     delete process.env.OPENROUTER_MODEL;
 
     await expect(extractBeliefFromText("ETH to 5000")).rejects.toThrow(
-      "AI_MODEL or OPENROUTER_MODEL is not configured."
+      "OPENROUTER_MODEL or AI_MODEL is not configured."
     );
   });
 

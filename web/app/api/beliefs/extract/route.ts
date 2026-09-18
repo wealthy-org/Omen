@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (process.env.NODE_ENV !== "test" && !process.env.AI_MODEL && !process.env.OPENROUTER_MODEL) {
+    if (process.env.NODE_ENV !== "test" && !process.env.OPENROUTER_MODEL && !process.env.AI_MODEL) {
       process.env.OPENROUTER_MODEL = "nex-agi/nex-n2.5-mini:free";
     }
 

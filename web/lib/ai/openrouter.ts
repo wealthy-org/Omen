@@ -40,14 +40,14 @@ export async function extractBeliefFromText(
   author?: string,
   sourceUrl?: string
 ): Promise<{ success: boolean; data?: StructuredBelief; error?: string; status?: number }> {
-  const apiKey = process.env.AI_API_KEY || process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    throw new Error("AI_API_KEY or OPENROUTER_API_KEY is not configured.");
+    throw new Error("OPENROUTER_API_KEY is not configured.");
   }
 
-  const model = process.env.AI_MODEL || process.env.OPENROUTER_MODEL;
+  const model = process.env.OPENROUTER_MODEL || process.env.AI_MODEL;
   if (!model) {
-    throw new Error("AI_MODEL or OPENROUTER_MODEL is not configured.");
+    throw new Error("OPENROUTER_MODEL or AI_MODEL is not configured.");
   }
 
   const userPrompt = `Extract structured belief from:

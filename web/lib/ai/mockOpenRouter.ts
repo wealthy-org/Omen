@@ -1,7 +1,7 @@
 import { StructuredBelief } from "../../types/belief";
 
 export function isMockAiEnabled(): boolean {
-  const apiKey = process.env.AI_API_KEY || process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey || apiKey.startsWith("dummy") || apiKey.startsWith("mock")) {
     return true;
   }
