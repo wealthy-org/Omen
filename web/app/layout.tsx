@@ -48,9 +48,23 @@ export const metadata: Metadata = {
   title: "Omen — Web3 Prediction Markets & Points Farming",
   description: "Institutional Web3 prediction market and points gamification dashboard built on Arbitrum Sepolia.",
   icons: {
-    icon: "/logo-omen 1.png",
+    icon: [
+      { url: "/logo-omen 1.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
     shortcut: "/logo-omen 1.png",
     apple: "/logo-omen 1.png",
+  },
+  openGraph: {
+    title: "Omen — Web3 Prediction Markets",
+    description: "Social Belief Market Protocol turning opinions into tradable on-chain markets.",
+    images: ["/logo-omen 1.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Omen — Web3 Prediction Markets",
+    description: "Social Belief Market Protocol turning opinions into tradable on-chain markets.",
+    images: ["/logo-omen 1.png"],
   },
 };
 
