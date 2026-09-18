@@ -59,8 +59,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${proximaNova.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen antialiased font-sans">
+    <html lang="en" className={`${proximaNova.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen antialiased font-sans" suppressHydrationWarning>
         <ThemeProvider>
           <Web3Providers>
             <div className="min-h-screen flex flex-col w-full">

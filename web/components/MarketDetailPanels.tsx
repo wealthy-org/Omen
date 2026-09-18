@@ -78,7 +78,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
               }`}>
                 {activeMarket.status}
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              <span className="text-xs text-zinc-500 dark:text-zinc-400" suppressHydrationWarning>
                 Created {new Date(activeMarket.createdAt).toLocaleDateString()}
               </span>
             </div>
@@ -186,7 +186,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/60">
               <span className="text-zinc-500 dark:text-zinc-400">Closes At:</span>
-              <span className="text-zinc-800 dark:text-zinc-200">{new Date(activeMarket.closesAt).toLocaleString()}</span>
+              <span className="text-zinc-800 dark:text-zinc-200" suppressHydrationWarning>{new Date(activeMarket.closesAt).toLocaleString()}</span>
             </div>
           </div>
         </div>
