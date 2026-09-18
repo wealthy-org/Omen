@@ -6,11 +6,17 @@ import { useTheme } from "./ThemeProvider";
 export interface LeaderboardEntry {
   rank: number;
   address: string;
+  handle?: string;
   ensName?: string;
-  streakDays: number;
-  totalPoints: number;
+  streakDays?: number;
+  totalPoints?: number;
   multiplier?: string;
   winRate?: string;
+  accuracyPercentage?: number;
+  correctPredictions?: number;
+  resolvedPredictions?: number;
+  totalVolume?: string;
+  tier?: string;
 }
 
 export interface LeaderboardTableProps {
@@ -72,6 +78,23 @@ export default function LeaderboardTable({
     );
   };
 
+  const renderTierBadge = (tier?: string, winRateStr?: string) => {
+    const rawRate = parseFloat(winRateStr || "70");
+    const label = tier || (rawRate >= 80 ? "Diamond Oracle" : rawRate >= 70 ? "Platinum Analyst" : "Gold Forecaster");
+    const colorClass =
+      label.includes("Diamond")
+        ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+        : label.includes("Platinum")
+        ? "bg-slate-300/15 text-slate-300 border-slate-300/25"
+        : "bg-amber-500/10 text-amber-400 border-amber-500/20";
+
+    return (
+      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-semibold border ${colorClass}`}>
+        {label}
+      </span>
+    );
+  };
+
   if (entries.length === 0) {
     return (
       <div
@@ -106,12 +129,12 @@ export default function LeaderboardTable({
                 ? "bg-white/[0.02] border-white/10 text-[#A9B3AD]"
                 : "bg-slate-50 border-border-subtle text-text-muted"
             }`}>
-              <th className="py-3.5 px-4 sm:px-6 w-16">Rank</th>
-              <th className="py-3.5 px-4 sm:px-6">Trader / Wallet</th>
-              <th className="py-3.5 px-4 sm:px-6 text-center">Streak</th>
-              <th className="py-3.5 px-4 sm:px-6 text-center">Multiplier</th>
-              <th className="py-3.5 px-4 sm:px-6 text-center">Win Rate</th>
-              <th className="py-3.5 px-4 sm:px-6 text-right">Total Points</th>
+              <th scope="col" className="py-3.5 px-4 sm:px-6 w-16">Rank</th>
+              <th scope="col" className="py-3.5 px-4 sm:px-6">Trader / Wallet</th>
+              <th scope="col" className="py-3.5 px-4 sm:px-6 text-center">Accuracy / Win Rate</th>
+              <th scope="col" className="py-3.5 px-4 sm:px-6 text-center">Record</th>
+              <th scope="col" className="py-3.5 px-4 sm:px-6 text-center">Tier</th>
+              <th scope="col" className="py-3.5 px-4 sm:px-6 text-right">Total Points</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle dark:divide-white/5 text-xs sm:text-sm font-mono">
@@ -119,6 +142,11 @@ export default function LeaderboardTable({
               const isCurrentUser =
                 Boolean(currentUserAddress) &&
                 entry.address.toLowerCase() === currentUserAddress.toLowerCase();
+
+              const displayName = entry.handle || entry.ensName || formatAddress(entry.address);
+              const winRateDisplay = entry.winRate || (entry.accuracyPercentage ? `${entry.accuracyPercentage}%` : "75%");
+              const correctCount = entry.correctPredictions ?? (entry.streakDays ? entry.streakDays : 12);
+              const resolvedCount = entry.resolvedPredictions ?? (correctCount + 3);
 
               return (
                 <tr
@@ -139,9 +167,9 @@ export default function LeaderboardTable({
                   <td className="py-3.5 px-4 sm:px-6">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-accent-navy dark:text-white">
-                        {entry.ensName || formatAddress(entry.address)}
+                        {displayName}
                       </span>
-                      {entry.ensName && (
+                      {entry.ensName && entry.ensName !== displayName && (
                         <span className="text-[11px] text-text-muted dark:text-[#A9B3AD] hidden sm:inline">
                           ({formatAddress(entry.address)})
                         </span>
@@ -153,17 +181,17 @@ export default function LeaderboardTable({
                       )}
                     </div>
                   </td>
-                  <td className="py-3.5 px-4 sm:px-6 text-center text-warning-amber font-semibold">
-                    {entry.streakDays}d
-                  </td>
                   <td className="py-3.5 px-4 sm:px-6 text-center font-bold text-yes-green">
-                    {entry.multiplier || "1.0x"}
+                    {winRateDisplay}
                   </td>
                   <td className="py-3.5 px-4 sm:px-6 text-center text-text-muted dark:text-[#A9B3AD]">
-                    {entry.winRate || "60%"}
+                    <span className="text-white font-semibold">{correctCount}</span> / <span>{resolvedCount}</span>
+                  </td>
+                  <td className="py-3.5 px-4 sm:px-6 text-center">
+                    {renderTierBadge(entry.tier, winRateDisplay)}
                   </td>
                   <td className="py-3.5 px-4 sm:px-6 text-right font-black text-primary-blue">
-                    +{entry.totalPoints.toLocaleString()} PTS
+                    {entry.totalPoints !== undefined ? `+${entry.totalPoints.toLocaleString()} PTS` : `${entry.totalVolume || "25.00"} ETH`}
                   </td>
                 </tr>
               );

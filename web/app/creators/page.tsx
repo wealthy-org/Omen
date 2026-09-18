@@ -31,7 +31,7 @@ const INITIAL_CREATORS: CreatorProfile[] = [
 ];
 
 export default function CreatorsPage() {
-  const [creators, setCreators] = useState<CreatorProfile[]>(INITIAL_CREATORS);
+  const [creators, setCreators] = useState<CreatorProfile[]>([]);
   const [sortBy, setSortBy] = useState<CreatorSortOption>("accuracy");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -44,18 +44,19 @@ export default function CreatorsPage() {
         const res = await fetch("/api/creators");
         if (res.ok) {
           const data = await res.json();
-          if (isMounted && data.creators && Array.isArray(data.creators)) {
-            const mapped: CreatorProfile[] = data.creators.map((c: any, idx: number) => ({
-              address: c.address || `0x000000000000000000000000000000000000000${idx + 1}`,
-              name: c.name || c.display_name || "Creator",
+          const creatorList = data.data || data.creators || (Array.isArray(data) ? data : []);
+          if (isMounted && Array.isArray(creatorList)) {
+            const mapped: CreatorProfile[] = creatorList.map((c: any, idx: number) => ({
+              address: c.address || c.wallet_address || `0x${(idx + 1).toString().padStart(40, "0")}`,
+              name: c.name || c.display_name || c.handle?.replace("@", "") || "Creator",
               handle: c.handle || c.username || undefined,
               avatarUrl: c.avatarUrl || c.avatar_url || undefined,
-              accuracyRate: Number(c.accuracyRate ?? c.accuracy_rate ?? c.win_rate ?? 80),
-              confirmedBeliefs: Number(c.confirmedBeliefs ?? c.confirmed_count ?? 5),
-              totalBeliefs: Number(c.totalBeliefs ?? c.total_count ?? 10),
-              volumeGeneratedEth: Number(c.volumeGeneratedEth ?? c.volume_eth ?? 50),
-              earnedFeesEth: Number(c.earnedFeesEth ?? c.fees_eth ?? 0.75),
-              isVerified: Boolean(c.isVerified ?? c.is_verified ?? true),
+              accuracyRate: Number(c.accuracyRate ?? c.accuracy_rate ?? c.accuracy_percentage ?? c.win_rate ?? 85),
+              confirmedBeliefs: Number(c.confirmedBeliefs ?? c.confirmed_count ?? c.confirmed_beliefs_count ?? 0),
+              totalBeliefs: Number(c.totalBeliefs ?? c.total_count ?? c.total_beliefs_count ?? 1),
+              volumeGeneratedEth: Number(c.volumeGeneratedEth ?? c.volume_eth ?? c.total_volume ?? 0),
+              earnedFeesEth: Number(c.earnedFeesEth ?? c.fees_eth ?? 0),
+              isVerified: Boolean(c.isVerified ?? c.is_verified ?? (c.confirmed_beliefs_count > 0)),
             }));
             setCreators(mapped);
           }

@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 
 export type BetStatus = "active" | "won" | "lost" | "cancelled";
-export type BetSide = "YES" | "NO";
+export type BetSide = "YES" | "NO" | "AGREE" | "DISAGREE";
 
 export interface UserBet {
   id: string | number;
@@ -65,6 +65,22 @@ export const UserBetsTable: React.FC<UserBetsTableProps> = ({
     );
   }
 
+  const renderSideBadge = (side: BetSide) => {
+    const isAgree = side === "AGREE" || side === "YES";
+    if (isAgree) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          {side}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+        {side}
+      </span>
+    );
+  };
+
   return (
     <div
       data-testid="user-bets-table-container"
@@ -124,15 +140,7 @@ export const UserBetsTable: React.FC<UserBetsTableProps> = ({
                   </td>
 
                   <td className="py-4 px-4 text-center whitespace-nowrap">
-                    {bet.side === "YES" ? (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        YES
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                        NO
-                      </span>
-                    )}
+                    {renderSideBadge(bet.side)}
                   </td>
 
                   <td className="py-4 px-4 text-right font-mono font-bold text-zinc-900 dark:text-zinc-100 whitespace-nowrap">

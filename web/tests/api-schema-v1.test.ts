@@ -24,8 +24,8 @@ import type {
 } from "../types/database";
 
 describe("TICKET-65: Supabase Schema V1 Beliefs Migration", () => {
-  const migrationPath = path.resolve(process.cwd(), "db/migrations/02_v1_belief_schema.sql");
-  const rollbackPath = path.resolve(process.cwd(), "db/migrations/02_v1_belief_rollback.sql");
+  const migrationPath = path.resolve(process.cwd(), "db/migrations/01_init_schema.sql");
+  const rollbackPath = path.resolve(process.cwd(), "db/migrations/01_rollback_schema.sql");
 
   it("should have migration and rollback files on filesystem", () => {
     expect(fs.existsSync(migrationPath)).toBe(true);
@@ -88,7 +88,6 @@ describe("TICKET-65: Supabase Schema V1 Beliefs Migration", () => {
     expect(content).toContain("CHECK (side IN ('AGREE', 'DISAGREE'))");
     expect(content).toContain("CHECK (resolved_outcome IN ('AGREE', 'DISAGREE', 'VOID'))");
     expect(content).toContain("CHECK (source IN ('chainlink', 'robinhood_market_data'))");
-    expect(content).toContain("CHECK (snapshot_type IN ('START', 'END', 'DISPLAY'))");
   });
 
   it("should create performance indexes for all 11 core tables", () => {

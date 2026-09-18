@@ -71,7 +71,8 @@ describe("AdminDashboardPage Component", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText("Total Markets Created")).toBeInTheDocument();
-    expect(screen.getByText("Configured Quests")).toBeInTheDocument();
+    expect(screen.getByText("Beliefs Pipeline")).toBeInTheDocument();
+    expect(screen.getByText("Oracle Price Feeds")).toBeInTheDocument();
     expect(screen.getByText("Pending Resolutions")).toBeInTheDocument();
 
     expect(
@@ -79,21 +80,36 @@ describe("AdminDashboardPage Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("switches to Manage Quests tab and renders quest management panel", () => {
+  it("switches to Social Belief Pipeline tab and renders pipeline monitor", () => {
     render(
       <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
     );
 
-    const manageQuestsTab = screen.getByRole("button", {
-      name: /manage quests/i,
+    const beliefsTab = screen.getByRole("button", {
+      name: /social belief pipeline/i,
     });
-    fireEvent.click(manageQuestsTab);
+    fireEvent.click(beliefsTab);
 
     expect(
-      screen.getByRole("heading", { name: /create new quest/i })
+      screen.getByRole("heading", { name: /belief markets lifecycle monitor/i })
+    ).toBeInTheDocument();
+  });
+
+  it("switches to Chainlink Oracle Monitor tab and renders feeds monitor", () => {
+    render(
+      <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
+    );
+
+    const oracleTab = screen.getByRole("button", {
+      name: /chainlink oracle monitor/i,
+    });
+    fireEvent.click(oracleTab);
+
+    expect(
+      screen.getByRole("heading", { name: /oracle pipeline & live feeds monitor/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /manage existing quests/i })
+      screen.getByRole("heading", { name: /trigger oracle snapshot/i })
     ).toBeInTheDocument();
   });
 
@@ -111,6 +127,24 @@ describe("AdminDashboardPage Component", () => {
       screen.getByRole("heading", {
         name: /expired markets pending resolution/i,
       })
+    ).toBeInTheDocument();
+  });
+
+  it("switches to Emergency Governance tab and renders circuit breakers", () => {
+    render(
+      <AdminDashboardPage initialConnectedAddress="0x1234567890abcdef1234567890abcdef12345678" />
+    );
+
+    const emergencyTab = screen.getByRole("button", {
+      name: /emergency governance/i,
+    });
+    fireEvent.click(emergencyTab);
+
+    expect(
+      screen.getByRole("heading", { name: /protocol circuit breakers & resolution overrides/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /global protocol pause/i })
     ).toBeInTheDocument();
   });
 

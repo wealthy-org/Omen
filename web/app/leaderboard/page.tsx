@@ -85,7 +85,8 @@ export default function LeaderboardPage() {
   const topThreeTarget = entries.find((e) => e.rank === 3);
   const nextTarget = entries.find((e) => e.rank === userRank - 1);
   const gapTarget = nextTarget || topThreeTarget;
-  const pointsGap = gapTarget ? Math.max(0, gapTarget.totalPoints - userPoints) : 0;
+  const targetPoints = gapTarget?.totalPoints ?? 0;
+  const pointsGap = gapTarget ? Math.max(0, targetPoints - userPoints) : 0;
 
   return (
     <div className="w-full flex flex-col gap-8 pb-16 animate-fade-in">
@@ -175,7 +176,7 @@ export default function LeaderboardPage() {
           </div>
           <p className="text-xs text-text-muted dark:text-[#A9B3AD] mt-2">
             {gapTarget
-              ? `Needed to overtake #${gapTarget.rank} ${gapTarget.ensName || gapTarget.address.slice(0, 6)} (${gapTarget.totalPoints.toLocaleString()} PTS).`
+              ? `Needed to overtake #${gapTarget.rank} ${gapTarget.ensName || gapTarget.address.slice(0, 6)} (${targetPoints.toLocaleString()} PTS).`
               : "You are currently leading the global leaderboard!"}
           </p>
         </div>

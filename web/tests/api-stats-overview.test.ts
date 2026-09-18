@@ -28,19 +28,23 @@ describe("GET /api/stats/overview", () => {
           }),
         };
       }
+      if (table === "beliefs") {
+        return {
+          select: vi.fn().mockResolvedValue({ count: 12, error: null }),
+        };
+      }
+      if (table === "creator_profiles") {
+        return {
+          select: vi.fn().mockResolvedValue({ count: 8, error: null }),
+        };
+      }
       if (table === "users") {
         return {
-          select: vi.fn().mockResolvedValue({
-            data: [
-              { total_points: 500 },
-              { total_points: 1500 },
-            ],
-            error: null,
-          }),
+          select: vi.fn().mockResolvedValue({ count: 24, error: null }),
         };
       }
       return {
-        select: vi.fn().mockResolvedValue({ data: [], error: null }),
+        select: vi.fn().mockResolvedValue({ data: [], count: 0, error: null }),
       };
     });
 
@@ -55,8 +59,9 @@ describe("GET /api/stats/overview", () => {
     expect(json.success).toBe(true);
     expect(json.stats.active_markets).toBe(2);
     expect(json.stats.total_tvl_eth).toBe("170.50");
-    expect(json.stats.total_points).toBe(2000);
-    expect(json.stats.active_wallets).toBe(2);
+    expect(json.stats.total_beliefs).toBe(12);
+    expect(json.stats.verified_creators).toBe(8);
+    expect(json.stats.active_wallets).toBe(24);
   });
 
   it("returns 500 error when supabase returns a database error", async () => {

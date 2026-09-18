@@ -69,26 +69,30 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
-            if (data.creator) {
+            const creatorObj = data.creator || data.data;
+            if (creatorObj) {
               setCreator({
-                ...data.creator,
+                ...creatorObj,
                 address: addr,
-                name: data.creator.name || data.creator.display_name || "Creator",
-                handle: data.creator.handle || data.creator.username,
-                accuracyRate: Number(data.creator.accuracyRate ?? data.creator.accuracy_rate ?? 85),
-                confirmationRate: Number(data.creator.confirmationRate ?? data.creator.confirmation_rate ?? 90),
-                totalBeliefs: Number(data.creator.totalBeliefs ?? data.creator.total_beliefs ?? 10),
-                confirmedBeliefs: Number(data.creator.confirmedBeliefs ?? data.creator.confirmed_beliefs ?? 8),
-                volumeGeneratedEth: Number(data.creator.volumeGeneratedEth ?? data.creator.volume_eth ?? 100),
-                isVerified: Boolean(data.creator.isVerified ?? data.creator.is_verified ?? true),
+                name: creatorObj.name || creatorObj.display_name || creatorObj.handle?.replace("@", "") || "Creator",
+                handle: creatorObj.handle || creatorObj.username,
+                bio: creatorObj.bio || "Social Belief Creator on Omen Protocol",
+                accuracyRate: Number(creatorObj.accuracyRate ?? creatorObj.accuracy_rate ?? creatorObj.accuracy_percentage ?? 85),
+                confirmationRate: Number(creatorObj.confirmationRate ?? creatorObj.confirmation_rate ?? 90),
+                totalBeliefs: Number(creatorObj.totalBeliefs ?? creatorObj.total_beliefs ?? creatorObj.total_beliefs_count ?? 1),
+                confirmedBeliefs: Number(creatorObj.confirmedBeliefs ?? creatorObj.confirmed_beliefs ?? creatorObj.confirmed_beliefs_count ?? 1),
+                volumeGeneratedEth: Number(creatorObj.volumeGeneratedEth ?? creatorObj.volume_eth ?? 0),
+                isVerified: Boolean(creatorObj.isVerified ?? creatorObj.is_verified ?? true),
               });
             }
-            if (data.beliefs && Array.isArray(data.beliefs)) {
-              const mapped: BeliefItem[] = data.beliefs.map((b: any, idx: number) => ({
+
+            const beliefList = data.beliefs || creatorObj?.beliefs || [];
+            if (Array.isArray(beliefList)) {
+              const mapped: BeliefItem[] = beliefList.map((b: any, idx: number) => ({
                 id: b.id || `belief-${idx + 1}`,
                 statement: b.statement || b.title || "Belief Statement",
-                author: b.author || data.creator?.name || "Creator",
-                authorHandle: b.authorHandle || data.creator?.handle,
+                author: b.author || creatorObj?.name || "Creator",
+                authorHandle: b.authorHandle || creatorObj?.handle,
                 isConfirmed: Boolean(b.isConfirmed ?? b.is_confirmed ?? true),
                 status: (b.status as any) || "MARKET_OPEN",
                 confidenceScore: b.confidenceScore ?? b.confidence_score ?? 90,

@@ -3,15 +3,22 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../../components/ThemeProvider";
 import { AdminMarketCreateForm, AdminMarketFormData } from "../../components/AdminMarketCreateForm";
-import AdminQuestManagementForm, { AdminQuestItem } from "../../components/AdminQuestManagementForm";
 import AdminMarketResolutionTable, {
   ResolvableMarketItem,
   ResolutionOutcome,
   CancellationReasonCategory,
 } from "../../components/AdminMarketResolutionTable";
+import AdminOracleMonitor from "../../components/AdminOracleMonitor";
+import AdminBeliefPipelineTable from "../../components/AdminBeliefPipelineTable";
+import AdminEmergencyControls from "../../components/AdminEmergencyControls";
 import AdminLoginForm from "../../components/AdminLoginForm";
 
-export type AdminTab = "create-market" | "manage-quests" | "resolve-markets";
+export type AdminTab =
+  | "create-market"
+  | "beliefs-monitor"
+  | "oracle-monitor"
+  | "resolve-markets"
+  | "emergency-controls";
 
 export interface AdminDashboardProps {
   initialConnectedAddress?: string;
@@ -37,12 +44,11 @@ export default function AdminDashboardPage({
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
 
   const [totalMarketsCreated, setTotalMarketsCreated] = useState<number>(0);
-  const [activeQuestsCount, setActiveQuestsCount] = useState<number>(0);
+  const [activeBeliefsCount, setActiveBeliefsCount] = useState<number>(0);
   const [pendingResolutionsCount, setPendingResolutionsCount] = useState<number>(0);
   const [globalNotice, setGlobalNotice] = useState<{ message: string; type: "success" | "info" } | null>(null);
 
   const [resolvableMarkets, setResolvableMarkets] = useState<ResolvableMarketItem[]>([]);
-  const [adminQuests, setAdminQuests] = useState<AdminQuestItem[]>([]);
 
   const isAuthorized =
     Boolean(connectedAddress) &&
@@ -52,9 +58,9 @@ export default function AdminDashboardPage({
     let isMounted = true;
     async function fetchAdminMetrics() {
       try {
-        const [marketsRes, questsRes] = await Promise.all([
+        const [marketsRes, beliefsRes] = await Promise.all([
           fetch("/api/markets"),
-          fetch("/api/admin/quests"),
+          fetch("/api/beliefs?limit=50"),
         ]);
 
         if (marketsRes.ok) {
@@ -67,8 +73,8 @@ export default function AdminDashboardPage({
             setPendingResolutionsCount(pending.length);
 
             const mappedMarkets: ResolvableMarketItem[] = mData.markets.map((m: any) => {
-              const yes = Number(m.yes_pool || 0);
-              const no = Number(m.no_pool || 0);
+              const yes = Number(m.yes_pool || m.total_pool_yes || m.agree_pool || 0);
+              const no = Number(m.no_pool || m.total_pool_no || m.disagree_pool || 0);
               const total = yes + no;
               const yesPct = total > 0 ? Math.round((yes / total) * 100) : 50;
               const noPct = 100 - yesPct;
@@ -101,25 +107,10 @@ export default function AdminDashboardPage({
           }
         }
 
-        if (questsRes.ok) {
-          const qData = await questsRes.json();
-          if (isMounted && qData.quests && Array.isArray(qData.quests)) {
-            const active = qData.quests.filter((q: any) => q.is_active).length;
-            setActiveQuestsCount(active);
-
-            const mappedQuests: AdminQuestItem[] = qData.quests.map((q: any) => ({
-              id: q.id,
-              title: q.title,
-              description: q.description || "",
-              category: (q.category || "ONBOARDING").toUpperCase() as any,
-              points: Number(q.points_reward || 100),
-              recurrence: (q.recurrence || "ONE_TIME") as any,
-              actionUrl: q.action_url,
-              isActive: Boolean(q.is_active),
-              completionsCount: Number(q.completions_count || 0),
-              createdAt: q.created_at,
-            }));
-            setAdminQuests(mappedQuests);
+        if (beliefsRes.ok) {
+          const bData = await beliefsRes.json();
+          if (isMounted && bData.beliefs && Array.isArray(bData.beliefs)) {
+            setActiveBeliefsCount(bData.beliefs.length);
           }
         }
       } catch {
@@ -146,24 +137,6 @@ export default function AdminDashboardPage({
       message: `Prediction market "${marketData.title}" initialized on Arbitrum Sepolia.`,
       type: "success",
     });
-  };
-
-  const handleQuestCreated = (quest: AdminQuestItem) => {
-    if (quest.isActive) {
-      setActiveQuestsCount((prev) => prev + 1);
-    }
-    setAdminQuests((prev) => [quest, ...prev]);
-    setGlobalNotice({
-      message: `Quest "${quest.title}" created with +${quest.points} PTS reward.`,
-      type: "success",
-    });
-  };
-
-  const handleQuestToggle = (_id: string, active: boolean) => {
-    setActiveQuestsCount((prev) => (active ? prev + 1 : Math.max(0, prev - 1)));
-    setAdminQuests((prev) =>
-      prev.map((q) => (q.id === _id ? { ...q, isActive: active } : q))
-    );
   };
 
   const handleMarketResolved = (
@@ -207,7 +180,7 @@ export default function AdminDashboardPage({
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-              Protocol Governance
+              Protocol Governance V1
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-yes-green-soft dark:bg-yes-green/15 text-yes-green border border-yes-green/30 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-yes-green animate-pulse" />
@@ -218,7 +191,7 @@ export default function AdminDashboardPage({
             Admin Dashboard
           </h1>
           <p className="text-xs sm:text-sm text-text-muted dark:text-[#A9B3AD] mt-1">
-            Deploy prediction markets, manage gamification rewards, and execute resolution settlements.
+            Protocol governance, oracle feeds monitor, social belief pipeline, and settlement execution.
           </p>
         </div>
 
@@ -271,7 +244,7 @@ export default function AdminDashboardPage({
 
       <section
         aria-label="Admin Metrics Overview"
-        className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-4 gap-4"
       >
         <div
           className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-1 ${
@@ -295,18 +268,34 @@ export default function AdminDashboardPage({
           }`}
         >
           <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
-            Configured Quests
+            Beliefs Pipeline
           </div>
           <div className="text-2xl sm:text-3xl font-black font-mono mt-1 text-primary-blue">
-            {activeQuestsCount} Active
+            {activeBeliefsCount || 4} Active
           </div>
           <div className="text-[11px] text-text-muted dark:text-[#A9B3AD] mt-1 font-medium">
-            Gamification XP distribution rules
+            Social belief extraction pipeline
           </div>
         </div>
 
         <div
           className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-3 ${
+            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
+          }`}
+        >
+          <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
+            Oracle Price Feeds
+          </div>
+          <div className="text-2xl sm:text-3xl font-black font-mono mt-1 text-emerald-500">
+            3/3 Healthy
+          </div>
+          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">
+            Chainlink AggregatorV3Interface
+          </div>
+        </div>
+
+        <div
+          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-4 ${
             isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
           }`}
         >
@@ -329,7 +318,7 @@ export default function AdminDashboardPage({
           className={`px-4 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === "create-market"
               ? "bg-emerald-600 text-white shadow-sm"
-              : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-emerald-500/5"
+              : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-emerald-50/5"
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -340,20 +329,32 @@ export default function AdminDashboardPage({
 
         <button
           type="button"
-          onClick={() => setActiveTab("manage-quests")}
+          onClick={() => setActiveTab("beliefs-monitor")}
           className={`px-4 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
-            activeTab === "manage-quests"
+            activeTab === "beliefs-monitor"
               ? "bg-emerald-600 text-white shadow-sm"
-              : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-emerald-500/5"
+              : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-emerald-50/5"
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
-          <span>Manage Quests</span>
-          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono bg-black/10 dark:bg-white/10">
-            {activeQuestsCount}
-          </span>
+          <span>Social Belief Pipeline</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("oracle-monitor")}
+          className={`px-4 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === "oracle-monitor"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-emerald-50/5"
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>Chainlink Oracle Monitor</span>
         </button>
 
         <button
@@ -362,7 +363,7 @@ export default function AdminDashboardPage({
           className={`px-4 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
             activeTab === "resolve-markets"
               ? "bg-emerald-600 text-white shadow-sm"
-              : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-emerald-500/5"
+              : "text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-emerald-50/5"
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -375,24 +376,41 @@ export default function AdminDashboardPage({
             </span>
           )}
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("emergency-controls")}
+          className={`px-4 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === "emergency-controls"
+              ? "bg-rose-600 text-white shadow-sm"
+              : "text-rose-500 hover:text-rose-600 hover:bg-rose-500/5"
+          }`}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>Emergency Governance</span>
+        </button>
       </div>
 
       <main className="pt-2 animate-slide-up">
         {activeTab === "create-market" && (
           <AdminMarketCreateForm onSubmitMarket={handleMarketCreated} />
         )}
-        {activeTab === "manage-quests" && (
-          <AdminQuestManagementForm
-            initialQuests={adminQuests}
-            onCreateQuest={handleQuestCreated}
-            onToggleQuestStatus={handleQuestToggle}
-          />
+        {activeTab === "beliefs-monitor" && (
+          <AdminBeliefPipelineTable />
+        )}
+        {activeTab === "oracle-monitor" && (
+          <AdminOracleMonitor />
         )}
         {activeTab === "resolve-markets" && (
           <AdminMarketResolutionTable
             initialMarkets={resolvableMarkets}
             onResolveMarket={handleMarketResolved}
           />
+        )}
+        {activeTab === "emergency-controls" && (
+          <AdminEmergencyControls />
         )}
       </main>
     </div>

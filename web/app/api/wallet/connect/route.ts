@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         { wallet_address: normalizedAddress },
         { onConflict: "wallet_address" }
       )
-      .select("id, wallet_address, total_points, streak_count")
+      .select("id, wallet_address, created_at")
       .single();
 
     if (error) {
@@ -45,8 +45,7 @@ export async function POST(req: NextRequest) {
       user: {
         id: user?.id,
         wallet_address: user?.wallet_address,
-        total_points: Number(user?.total_points || 0),
-        streak_count: user?.streak_count || 1,
+        created_at: user?.created_at,
       },
     });
   } catch (err: unknown) {

@@ -50,9 +50,9 @@ describe("TICKET-25: API Route Pendaftaran Wallet (/api/wallet/connect)", () => 
 
   it("should return 200 and normalized user data on successful upsert", async () => {
     const mockUser = {
+      id: "u-123",
       wallet_address: "0x71c841915637e130f9cf8853765eea5957019c9e",
-      total_points: "150",
-      streak_count: 3,
+      created_at: "2026-09-18T00:00:00Z",
     };
 
     const mockSingle = vi.fn().mockResolvedValue({ data: mockUser, error: null });
@@ -73,9 +73,9 @@ describe("TICKET-25: API Route Pendaftaran Wallet (/api/wallet/connect)", () => 
 
     const body = await res.json();
     expect(body.success).toBe(true);
+    expect(body.user.id).toBe("u-123");
     expect(body.user.wallet_address).toBe("0x71c841915637e130f9cf8853765eea5957019c9e");
-    expect(body.user.total_points).toBe(150);
-    expect(body.user.streak_count).toBe(3);
+    expect(body.user.created_at).toBe("2026-09-18T00:00:00Z");
 
     expect(mockFrom).toHaveBeenCalledWith("users");
     expect(mockUpsert).toHaveBeenCalledWith(

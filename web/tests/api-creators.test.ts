@@ -201,10 +201,27 @@ describe("TICKET-89: Creator Profiles & Directory API", () => {
       error: null,
     });
 
+    const mockBeliefsQuery: any = {};
+    mockBeliefsQuery.or = vi.fn().mockReturnValue(mockBeliefsQuery);
+    mockBeliefsQuery.order = vi.fn().mockResolvedValue({
+      data: [],
+      error: null,
+    });
+
     vi.spyOn(supabaseLib, "getSupabaseClient").mockReturnValue({
-      from: vi.fn(() => ({
-        select: vi.fn().mockReturnValue(mockProfileQuery),
-      })),
+      from: vi.fn((table: string) => {
+        if (table === "creator_profiles") {
+          return {
+            select: vi.fn().mockReturnValue(mockProfileQuery),
+          };
+        }
+        if (table === "beliefs") {
+          return {
+            select: vi.fn().mockReturnValue(mockBeliefsQuery),
+          };
+        }
+        return {} as any;
+      }),
     } as unknown as ReturnType<typeof supabaseLib.getSupabaseClient>);
 
     const req = createMockGetRequest("http://localhost:3000/api/creators/0xnonexistent");
