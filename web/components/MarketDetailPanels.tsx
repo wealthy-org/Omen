@@ -9,24 +9,24 @@ import { useClaim } from "@/hooks/useClaim";
 export interface MarketDetailData {
   id: string;
   statement: string;
-  authorHandle: string;
-  creatorAddress: string;
-  sourceUrl?: string;
-  sourcePlatform?: string;
+  authorHandle: string | null;
+  creatorAddress: string | null;
+  sourceUrl?: string | null;
+  sourcePlatform?: string | null;
   createdAt: string;
   closesAt: string;
   isConfirmed: boolean;
   status: "OPEN" | "CLOSED" | "RESOLVED" | "SETTLED";
-  winningSide?: "AGREE" | "DISAGREE";
+  winningSide?: "AGREE" | "DISAGREE" | null;
   agreePoolEth: number;
   disagreePoolEth: number;
   totalVolumeEth: number;
   socialConsensusPct: number;
-  marketAddress: string;
+  marketAddress: string | null;
   chainId: number;
-  oracleFeed: string;
-  targetPrice: number;
-  resolutionType: string;
+  oracleFeed: string | null;
+  targetPrice: number | null;
+  resolutionType: string | null;
 }
 
 export interface MarketDetailPanelsProps {
@@ -36,7 +36,7 @@ export interface MarketDetailPanelsProps {
 
 export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPanelsProps) {
   const [activeMarket, setActiveMarket] = useState(market);
-  const { claim, isPending: isClaiming, isSuccess: isClaimSuccess, error: claimError } = useClaim(activeMarket.marketAddress);
+  const { claim, isPending: isClaiming, isSuccess: isClaimSuccess, error: claimError } = useClaim(activeMarket.marketAddress ?? undefined);
 
   const totalPool = activeMarket.agreePoolEth + activeMarket.disagreePoolEth;
   const agreePct = totalPool > 0 ? Math.round((activeMarket.agreePoolEth / totalPool) * 100) : 50;
@@ -134,10 +134,10 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
         <CreatorConfirmation
           beliefId={activeMarket.id}
           statement={activeMarket.statement}
-          authorHandle={activeMarket.authorHandle}
-          creatorAddress={activeMarket.creatorAddress}
+          authorHandle={activeMarket.authorHandle ?? ""}
+          creatorAddress={activeMarket.creatorAddress ?? undefined}
           isConfirmed={activeMarket.isConfirmed}
-          marketAddress={activeMarket.marketAddress}
+          marketAddress={activeMarket.marketAddress ?? undefined}
           onConfirmed={handleCreatorConfirmed}
         />
 
@@ -155,19 +155,19 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
             <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80">
               <span className="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Condition</span>
               <span className="text-sm font-semibold text-purple-600 dark:text-purple-300">
-                {activeMarket.resolutionType}
+                {activeMarket.resolutionType ?? "PRICE_ABOVE"}
               </span>
             </div>
           </div>
           <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 space-y-1">
             <span className="text-xs text-zinc-500 dark:text-zinc-400 block">Chainlink Price Feed</span>
             <a
-              href={`${explorerBase}/address/${activeMarket.oracleFeed}`}
+              href={`${explorerBase}/address/${activeMarket.oracleFeed ?? ""}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline break-all block"
             >
-              {activeMarket.oracleFeed} ↗
+              {activeMarket.oracleFeed ?? "N/A"} ↗
             </a>
           </div>
         </div>
@@ -178,12 +178,12 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
             <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/60 gap-1">
               <span className="text-zinc-500 dark:text-zinc-400">Market Contract:</span>
               <a
-                href={`${explorerBase}/address/${activeMarket.marketAddress}`}
+                href={`${explorerBase}/address/${activeMarket.marketAddress ?? ""}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-emerald-600 dark:text-emerald-400 hover:underline break-all"
               >
-                {activeMarket.marketAddress} ↗
+                {activeMarket.marketAddress ?? "N/A"} ↗
               </a>
             </div>
             <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/60">
@@ -260,7 +260,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
         {activeMarket.status === "OPEN" && (
           <PositionPanel
             marketId={activeMarket.id}
-            marketAddress={activeMarket.marketAddress}
+            marketAddress={activeMarket.marketAddress ?? undefined}
             agreePool={activeMarket.agreePoolEth}
             disagreePool={activeMarket.disagreePoolEth}
             onPositionSuccess={handlePositionSuccess}

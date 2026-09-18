@@ -92,8 +92,8 @@ export interface FormattedMarketDetail {
   created_at: string;
   statement: string;
   author: string | null;
-  authorHandle: string;
-  creatorAddress: string;
+  authorHandle: string | null;
+  creatorAddress: string | null;
   sourceUrl: string | null;
   sourcePlatform: string | null;
   createdAt: string;
@@ -104,9 +104,9 @@ export interface FormattedMarketDetail {
   disagreePoolEth: number;
   totalVolumeEth: number;
   socialConsensusPct: number;
-  marketAddress: string;
+  marketAddress: string | null;
   chainId: number;
-  oracleFeed: string;
+  oracleFeed: string | null;
   targetPrice: number | null;
   total_pool: number;
   capital_consensus: number;

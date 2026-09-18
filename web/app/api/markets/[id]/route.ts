@@ -73,14 +73,22 @@ export async function GET(
 
     const winningOutcome = market.winner ?? (market.market_resolutions && market.market_resolutions.length > 0 ? market.market_resolutions[0].resolved_outcome : null);
 
+    const statement = belief?.statement ?? market.title;
+    if (!statement || statement.trim().length === 0) {
+      return NextResponse.json(
+        { success: false, error: `Market "${trimmedId}" is missing a valid statement` },
+        { status: 500 }
+      );
+    }
+
     const formattedMarket = {
       ...market,
       id: market.id,
       belief_id: market.belief_id,
-      statement: belief?.statement ?? market.title ?? "",
+      statement: statement.trim(),
       author: belief?.author ?? null,
-      authorHandle: belief?.author ?? "",
-      creatorAddress: primaryCreatorWallet ?? "",
+      authorHandle: belief?.author ?? null,
+      creatorAddress: primaryCreatorWallet,
       sourceUrl: belief?.source_url ?? null,
       sourcePlatform: belief?.source_platform ?? null,
       createdAt: market.created_at,
@@ -94,9 +102,9 @@ export async function GET(
       socialConsensusPct: belief?.ai_confidence !== null && belief?.ai_confidence !== undefined
         ? Math.round(Number(belief.ai_confidence))
         : Math.round(capitalConsensus),
-      marketAddress: market.contract_address ?? "",
+      marketAddress: market.contract_address ?? null,
       chainId: market.chain_id,
-      oracleFeed: market.resolution_source ?? "",
+      oracleFeed: market.resolution_source ?? null,
       targetPrice: targetPriceVal,
       resolutionType: market.resolution_type,
       agree_pool: agreePool,
