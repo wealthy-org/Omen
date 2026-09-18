@@ -21,13 +21,16 @@ Do not include any greeting, preamble, commentary, or markdown fences. Output on
 
 export function cleanJsonOutput(raw: string): string {
   let cleaned = raw.trim();
-  if (cleaned.startsWith("```json")) {
-    cleaned = cleaned.slice(7);
-  } else if (cleaned.startsWith("```")) {
-    cleaned = cleaned.slice(3);
+  cleaned = cleaned.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  const jsonBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/i;
+  const match = cleaned.match(jsonBlockRegex);
+  if (match && match[1]) {
+    cleaned = match[1].trim();
   }
-  if (cleaned.endsWith("```")) {
-    cleaned = cleaned.slice(0, -3);
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.substring(firstBrace, lastBrace + 1);
   }
   return cleaned.trim();
 }

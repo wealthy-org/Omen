@@ -1,10 +1,14 @@
 import { StructuredBelief } from "../../types/belief";
 
-export const USE_MOCK_AI =
-  process.env.NEXT_PUBLIC_USE_MOCK_CONTRACT !== "false" ||
-  !process.env.AI_API_KEY ||
-  process.env.AI_API_KEY.startsWith("dummy") ||
-  process.env.AI_API_KEY.startsWith("mock");
+export function isMockAiEnabled(): boolean {
+  const apiKey = process.env.AI_API_KEY || process.env.OPENROUTER_API_KEY;
+  if (!apiKey || apiKey.startsWith("dummy") || apiKey.startsWith("mock")) {
+    return true;
+  }
+  return false;
+}
+
+export const USE_MOCK_AI = isMockAiEnabled();
 
 export function extractMockBelief(rawText: string): StructuredBelief {
   const upper = rawText.toUpperCase();
