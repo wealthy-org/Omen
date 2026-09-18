@@ -2,38 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import BeliefCard, { BeliefItem } from "@/components/BeliefCard";
+import BeliefCard, { BeliefItem, BeliefCardStatus } from "@/components/BeliefCard";
+import { BeliefRecord, BeliefsApiResponse } from "@/types/api";
 
 export type BeliefFilterStatus = "all" | "detected" | "confirmed" | "market_live";
 
-const INITIAL_BELIEFS: BeliefItem[] = [
-  {
-    id: "belief-1",
-    statement: "ETH will outperform SOL after the Pectra hard fork.",
-    author: "VitalikFan",
-    authorHandle: "@vitalikfan",
-    isConfirmed: true,
-    status: "CONFIRMED",
-    confidenceScore: 92,
-    sourceUrl: "https://x.com/vitalikfan/1",
-    subject: "ETH",
-    marketId: "market-101",
-  },
-  {
-    id: "belief-2",
-    statement: "AI agent micro-payments will dominate L2 transaction counts.",
-    author: "AgentDev",
-    authorHandle: "@agentdev",
-    isConfirmed: false,
-    status: "DETECTED",
-    confidenceScore: 85,
-    sourceUrl: "https://warpcast.com/agentdev/1",
-    subject: "AI",
-  },
-];
-
 export default function BeliefsPage() {
-  const [beliefs, setBeliefs] = useState<BeliefItem[]>(INITIAL_BELIEFS);
+  const [beliefs, setBeliefs] = useState<BeliefItem[]>([]);
   const [filterStatus, setFilterStatus] = useState<BeliefFilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -45,20 +20,24 @@ export default function BeliefsPage() {
         setIsLoading(true);
         const res = await fetch("/api/beliefs");
         if (res.ok) {
-          const data = await res.json();
-          if (isMounted && data.beliefs && Array.isArray(data.beliefs)) {
-            const mapped: BeliefItem[] = data.beliefs.map((b: any, idx: number) => ({
-              id: b.id || `belief-${idx + 1}`,
-              statement: b.statement || b.title || "Social belief statement",
-              author: b.author || b.creator_name || "Anonymous",
-              authorHandle: b.authorHandle || b.creator_handle || undefined,
-              isConfirmed: Boolean(b.isConfirmed ?? b.is_confirmed ?? false),
-              status: (b.status as any) || (b.isConfirmed ? "CONFIRMED" : "DETECTED"),
-              confidenceScore: b.confidenceScore ?? b.confidence_score ?? 90,
-              sourceUrl: b.sourceUrl || b.source_url || undefined,
-              subject: b.subject || b.category || undefined,
-              marketId: b.marketId || b.market_id || undefined,
-            }));
+          const data: BeliefsApiResponse = await res.json();
+          if (isMounted && Array.isArray(data.beliefs)) {
+            const mapped: BeliefItem[] = data.beliefs
+              .filter((b): b is BeliefRecord & { statement: string } => Boolean(b.statement))
+              .map((b) => {
+                const firstMarket = Array.isArray(b.markets) ? b.markets[0] : b.markets;
+                return {
+                  id: b.id,
+                  statement: b.statement,
+                  author: b.author ?? "Unknown",
+                  authorHandle: b.source_platform ? `@${b.source_platform}` : undefined,
+                  isConfirmed: b.status === "CONFIRMED" || b.status === "MARKET_OPEN",
+                  status: (b.status as BeliefCardStatus) || "DETECTED",
+                  confidenceScore: b.ai_confidence !== null ? Number(b.ai_confidence) : undefined,
+                  sourceUrl: b.source_url ?? undefined,
+                  marketId: firstMarket?.id ?? undefined,
+                };
+              });
             setBeliefs(mapped);
           }
         }

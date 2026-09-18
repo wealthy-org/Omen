@@ -4,56 +4,8 @@ import React, { useState, useEffect } from "react";
 import BeliefMarketCard, { BeliefMarket } from "@/components/BeliefMarketCard";
 import DiscoveryFilter, { DiscoveryTab, MarketCategoryFilter } from "@/components/DiscoveryFilter";
 
-const INITIAL_MARKETS: BeliefMarket[] = [
-  {
-    id: "market-1",
-    statement: "Will ETH trade above $5000 in Q4 2026?",
-    author: "VitalikFan",
-    authorHandle: "@vitalikfan",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 100,
-    disagreePool: 50,
-    agreeParticipants: 70,
-    disagreeParticipants: 30,
-    closeTime: new Date(Date.now() + 86400000 * 5).toISOString(),
-    category: "Crypto",
-    volume: 150,
-  },
-  {
-    id: "market-2",
-    statement: "Will Solana DEX volume overtake Ethereum mainnet in 2026?",
-    author: "SolMaxi",
-    authorHandle: "@solmaxi",
-    isConfirmed: false,
-    status: "DETECTED",
-    agreePool: 20,
-    disagreePool: 80,
-    agreeParticipants: 25,
-    disagreeParticipants: 75,
-    closeTime: new Date(Date.now() + 86400000 * 2).toISOString(),
-    category: "Crypto",
-    volume: 100,
-  },
-  {
-    id: "market-3",
-    statement: "Will AI agents generate $10B in on-chain revenue by 2027?",
-    author: "AIThinker",
-    authorHandle: "@aithinker",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 200,
-    disagreePool: 100,
-    agreeParticipants: 80,
-    disagreeParticipants: 20,
-    closeTime: new Date(Date.now() + 86400000 * 10).toISOString(),
-    category: "AI",
-    volume: 300,
-  },
-];
-
 export default function MarketsPage() {
-  const [markets, setMarkets] = useState<BeliefMarket[]>(INITIAL_MARKETS);
+  const [markets, setMarkets] = useState<BeliefMarket[]>([]);
   const [activeTab, setActiveTab] = useState<DiscoveryTab>("trending");
   const [activeCategory, setActiveCategory] = useState<MarketCategoryFilter>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -73,21 +25,23 @@ export default function MarketsPage() {
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.markets && Array.isArray(data.markets)) {
-            const mapped: BeliefMarket[] = data.markets.map((m: any, idx: number) => ({
-              id: m.id || `mkt-${idx + 1}`,
-              statement: m.statement ?? m.title ?? "Belief Statement",
-              author: m.author ?? m.beliefs?.author ?? "Anonymous",
-              authorHandle: m.authorHandle ?? m.beliefs?.author ?? undefined,
-              isConfirmed: Boolean(m.isConfirmed ?? (m.beliefs?.status === "CONFIRMED")),
-              status: m.status ?? "OPEN",
-              agreePool: Number(m.agreePool ?? m.agree_pool ?? 0),
-              disagreePool: Number(m.disagreePool ?? m.disagree_pool ?? 0),
-              agreeParticipants: Number(m.agreeParticipants ?? m.agree_participants ?? 0),
-              disagreeParticipants: Number(m.disagreeParticipants ?? m.disagree_participants ?? 0),
-              closeTime: m.closeTime ?? m.close_time ?? m.deadline ?? new Date(Date.now() + 86400000 * 3).toISOString(),
-              category: m.category ?? "Crypto",
-              volume: Number(m.volume ?? m.total_pool ?? 0),
-            }));
+            const mapped: BeliefMarket[] = data.markets
+              .filter((m: any) => m && (m.statement || m.title))
+              .map((m: any, idx: number) => ({
+                id: m.id || `mkt-${idx + 1}`,
+                statement: m.statement ?? m.title,
+                author: m.author ?? m.beliefs?.author ?? "Unknown",
+                authorHandle: m.authorHandle ?? m.beliefs?.author ?? undefined,
+                isConfirmed: Boolean(m.isConfirmed ?? (m.beliefs?.status === "CONFIRMED")),
+                status: m.status ?? "OPEN",
+                agreePool: Number(m.agreePool ?? m.agree_pool ?? 0),
+                disagreePool: Number(m.disagreePool ?? m.disagree_pool ?? 0),
+                agreeParticipants: Number(m.agreeParticipants ?? m.agree_participants ?? 0),
+                disagreeParticipants: Number(m.disagreeParticipants ?? m.disagree_participants ?? 0),
+                closeTime: m.closeTime ?? m.close_time ?? m.deadline ?? "",
+                category: m.category ?? "General",
+                volume: Number(m.volume ?? m.total_pool ?? 0),
+              }));
             setMarkets(mapped);
           }
         }

@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 
-export type ActivityType = "AGREE" | "DISAGREE" | "CONFIRM_EIP712" | "CLAIM" | "RESOLVE";
+export type ActivityType = "AGREE" | "DISAGREE" | "CONFIRM_EIP712" | "CLAIM" | "RESOLVE" | "MARKET_CREATED";
 
 export interface ActivityItem {
   id: string;
@@ -24,25 +24,24 @@ export interface ActivityFeedProps {
   isLoading?: boolean;
 }
 
-function getExplorerUrl(txHash: string, chainId: number = 11155111): string {
+function getExplorerUrl(txHash: string, chainId?: number): string {
   if (chainId === 46630) {
     return `https://explorer.robinhood.com/tx/${txHash}`;
   }
-  return `https://sepolia.etherscan.io/tx/${txHash}`;
+  if (chainId === 11155111) {
+    return `https://sepolia.etherscan.io/tx/${txHash}`;
+  }
+  return "";
 }
 
 function formatRelativeTime(dateString: string): string {
-  try {
-    const diff = new Date().getTime() - new Date(dateString).getTime();
-    const mins = Math.max(1, Math.floor(diff / (1000 * 60)));
-    if (mins < 60) return `${mins}m ago`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days}d ago`;
-  } catch {
-    return "just now";
-  }
+  const diff = new Date().getTime() - new Date(dateString).getTime();
+  const mins = Math.max(1, Math.floor(diff / (1000 * 60)));
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoading = false }) => {
@@ -69,14 +68,24 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
   return (
     <div className="space-y-3">
       {activities.map((item) => {
-        const shortActor = item.actorAddress
+        const shortActor = item.actorAddress.length >= 10
           ? `${item.actorAddress.slice(0, 6)}...${item.actorAddress.slice(-4)}`
-          : "0xUnknown";
-        const shortTx = `${item.txHash.slice(0, 8)}...`;
+          : item.actorAddress;
+        const shortTx = item.txHash.length >= 10
+          ? `${item.txHash.slice(0, 8)}...`
+          : item.txHash;
         const explorerUrl = getExplorerUrl(item.txHash, item.chainId);
+        const displayName = item.actorName ?? shortActor;
+        const avatarInitial = (item.actorName ?? item.actorAddress).slice(0, 2).toUpperCase();
 
         const renderBadge = () => {
           switch (item.type) {
+            case "MARKET_CREATED":
+              return (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+                  ✨ MARKET CREATED
+                </span>
+              );
             case "AGREE":
               return (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
@@ -117,13 +126,13 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
           >
             <div className="flex items-start sm:items-center gap-3.5">
               <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs text-zinc-700 dark:text-zinc-300 shrink-0 border border-zinc-200 dark:border-zinc-700">
-                {(item.actorName || item.actorAddress).slice(0, 2).toUpperCase()}
+                {avatarInitial}
               </div>
 
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                    {item.actorName || shortActor}
+                    {displayName}
                   </span>
                   {renderBadge()}
                   {item.amountEth !== undefined && (
@@ -148,18 +157,20 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
                 {formatRelativeTime(item.timestamp)}
               </span>
 
-              <a
-                href={explorerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                aria-label={`View tx ${shortTx}`}
-              >
-                <span>{shortTx}</span>
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
+              {explorerUrl ? (
+                <a
+                  href={explorerUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-mono px-2.5 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  aria-label={`View tx ${shortTx}`}
+                >
+                  <span>{shortTx}</span>
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              ) : null}
             </div>
           </div>
         );

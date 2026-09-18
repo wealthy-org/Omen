@@ -25,6 +25,15 @@ export interface BeliefRecord {
   created_at: string;
   belief_sources?: BeliefSourceRecord[];
   creator_confirmations?: CreatorConfirmationRecord[];
+  markets?: MarketRecord[] | MarketRecord | null;
+}
+
+export interface BeliefsApiResponse {
+  success: boolean;
+  count: number;
+  total: number;
+  beliefs: BeliefRecord[];
+  error?: string;
 }
 
 export interface MarketResolutionRecord {
@@ -117,5 +126,32 @@ export interface FormattedMarketDetail {
 export interface MarketDetailApiResponse {
   success: boolean;
   market?: FormattedMarketDetail;
+  error?: string;
+}
+
+export interface ApiActivityEvent {
+  id: string;
+  market_id: string;
+  event_type: string;
+  wallet_address: string;
+  amount: number | null;
+  tx_hash: string;
+  block_number: number | null;
+  created_at: string;
+  market_contract_address: string | null;
+  market_chain_id: number | null;
+  market_status: string | null;
+  belief_id: string | null;
+  statement: string | null;
+  belief_author: string | null;
+}
+
+export interface ActivityApiResponse {
+  success: boolean;
+  activities: ApiActivityEvent[];
+  data: ApiActivityEvent[];
+  total: number;
+  limit: number;
+  offset: number;
   error?: string;
 }

@@ -27,20 +27,22 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.markets && Array.isArray(data.markets)) {
-            const mapped: BeliefMarket[] = data.markets.map((m: any, idx: number) => ({
-              id: m.id || `market-${idx + 1}`,
-              statement: m.statement ?? m.title ?? "Belief Market",
-              author: m.author ?? m.beliefs?.author ?? "Anonymous",
-              authorHandle: m.authorHandle ?? m.beliefs?.author ?? undefined,
-              isConfirmed: Boolean(m.isConfirmed ?? (m.beliefs?.status === "CONFIRMED")),
-              status: m.status ?? "OPEN",
-              agreePool: Number(m.agreePool ?? m.agree_pool ?? 0),
-              disagreePool: Number(m.disagreePool ?? m.disagree_pool ?? 0),
-              agreeParticipants: Number(m.agreeParticipants ?? m.agree_participants ?? 0),
-              disagreeParticipants: Number(m.disagreeParticipants ?? m.disagree_participants ?? 0),
-              closeTime: m.closeTime ?? m.close_time ?? m.deadline ?? new Date(Date.now() + 86400000 * 3).toISOString(),
-              category: m.category ?? "Crypto",
-            }));
+            const mapped: BeliefMarket[] = data.markets
+              .filter((m: any) => m && (m.statement || m.title))
+              .map((m: any, idx: number) => ({
+                id: m.id || `market-${idx + 1}`,
+                statement: m.statement ?? m.title,
+                author: m.author ?? m.beliefs?.author ?? "Unknown",
+                authorHandle: m.authorHandle ?? m.beliefs?.author ?? undefined,
+                isConfirmed: Boolean(m.isConfirmed ?? (m.beliefs?.status === "CONFIRMED")),
+                status: m.status ?? "OPEN",
+                agreePool: Number(m.agreePool ?? m.agree_pool ?? 0),
+                disagreePool: Number(m.disagreePool ?? m.disagree_pool ?? 0),
+                agreeParticipants: Number(m.agreeParticipants ?? m.agree_participants ?? 0),
+                disagreeParticipants: Number(m.disagreeParticipants ?? m.disagree_participants ?? 0),
+                closeTime: m.closeTime ?? m.close_time ?? m.deadline ?? "",
+                category: m.category ?? "General",
+              }));
             setMarkets(mapped);
           }
         }

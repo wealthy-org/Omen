@@ -89,13 +89,15 @@ describe("Landing Page V1 Components", () => {
     expect(submitButton).toHaveAttribute("href", "/create");
   });
 
-  it("renders the 4 V1 platform metrics overview cards in StatsOverview", () => {
+  it("renders the 4 V1 platform metrics overview cards in StatsOverview", async () => {
     render(<HomePage />);
 
-    expect(screen.getByText("320.50 ETH")).toBeInTheDocument();
-    expect(screen.getByText("18 Markets")).toBeInTheDocument();
-    expect(screen.getByText("142 Beliefs")).toBeInTheDocument();
-    expect(screen.getByText("38 Creators")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("320.50 ETH")).toBeInTheDocument();
+      expect(screen.getByText("18 Markets")).toBeInTheDocument();
+      expect(screen.getByText("142 Beliefs")).toBeInTheDocument();
+      expect(screen.getByText("38 Creators")).toBeInTheDocument();
+    });
   });
 
   it("renders dynamic trending belief markets using BeliefMarketCard", async () => {

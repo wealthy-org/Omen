@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const supabase = getSupabaseClient();
     let query = supabase
       .from("market_events")
-      .select("*, markets (id, contract_address, chain_id, status, belief_id, beliefs (id, statement, author))", { count: "exact" });
+      .select("*, markets (id, title, contract_address, chain_id, status, belief_id, beliefs (id, statement, author))", { count: "exact" });
 
     if (marketId) {
       query = query.eq("market_id", marketId);
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
         market_chain_id: market?.chain_id || null,
         market_status: market?.status || null,
         belief_id: belief?.id || market?.belief_id || null,
-        statement: belief?.statement || null,
+        statement: belief?.statement || market?.title || null,
         belief_author: belief?.author || null,
       };
     });

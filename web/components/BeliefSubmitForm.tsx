@@ -140,7 +140,10 @@ export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
       }
 
       const data = await res.json();
-      const marketId = data.marketId || data.data?.market_id || "market-1";
+      const marketId = data.marketId || data.data?.market_id;
+      if (!marketId) {
+        throw new Error("Market ID not returned");
+      }
 
       if (onSuccessRedirect) {
         onSuccessRedirect(marketId);

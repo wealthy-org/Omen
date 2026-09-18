@@ -2,8 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import ActivityFeed, { ActivityItem, ActivityType } from "@/components/ActivityFeed";
+import { ApiActivityEvent, ActivityApiResponse } from "@/types/api";
 
 export type ActivityFilterCategory = "all" | "stakes" | "confirmations" | "payouts";
+
+function parseActivityType(eventType: string): ActivityType {
+  const norm = (eventType || "").toUpperCase();
+  if (norm === "MARKETCREATED" || norm === "MARKET_CREATED") return "MARKET_CREATED";
+  if (norm === "CREATORCONFIRMED" || norm === "CONFIRM_EIP712" || norm === "CONFIRMED") return "CONFIRM_EIP712";
+  if (norm === "PAYOUTCLAIMED" || norm === "CLAIM") return "CLAIM";
+  if (norm === "MARKETRESOLVED" || norm === "RESOLVE") return "RESOLVE";
+  if (norm === "DISAGREE" || norm === "POSITION_DISAGREE") return "DISAGREE";
+  return "AGREE";
+}
 
 export default function ActivityPage() {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
@@ -16,22 +27,22 @@ export default function ActivityPage() {
       try {
         const res = await fetch("/api/activity");
         if (res.ok) {
-          const data = await res.json();
-          const rawList = data.activities || data.data;
-          if (isMounted && rawList && Array.isArray(rawList)) {
-            const mapped: ActivityItem[] = rawList.map((a: any, idx: number) => ({
-              id: a.id || `act-${idx + 1}`,
-              type: (a.type as ActivityType) || "AGREE",
-              actorAddress: a.actorAddress || a.user_address || "0x0000000000000000000000000000000000000000",
-              actorName: a.actorName || a.username || undefined,
-              marketId: a.marketId || a.market_id || "market-1",
-              marketStatement: a.marketStatement || a.market_title || "Market Statement",
-              amountEth: a.amountEth !== undefined ? Number(a.amountEth) : a.amount_eth !== undefined ? Number(a.amount_eth) : undefined,
-              outcomeWon: a.outcomeWon || a.outcome || undefined,
-              txHash: a.txHash || a.transaction_hash || "0x0000000000000000000000000000000000000000000000000000000000000000",
-              chainId: a.chainId || a.chain_id || 11155111,
-              timestamp: a.timestamp || a.created_at || new Date().toISOString(),
-            }));
+          const data: ActivityApiResponse = await res.json();
+          if (isMounted && Array.isArray(data.activities)) {
+            const mapped: ActivityItem[] = data.activities
+              .filter((a): a is ApiActivityEvent & { statement: string } => Boolean(a.statement))
+              .map((a) => ({
+                id: a.id,
+                type: parseActivityType(a.event_type),
+                actorAddress: a.wallet_address,
+                actorName: a.belief_author ?? undefined,
+                marketId: a.market_id,
+                marketStatement: a.statement,
+                amountEth: a.amount !== null && a.amount !== undefined ? Number(a.amount) : undefined,
+                txHash: a.tx_hash,
+                chainId: a.market_chain_id ?? undefined,
+                timestamp: a.created_at,
+              }));
             setActivities(mapped);
           }
         }
@@ -53,7 +64,7 @@ export default function ActivityPage() {
 
   const filteredActivities = activities.filter((act) => {
     if (filterCategory === "all") return true;
-    if (filterCategory === "stakes") return act.type === "AGREE" || act.type === "DISAGREE";
+    if (filterCategory === "stakes") return act.type === "AGREE" || act.type === "DISAGREE" || act.type === "MARKET_CREATED";
     if (filterCategory === "confirmations") return act.type === "CONFIRM_EIP712";
     if (filterCategory === "payouts") return act.type === "CLAIM" || act.type === "RESOLVE";
     return true;

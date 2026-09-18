@@ -12,10 +12,10 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
   const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
 
   const [stats, setStats] = useState({
-    totalVolume: "320.50 ETH",
-    activeMarkets: "18 Markets",
-    totalBeliefs: "142 Beliefs",
-    verifiedCreators: "38 Creators",
+    totalVolume: "0.00 ETH",
+    activeMarkets: "0 Markets",
+    totalBeliefs: "0 Beliefs",
+    verifiedCreators: "0 Creators",
   });
 
   useEffect(() => {
@@ -25,10 +25,10 @@ export default function StatsOverview({ theme: propTheme }: StatsOverviewProps) 
       .then((data) => {
         if (isMounted && data?.success && data?.stats) {
           setStats({
-            totalVolume: `${data.stats.total_volume_eth || data.stats.total_tvl_eth || "320.50"} ETH`,
-            activeMarkets: `${data.stats.active_markets || "18"} Markets`,
-            totalBeliefs: `${data.stats.total_beliefs || "142"} Beliefs`,
-            verifiedCreators: `${data.stats.verified_creators || "38"} Creators`,
+            totalVolume: `${data.stats.total_volume_eth ?? data.stats.total_tvl_eth ?? "0.00"} ETH`,
+            activeMarkets: `${data.stats.active_markets ?? 0} Markets`,
+            totalBeliefs: `${data.stats.total_beliefs ?? 0} Beliefs`,
+            verifiedCreators: `${data.stats.verified_creators ?? 0} Creators`,
           });
         }
       })

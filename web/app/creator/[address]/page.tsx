@@ -12,46 +12,10 @@ export interface CreatorPageProps {
   params: { address: string } | Promise<{ address: string }>;
 }
 
-const DEFAULT_CREATOR: CreatorProfile & { bio?: string; confirmationRate?: number } = {
-  address: "0x1111111111111111111111111111111111111111",
-  name: "Vitalik Buterin",
-  handle: "@vitalik.eth",
-  bio: "Ethereum researcher and decentralization advocate.",
-  isVerified: true,
-  accuracyRate: 88,
-  confirmationRate: 95,
-  totalBeliefs: 24,
-  volumeGeneratedEth: 540.2,
-  confirmedBeliefs: 22,
-};
-
-const DEFAULT_BELIEFS: BeliefItem[] = [
-  {
-    id: "belief-1",
-    statement: "Will ETH trade above $5000 in Q4 2026?",
-    author: "Vitalik Buterin",
-    authorHandle: "@vitalik.eth",
-    isConfirmed: true,
-    status: "MARKET_OPEN",
-    confidenceScore: 95,
-    marketId: "market-101",
-  },
-  {
-    id: "belief-2",
-    statement: "Layer 2 transaction count will exceed 100M daily.",
-    author: "Vitalik Buterin",
-    authorHandle: "@vitalik.eth",
-    isConfirmed: true,
-    status: "RESOLVED",
-    confidenceScore: 92,
-    marketId: "market-102",
-  },
-];
-
 export default function CreatorProfilePage({ params }: CreatorPageProps) {
-  const [targetAddress, setTargetAddress] = useState<string>("0x1111111111111111111111111111111111111111");
-  const [creator, setCreator] = useState(DEFAULT_CREATOR);
-  const [beliefs, setBeliefs] = useState<BeliefItem[]>(DEFAULT_BELIEFS);
+  const [targetAddress, setTargetAddress] = useState<string>("");
+  const [creator, setCreator] = useState<(CreatorProfile & { bio?: string; confirmationRate?: number }) | null>(null);
+  const [beliefs, setBeliefs] = useState<BeliefItem[]>([]);
   const [activeTab, setActiveTab] = useState<ProfileTab>("active");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -61,8 +25,13 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
       try {
         const resolved = await Promise.resolve(params);
         if (!isMounted) return;
-        const addr = resolved?.address || "0x1111111111111111111111111111111111111111";
+        const addr = resolved?.address || "";
         setTargetAddress(addr);
+
+        if (!addr) {
+          setIsLoading(false);
+          return;
+        }
 
         setIsLoading(true);
         const res = await fetch(`/api/creators/${addr}`);
@@ -137,7 +106,11 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
         </Link>
       </div>
 
-      <CreatorProfileHeader creator={{ ...creator, address: targetAddress }} />
+      {creator ? (
+        <CreatorProfileHeader creator={{ ...creator, address: targetAddress }} />
+      ) : isLoading ? (
+        <div className="h-48 rounded-3xl bg-zinc-100 dark:bg-zinc-800/60 animate-pulse mb-8" />
+      ) : null}
 
       <div className="flex items-center gap-2 mb-6 border-b border-zinc-200 dark:border-zinc-800 pb-3 overflow-x-auto animate-fade-in">
         <button

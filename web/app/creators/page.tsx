@@ -5,31 +5,6 @@ import CreatorCard, { CreatorProfile } from "@/components/CreatorCard";
 
 export type CreatorSortOption = "accuracy" | "confirmed" | "volume" | "beliefs";
 
-const INITIAL_CREATORS: CreatorProfile[] = [
-  {
-    address: "0x1111111111111111111111111111111111111111",
-    name: "Vitalik Buterin",
-    handle: "@vitalik.eth",
-    accuracyRate: 92,
-    confirmedBeliefs: 18,
-    totalBeliefs: 20,
-    volumeGeneratedEth: 450.5,
-    earnedFeesEth: 6.75,
-    isVerified: true,
-  },
-  {
-    address: "0x2222222222222222222222222222222222222222",
-    name: "Satoshi Disciple",
-    handle: "@satoshidisciple",
-    accuracyRate: 75,
-    confirmedBeliefs: 30,
-    totalBeliefs: 35,
-    volumeGeneratedEth: 120.0,
-    earnedFeesEth: 1.8,
-    isVerified: true,
-  },
-];
-
 export default function CreatorsPage() {
   const [creators, setCreators] = useState<CreatorProfile[]>([]);
   const [sortBy, setSortBy] = useState<CreatorSortOption>("accuracy");
@@ -46,18 +21,20 @@ export default function CreatorsPage() {
           const data = await res.json();
           const creatorList = data.data || data.creators || (Array.isArray(data) ? data : []);
           if (isMounted && Array.isArray(creatorList)) {
-            const mapped: CreatorProfile[] = creatorList.map((c: any, idx: number) => ({
-              address: c.address || c.wallet_address || `0x${(idx + 1).toString().padStart(40, "0")}`,
-              name: c.name || c.display_name || c.handle?.replace("@", "") || "Creator",
-              handle: c.handle || c.username || undefined,
-              avatarUrl: c.avatarUrl || c.avatar_url || undefined,
-              accuracyRate: Number(c.accuracyRate ?? c.accuracy_rate ?? c.accuracy_percentage ?? c.win_rate ?? 85),
-              confirmedBeliefs: Number(c.confirmedBeliefs ?? c.confirmed_count ?? c.confirmed_beliefs_count ?? 0),
-              totalBeliefs: Number(c.totalBeliefs ?? c.total_count ?? c.total_beliefs_count ?? 1),
-              volumeGeneratedEth: Number(c.volumeGeneratedEth ?? c.volume_eth ?? c.total_volume ?? 0),
-              earnedFeesEth: Number(c.earnedFeesEth ?? c.fees_eth ?? 0),
-              isVerified: Boolean(c.isVerified ?? c.is_verified ?? (c.confirmed_beliefs_count > 0)),
-            }));
+            const mapped: CreatorProfile[] = creatorList
+              .filter((c: any) => c && (c.address || c.wallet_address))
+              .map((c: any) => ({
+                address: c.address || c.wallet_address,
+                name: c.name || c.display_name || c.handle?.replace("@", "") || "Creator",
+                handle: c.handle || c.username || undefined,
+                avatarUrl: c.avatarUrl || c.avatar_url || undefined,
+                accuracyRate: Number(c.accuracyRate ?? c.accuracy_rate ?? c.accuracy_percentage ?? c.win_rate ?? 85),
+                confirmedBeliefs: Number(c.confirmedBeliefs ?? c.confirmed_count ?? c.confirmed_beliefs_count ?? 0),
+                totalBeliefs: Number(c.totalBeliefs ?? c.total_count ?? c.total_beliefs_count ?? 1),
+                volumeGeneratedEth: Number(c.volumeGeneratedEth ?? c.volume_eth ?? c.total_volume ?? 0),
+                earnedFeesEth: Number(c.earnedFeesEth ?? c.fees_eth ?? 0),
+                isVerified: Boolean(c.isVerified ?? c.is_verified ?? (c.confirmed_beliefs_count > 0)),
+              }));
             setCreators(mapped);
           }
         }
