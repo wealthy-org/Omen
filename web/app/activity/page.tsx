@@ -54,8 +54,9 @@ export default function ActivityPage() {
         const res = await fetch("/api/activity");
         if (res.ok) {
           const data = await res.json();
-          if (isMounted && data.activities && Array.isArray(data.activities)) {
-            const mapped: ActivityItem[] = data.activities.map((a: any, idx: number) => ({
+          const rawList = data.activities || data.data;
+          if (isMounted && rawList && Array.isArray(rawList)) {
+            const mapped: ActivityItem[] = rawList.map((a: any, idx: number) => ({
               id: a.id || `act-${idx + 1}`,
               type: (a.type as ActivityType) || "AGREE",
               actorAddress: a.actorAddress || a.user_address || "0x0000000000000000000000000000000000000000",

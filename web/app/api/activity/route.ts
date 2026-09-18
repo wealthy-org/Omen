@@ -57,6 +57,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: formattedEvents,
+      activities: formattedEvents,
       total: count ?? formattedEvents.length,
       limit,
       offset,
