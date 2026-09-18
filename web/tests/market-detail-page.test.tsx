@@ -115,4 +115,21 @@ describe("Market Detail Page (/market/[id])", () => {
       expect(screen.getByText(/Payout Claimed/i)).toBeInTheDocument();
     });
   });
+
+  it("renders market not found state when API returns 404", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: async () => ({ error: "Market not found" }),
+    });
+
+    render(<MarketDetailPage params={{ id: "non-existent" }} />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: /Market Not Found/i })).toBeInTheDocument();
+    });
+
+    expect(screen.getByRole("link", { name: /Explore All Markets/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Back to Home/i })).toBeInTheDocument();
+  });
 });

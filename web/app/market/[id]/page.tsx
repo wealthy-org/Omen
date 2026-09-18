@@ -99,16 +99,16 @@ function MarketDetailContent({ params }: MarketDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
         <div className="max-w-6xl mx-auto space-y-6 animate-pulse">
-          <div className="h-4 w-32 bg-zinc-800 rounded mb-4" />
+          <div className="h-4 w-32 bg-zinc-200 dark:bg-zinc-800 rounded mb-4" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-7 space-y-4">
-              <div className="h-64 bg-zinc-900 rounded-2xl" />
-              <div className="h-32 bg-zinc-900 rounded-2xl" />
+              <div className="h-64 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl" />
+              <div className="h-32 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl" />
             </div>
             <div className="lg:col-span-5 space-y-4">
-              <div className="h-80 bg-zinc-900 rounded-2xl" />
+              <div className="h-80 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl" />
             </div>
           </div>
         </div>
@@ -118,14 +118,14 @@ function MarketDetailContent({ params }: MarketDetailPageProps) {
 
   if (error || !market) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8 animate-fade-in flex items-center justify-center">
-        <div className="max-w-md w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl p-8 text-center space-y-5 shadow-2xl backdrop-blur-md">
-          <div className="w-16 h-16 mx-auto rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-2xl font-bold">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-fade-in flex items-center justify-center">
+        <div className="max-w-md w-full bg-white dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 text-center space-y-5 shadow-xl backdrop-blur-md">
+          <div className="w-16 h-16 mx-auto rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 dark:text-rose-400 text-2xl font-bold">
             !
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-white tracking-tight">Market Not Found</h2>
-            <p className="text-sm text-zinc-400 font-mono break-all leading-relaxed">
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white tracking-tight">Market Not Found</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 font-mono break-all leading-relaxed">
               {error ?? `Market "${marketId}" does not exist in the protocol database.`}
             </p>
           </div>
@@ -138,7 +138,7 @@ function MarketDetailContent({ params }: MarketDetailPageProps) {
             </Link>
             <Link
               href="/"
-              className="w-full py-2.5 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors text-center"
+              className="w-full py-2.5 px-4 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-300 text-sm font-medium transition-colors text-center"
             >
               Back to Home
             </Link>
@@ -149,14 +149,14 @@ function MarketDetailContent({ params }: MarketDetailPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pt-24 pb-16 px-4 sm:px-6 lg:px-8 animate-fade-in">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-2 text-xs text-zinc-400 animate-slide-right">
-          <Link href="/markets" className="hover:text-emerald-400 transition-colors">
+        <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 animate-slide-right">
+          <Link href="/markets" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
             Markets
           </Link>
           <span>/</span>
-          <span className="text-zinc-200 font-mono">{market.id}</span>
+          <span className="text-zinc-800 dark:text-zinc-200 font-mono">{market.id}</span>
         </div>
 
         <MarketDetailPanels market={market} />
@@ -169,8 +169,8 @@ export default function MarketDetailPage(props: MarketDetailPageProps = {}) {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-zinc-950 text-white pt-24 pb-16 px-4 flex items-center justify-center">
-          <div className="text-zinc-500 font-mono text-sm">Loading market details...</div>
+        <div className="w-full py-20 flex items-center justify-center">
+          <div className="text-zinc-500 dark:text-zinc-400 font-mono text-sm">Loading market details...</div>
         </div>
       }
     >

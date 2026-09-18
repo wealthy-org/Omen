@@ -142,17 +142,19 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
               </a>
             )}
           </div>
-        </div>
 
-        <CreatorConfirmation
-          beliefId={activeMarket.id}
-          statement={activeMarket.statement}
-          authorHandle={activeMarket.authorHandle ?? ""}
-          creatorAddress={activeMarket.creatorAddress ?? undefined}
-          isConfirmed={activeMarket.isConfirmed}
-          marketAddress={activeMarket.marketAddress ?? undefined}
-          onConfirmed={handleCreatorConfirmed}
-        />
+          <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
+            <CreatorConfirmation
+              beliefId={activeMarket.id}
+              statement={activeMarket.statement}
+              authorHandle={activeMarket.authorHandle ?? ""}
+              creatorAddress={activeMarket.creatorAddress ?? undefined}
+              isConfirmed={activeMarket.isConfirmed}
+              marketAddress={activeMarket.marketAddress ?? undefined}
+              onConfirmed={handleCreatorConfirmed}
+            />
+          </div>
+        </div>
 
         <div className="bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 space-y-4">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-white flex items-center gap-2">
