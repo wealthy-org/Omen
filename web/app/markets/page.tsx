@@ -75,18 +75,18 @@ export default function MarketsPage() {
           if (isMounted && data.markets && Array.isArray(data.markets)) {
             const mapped: BeliefMarket[] = data.markets.map((m: any, idx: number) => ({
               id: m.id || `mkt-${idx + 1}`,
-              statement: m.statement || m.title || "Belief Statement",
-              author: m.author || m.creator || "Anonymous",
-              authorHandle: m.authorHandle || m.creator_handle || undefined,
-              isConfirmed: Boolean(m.isConfirmed ?? m.creator_confirmed ?? false),
-              status: m.status || "OPEN",
-              agreePool: Number(m.agreePool ?? m.agree_pool ?? m.yes_pool ?? 0),
-              disagreePool: Number(m.disagreePool ?? m.disagree_pool ?? m.no_pool ?? 0),
-              agreeParticipants: Number(m.agreeParticipants ?? m.agree_participants ?? 10),
-              disagreeParticipants: Number(m.disagreeParticipants ?? m.disagree_participants ?? 5),
-              closeTime: m.closeTime || m.deadline || new Date(Date.now() + 86400000 * 3).toISOString(),
-              category: m.category || "Crypto",
-              volume: Number(m.volume ?? (m.agree_pool || 0) + (m.no_pool || 0)),
+              statement: m.statement ?? m.title ?? "Belief Statement",
+              author: m.author ?? m.beliefs?.author ?? "Anonymous",
+              authorHandle: m.authorHandle ?? m.beliefs?.author ?? undefined,
+              isConfirmed: Boolean(m.isConfirmed ?? (m.beliefs?.status === "CONFIRMED")),
+              status: m.status ?? "OPEN",
+              agreePool: Number(m.agreePool ?? m.agree_pool ?? 0),
+              disagreePool: Number(m.disagreePool ?? m.disagree_pool ?? 0),
+              agreeParticipants: Number(m.agreeParticipants ?? m.agree_participants ?? 0),
+              disagreeParticipants: Number(m.disagreeParticipants ?? m.disagree_participants ?? 0),
+              closeTime: m.closeTime ?? m.close_time ?? m.deadline ?? new Date(Date.now() + 86400000 * 3).toISOString(),
+              category: m.category ?? "Crypto",
+              volume: Number(m.volume ?? m.total_pool ?? 0),
             }));
             setMarkets(mapped);
           }

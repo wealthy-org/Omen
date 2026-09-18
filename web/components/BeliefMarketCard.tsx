@@ -47,11 +47,11 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
   const totalPool = market.agreePool + market.disagreePool;
   const totalParticipants = market.agreeParticipants + market.disagreeParticipants;
   
-  const agreePoolPercent = totalPool > 0 ? Math.round((market.agreePool / totalPool) * 100) : 50;
-  const disagreePoolPercent = totalPool > 0 ? 100 - agreePoolPercent : 50;
+  const agreePoolPercent = totalPool > 0 ? Math.round((market.agreePool / totalPool) * 100) : 0;
+  const disagreePoolPercent = totalPool > 0 ? 100 - agreePoolPercent : 0;
 
-  const agreeParticipantPercent = totalParticipants > 0 ? Math.round((market.agreeParticipants / totalParticipants) * 100) : 50;
-  const disagreeParticipantPercent = totalParticipants > 0 ? 100 - agreeParticipantPercent : 50;
+  const agreeParticipantPercent = totalParticipants > 0 ? Math.round((market.agreeParticipants / totalParticipants) * 100) : 0;
+  const disagreeParticipantPercent = totalParticipants > 0 ? 100 - agreeParticipantPercent : 0;
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:shadow-lg transition-all hover-lift flex flex-col justify-between group">

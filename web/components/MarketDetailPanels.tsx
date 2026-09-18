@@ -39,8 +39,8 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
   const { claim, isPending: isClaiming, isSuccess: isClaimSuccess, error: claimError } = useClaim(activeMarket.marketAddress ?? undefined);
 
   const totalPool = activeMarket.agreePoolEth + activeMarket.disagreePoolEth;
-  const agreePct = totalPool > 0 ? Math.round((activeMarket.agreePoolEth / totalPool) * 100) : 50;
-  const disagreePct = 100 - agreePct;
+  const agreePct = totalPool > 0 ? Math.round((activeMarket.agreePoolEth / totalPool) * 100) : 0;
+  const disagreePct = totalPool > 0 ? 100 - agreePct : 0;
 
   const explorerBase = activeMarket.chainId === 46630
     ? "https://robinhood.blockscout.com"

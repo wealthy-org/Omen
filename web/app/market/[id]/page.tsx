@@ -31,7 +31,7 @@ function mapToMarketDetailData(raw: Record<string, unknown>, idFallback: string)
     agreePoolEth: agreePool,
     disagreePoolEth: disagreePool,
     totalVolumeEth: totalVolume,
-    socialConsensusPct: typeof raw.socialConsensusPct === "number" ? raw.socialConsensusPct : 50,
+    socialConsensusPct: typeof raw.socialConsensusPct === "number" ? raw.socialConsensusPct : 0,
     marketAddress: typeof raw.marketAddress === "string" ? raw.marketAddress : (typeof raw.contract_address === "string" ? raw.contract_address : null),
     chainId: typeof raw.chainId === "number" ? raw.chainId : 11155111,
     oracleFeed: typeof raw.oracleFeed === "string" ? raw.oracleFeed : (typeof raw.resolution_source === "string" ? raw.resolution_source : null),

@@ -65,7 +65,10 @@ export async function GET(
     const agreePool = Number(market.agree_pool ?? 0);
     const disagreePool = Number(market.disagree_pool ?? 0);
     const totalPool = agreePool + disagreePool;
-    const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 50;
+    const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 0;
+    const positions = Array.isArray(market.market_positions) ? market.market_positions : [];
+    const agreeParticipants = positions.filter((p: any) => p.side === "AGREE" || p.side === "YES").length;
+    const disagreeParticipants = positions.filter((p: any) => p.side === "DISAGREE" || p.side === "NO").length;
 
     const targetPriceVal = typeof market.resolution_config?.target_price === "number"
       ? market.resolution_config.target_price
@@ -111,6 +114,8 @@ export async function GET(
       disagree_pool: disagreePool,
       total_pool: totalPool,
       capital_consensus: Math.round(capitalConsensus * 100) / 100,
+      agree_participants: agreeParticipants,
+      disagree_participants: disagreeParticipants,
     };
 
     return NextResponse.json({

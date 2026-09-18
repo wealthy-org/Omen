@@ -110,6 +110,8 @@ export interface FormattedMarketDetail {
   targetPrice: number | null;
   total_pool: number;
   capital_consensus: number;
+  agree_participants: number;
+  disagree_participants: number;
 }
 
 export interface MarketDetailApiResponse {

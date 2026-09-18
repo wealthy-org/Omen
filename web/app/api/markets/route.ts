@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const limit = rawLimit ? Math.min(Math.max(parseInt(rawLimit, 10) || 20, 1), 100) : 20;
     const offset = rawOffset ? Math.max(parseInt(rawOffset, 10) || 0, 0) : 0;
 
-    let query: any = supabase.from("markets").select("*, beliefs(*, belief_sources(*))");
+    let query: any = supabase.from("markets").select("*, beliefs(*, belief_sources(*)), market_positions(id, side, wallet_address)");
 
     if (statusParam === "active") {
       query = query.eq("status", "active");
@@ -63,7 +63,10 @@ export async function GET(req: NextRequest) {
       const agreePool = Number(m.agree_pool ?? m.total_pool_yes ?? 0);
       const disagreePool = Number(m.disagree_pool ?? m.total_pool_no ?? 0);
       const totalPool = agreePool + disagreePool;
-      const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 50;
+      const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 0;
+      const positions = Array.isArray(m.market_positions) ? m.market_positions : [];
+      const agreeParticipants = positions.filter((p: any) => p.side === "AGREE" || p.side === "YES").length;
+      const disagreeParticipants = positions.filter((p: any) => p.side === "DISAGREE" || p.side === "NO").length;
 
       return {
         id: m.id,
@@ -85,6 +88,8 @@ export async function GET(req: NextRequest) {
         total_pool_no: disagreePool,
         total_pool: totalPool,
         capital_consensus: Math.round(capitalConsensus * 100) / 100,
+        agree_participants: agreeParticipants,
+        disagree_participants: disagreeParticipants,
         resolution_type: m.resolution_type,
         resolution_config: m.resolution_config,
         resolution_source: m.resolution_source ?? null,
