@@ -94,23 +94,25 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800/80">
             <Link
-              href={`/creator/${activeMarket.creatorAddress}`}
+              href={`/creator/${activeMarket.creatorAddress || "0x0000000000000000000000000000000000000000"}`}
               className="flex items-center gap-3 group"
             >
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-emerald-500 p-0.5">
                 <div className="w-full h-full rounded-full bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-zinc-900 dark:text-white font-bold text-sm">
-                  {activeMarket.authorHandle.slice(0, 2).toUpperCase()}
+                  {(activeMarket.authorHandle || "AN").slice(0, 2).toUpperCase()}
                 </div>
               </div>
               <div>
                 <div className="text-sm font-semibold text-zinc-900 dark:text-white group-hover:text-emerald-500 transition-colors flex items-center gap-1.5">
-                  @{activeMarket.authorHandle}
+                  @{activeMarket.authorHandle || "anonymous"}
                   {activeMarket.isConfirmed && (
                     <span className="text-emerald-500 text-xs">✓</span>
                   )}
                 </div>
                 <div className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
-                  {activeMarket.creatorAddress.slice(0, 6)}...{activeMarket.creatorAddress.slice(-4)}
+                  {activeMarket.creatorAddress && activeMarket.creatorAddress.length >= 10
+                    ? `${activeMarket.creatorAddress.slice(0, 6)}...${activeMarket.creatorAddress.slice(-4)}`
+                    : activeMarket.creatorAddress || "0x00...0000"}
                 </div>
               </div>
             </Link>
@@ -147,7 +149,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
             <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80">
               <span className="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Target Price Threshold</span>
               <span className="text-lg font-bold text-zinc-900 dark:text-white font-mono">
-                ${activeMarket.targetPrice.toLocaleString()}
+                ${(activeMarket.targetPrice ?? 0).toLocaleString()}
               </span>
             </div>
             <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80">

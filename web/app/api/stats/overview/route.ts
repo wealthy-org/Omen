@@ -16,16 +16,17 @@ export async function GET() {
       return NextResponse.json({ success: false, error: marketsRes.error.message }, { status: 500 });
     }
 
-    const liveMarkets = marketsRes.data || [];
+    const liveMarkets = marketsRes.data ?? [];
     const activeMarketsCount = liveMarkets.filter((m) => m.status === "active" || m.status === "OPEN").length;
-    const totalTvl = liveMarkets.reduce(
-      (sum, m) => sum + (Number(m.total_pool_yes || m.agree_pool || m.yes_pool || 0) + Number(m.total_pool_no || m.disagree_pool || m.no_pool || 0)),
-      0
-    );
+    const totalTvl = liveMarkets.reduce((sum, m) => {
+      const agree = Number(m.agree_pool ?? m.total_pool_yes ?? m.yes_pool ?? 0);
+      const disagree = Number(m.disagree_pool ?? m.total_pool_no ?? m.no_pool ?? 0);
+      return sum + (agree + disagree);
+    }, 0);
 
-    const totalBeliefsCount = beliefsRes.count || (liveMarkets.length > 0 ? liveMarkets.length : 142);
-    const verifiedCreatorsCount = creatorsRes.count || 38;
-    const activeWalletsCount = usersRes.count || 120;
+    const totalBeliefsCount = beliefsRes.count ?? liveMarkets.length;
+    const verifiedCreatorsCount = creatorsRes.count ?? 0;
+    const activeWalletsCount = usersRes.count ?? 0;
 
     return NextResponse.json({
       success: true,
@@ -38,7 +39,7 @@ export async function GET() {
         active_wallets: activeWalletsCount,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Internal Server Error";
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }

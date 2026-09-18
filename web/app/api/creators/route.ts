@@ -33,9 +33,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    let formattedProfiles = (profiles || []).map((profile) => {
-      const resolved = profile.resolved_count || 0;
-      const correct = profile.correct_count || 0;
+    const formattedProfiles = (profiles ?? []).map((profile) => {
+      const resolved = Number(profile.resolved_count ?? 0);
+      const correct = Number(profile.correct_count ?? 0);
       const accuracy = resolved > 0 ? Number(((correct / resolved) * 100).toFixed(2)) : 0;
 
       return {
@@ -43,55 +43,6 @@ export async function GET(req: NextRequest) {
         accuracy_percentage: accuracy,
       };
     });
-
-    if (formattedProfiles.length === 0) {
-      const { data: beliefs } = await supabase
-        .from("beliefs")
-        .select("author, creator_address, is_confirmed, status")
-        .order("created_at", { ascending: false });
-
-      if (beliefs && beliefs.length > 0) {
-        const authorMap = new Map<string, { total: number; confirmed: number; address: string }>();
-
-        for (const b of beliefs) {
-          const key = b.author || b.creator_address || "Anonymous";
-          const existing = authorMap.get(key) || {
-            total: 0,
-            confirmed: 0,
-            address: b.creator_address || `0x${Array.from({ length: 40 }, () => "0").join("")}`,
-          };
-          existing.total += 1;
-          if (b.is_confirmed) {
-            existing.confirmed += 1;
-          }
-          if (b.creator_address) {
-            existing.address = b.creator_address;
-          }
-          authorMap.set(key, existing);
-        }
-
-        formattedProfiles = Array.from(authorMap.entries()).map(([handle, stats], idx) => {
-          const address = stats.address.startsWith("0x") && stats.address.length === 42
-            ? stats.address
-            : `0x${(idx + 1).toString().padStart(40, "0")}`;
-
-          return {
-            id: `creator-${idx + 1}`,
-            wallet_address: address,
-            handle: handle.startsWith("@") ? handle : `@${handle}`,
-            display_name: handle.replace("@", ""),
-            bio: "Active Social Belief Creator",
-            avatar_url: null,
-            total_beliefs_count: stats.total,
-            confirmed_beliefs_count: stats.confirmed,
-            resolved_count: 0,
-            correct_count: 0,
-            accuracy_percentage: 85,
-            created_at: new Date().toISOString(),
-          };
-        });
-      }
-    }
 
     return NextResponse.json({
       success: true,
@@ -101,9 +52,10 @@ export async function GET(req: NextRequest) {
       limit,
       offset,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json(
-      { success: false, error: error?.message || "Internal server error" },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }

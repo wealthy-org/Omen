@@ -32,9 +32,9 @@ export async function GET(req: NextRequest) {
     }
 
     const formattedPositions = (positions || []).map((p: any) => {
-      const market = p.markets || {};
-      const agreePool = Number(market.total_pool_yes || market.agree_pool || market.yes_pool || 0);
-      const disagreePool = Number(market.total_pool_no || market.disagree_pool || market.no_pool || 0);
+      const market = p.markets ?? {};
+      const agreePool = Number(market.agree_pool ?? 0);
+      const disagreePool = Number(market.disagree_pool ?? 0);
       const totalPool = agreePool + disagreePool;
       const userAmount = Number(p.amount);
 

@@ -60,8 +60,8 @@ export async function GET(req: NextRequest) {
     }
 
     const formattedMarkets = (markets || []).map((m: any) => {
-      const agreePool = Number(m.total_pool_yes || m.agree_pool || m.yes_pool || 0);
-      const disagreePool = Number(m.total_pool_no || m.disagree_pool || m.no_pool || 0);
+      const agreePool = Number(m.agree_pool ?? m.total_pool_yes ?? 0);
+      const disagreePool = Number(m.disagree_pool ?? m.total_pool_no ?? 0);
       const totalPool = agreePool + disagreePool;
       const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 50;
 
@@ -69,14 +69,14 @@ export async function GET(req: NextRequest) {
         id: m.id,
         contract_market_id: m.contract_market_id,
         contract_address: m.contract_address,
-        chain_id: m.chain_id || 11155111,
+        chain_id: typeof m.chain_id === "number" ? m.chain_id : 11155111,
         belief_id: m.belief_id,
-        title: m.title || m.beliefs?.statement || "Belief Market",
+        title: m.title ?? m.beliefs?.statement ?? "",
         description: m.description,
-        category: m.category || "crypto",
-        deadline: m.close_time || m.deadline,
+        category: m.category ?? "crypto",
+        deadline: m.close_time ?? m.deadline ?? "",
         open_time: m.open_time,
-        close_time: m.close_time || m.deadline,
+        close_time: m.close_time ?? m.deadline ?? "",
         status: m.status,
         winner: m.winner,
         agree_pool: agreePool,
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       count: formattedMarkets.length,
-      total: count || formattedMarkets.length,
+      total: count ?? formattedMarkets.length,
       markets: formattedMarkets,
     });
   } catch (err: unknown) {
