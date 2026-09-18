@@ -100,10 +100,15 @@ describe("Landing Page V1 Components", () => {
     });
   });
 
-  it("renders dynamic trending belief markets using BeliefMarketCard", async () => {
+  it("renders dynamic trending belief markets and category icon tabs", async () => {
     render(<HomePage />);
 
     expect(screen.getByText(/Trending Belief Markets/i)).toBeInTheDocument();
+    expect(screen.getByText("All")).toBeInTheDocument();
+    expect(screen.getByText("ETH")).toBeInTheDocument();
+    expect(screen.getByText("BTC")).toBeInTheDocument();
+    expect(screen.getByText("ARB")).toBeInTheDocument();
+    expect(screen.getByText("Macro")).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText(/Will ETH reach \$5,000 before end of Q4 2026\?/i)).toBeInTheDocument();

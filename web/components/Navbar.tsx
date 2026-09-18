@@ -83,7 +83,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
             >
               <div className="relative w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
                 <Image
-                  src="/images/logo.png"
+                  src="/logo-omen 1.png"
                   alt="Omen Logo"
                   width={32}
                   height={32}

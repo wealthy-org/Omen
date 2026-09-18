@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useTheme } from "../ThemeProvider";
 import BeliefMarketCard, { BeliefMarket } from "../BeliefMarketCard";
 
@@ -9,7 +10,21 @@ export interface TrendingMarketsTeaserProps {
   theme?: "dark" | "light";
 }
 
-export type TabCategory = "all" | "crypto" | "ai" | "macro";
+export type TabCategory = "all" | "eth" | "btc" | "arb" | "macro";
+
+export interface CategoryTabItem {
+  id: TabCategory;
+  label: string;
+  icon: string;
+}
+
+export const CATEGORY_TABS: CategoryTabItem[] = [
+  { id: "all", label: "All", icon: "/icons/hot.webp" },
+  { id: "eth", label: "ETH", icon: "/icons/eth.webp" },
+  { id: "btc", label: "BTC", icon: "/icons/btc.webp" },
+  { id: "arb", label: "ARB", icon: "/icons/arb.webp" },
+  { id: "macro", label: "Macro", icon: "/icons/macro.webp" },
+];
 
 export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMarketsTeaserProps) {
   const contextTheme = useTheme();
@@ -63,7 +78,44 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
   const filteredMarkets =
     activeTab === "all"
       ? markets
-      : markets.filter((m) => (m.category || "").toLowerCase() === activeTab);
+      : markets.filter((m) => {
+          const categoryLower = (m.category || "").toLowerCase();
+          const statementLower = (m.statement || "").toLowerCase();
+          if (activeTab === "eth") {
+            return (
+              categoryLower === "eth" ||
+              categoryLower === "crypto" ||
+              statementLower.includes("eth") ||
+              statementLower.includes("ethereum")
+            );
+          }
+          if (activeTab === "btc") {
+            return (
+              categoryLower === "btc" ||
+              categoryLower === "bitcoin" ||
+              statementLower.includes("btc") ||
+              statementLower.includes("bitcoin")
+            );
+          }
+          if (activeTab === "arb") {
+            return (
+              categoryLower === "arb" ||
+              categoryLower === "arbitrum" ||
+              statementLower.includes("arb") ||
+              statementLower.includes("arbitrum")
+            );
+          }
+          if (activeTab === "macro") {
+            return (
+              categoryLower === "macro" ||
+              categoryLower === "economics" ||
+              statementLower.includes("fed") ||
+              statementLower.includes("rate") ||
+              statementLower.includes("inflation")
+            );
+          }
+          return categoryLower === activeTab;
+        });
 
   return (
     <section className="w-full my-8 sm:my-12">
@@ -94,19 +146,26 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
-        {(["all", "crypto", "ai", "macro"] as TabCategory[]).map((tab) => (
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-none">
+        {CATEGORY_TABS.map((tab) => (
           <button
-            key={tab}
+            key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold font-mono uppercase tracking-wider transition-all cursor-pointer ${
-              activeTab === tab
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
+              activeTab === tab.id
+                ? "bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-500/50"
+                : "bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/80 dark:hover:bg-zinc-800"
             }`}
           >
-            {tab}
+            <Image
+              src={tab.icon}
+              alt={`${tab.label} icon`}
+              width={18}
+              height={18}
+              className="w-4 h-4 sm:w-4.5 sm:h-4.5 object-contain shrink-0"
+            />
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>

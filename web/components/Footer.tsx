@@ -45,7 +45,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
             <div className="flex items-center gap-2.5">
               <div className="relative w-7 h-7 rounded-md overflow-hidden flex items-center justify-center">
                 <Image
-                  src="/images/logo.png"
+                  src="/logo-omen 1.png"
                   alt="Omen Logo"
                   width={28}
                   height={28}
