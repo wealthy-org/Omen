@@ -11,42 +11,11 @@ export interface TrendingMarketsTeaserProps {
 
 export type TabCategory = "all" | "crypto" | "ai" | "macro";
 
-const DEFAULT_MARKETS: BeliefMarket[] = [
-  {
-    id: "market-1",
-    statement: "Will ETH reach $5,000 before end of Q4 2026?",
-    author: "VitalikFan",
-    authorHandle: "@vitalikfan",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 45.5,
-    disagreePool: 15.2,
-    agreeParticipants: 58,
-    disagreeParticipants: 22,
-    closeTime: new Date(Date.now() + 86400000 * 5).toISOString(),
-    category: "Crypto",
-  },
-  {
-    id: "market-2",
-    statement: "AI agent transaction volume will surpass 20% on L2s.",
-    author: "CryptoOracle",
-    authorHandle: "@cryptooracle",
-    isConfirmed: false,
-    status: "DETECTED",
-    agreePool: 20.0,
-    disagreePool: 30.0,
-    agreeParticipants: 35,
-    disagreeParticipants: 65,
-    closeTime: new Date(Date.now() + 86400000 * 2).toISOString(),
-    category: "AI",
-  },
-];
-
 export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMarketsTeaserProps) {
   const contextTheme = useTheme();
   const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
   const [activeTab, setActiveTab] = useState<TabCategory>("all");
-  const [markets, setMarkets] = useState<BeliefMarket[]>(DEFAULT_MARKETS);
+  const [markets, setMarkets] = useState<BeliefMarket[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -142,11 +111,36 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-pulse">
-          <div className="h-64 bg-white/5 rounded-2xl" />
-          <div className="h-64 bg-white/5 rounded-2xl" />
+          <div className="h-64 bg-zinc-100 dark:bg-white/5 rounded-2xl" />
+          <div className="h-64 bg-zinc-100 dark:bg-white/5 rounded-2xl" />
+        </div>
+      ) : filteredMarkets.length === 0 ? (
+        <div className="p-8 sm:p-10 text-center rounded-2xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 animate-scale-in flex flex-col items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+              No trending belief markets found
+            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {activeTab === "all"
+                ? "No active belief markets are available right now. Be the first to create one!"
+                : `No active belief markets found in the ${activeTab.toUpperCase()} category.`}
+            </p>
+          </div>
+          <Link
+            href="/create"
+            className="mt-1 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm flex items-center gap-1.5"
+          >
+            <span>Submit New Belief</span>
+            <span>↗</span>
+          </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
           {filteredMarkets.map((market) => (
             <BeliefMarketCard key={market.id} market={market} />
           ))}

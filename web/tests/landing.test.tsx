@@ -117,4 +117,24 @@ describe("Landing Page V1 Components", () => {
     expect(screen.getByText("02")).toBeInTheDocument();
     expect(screen.getByText("03")).toBeInTheDocument();
   });
+
+  it("renders empty state notification when no trending belief markets exist", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+      const urlString = String(url);
+      if (urlString.includes("/api/markets")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ success: true, markets: [] }),
+        } as Response);
+      }
+      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
+    });
+
+    render(<HomePage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/No trending belief markets found/i)).toBeInTheDocument();
+      expect(screen.getByText(/Be the first to create one!/i)).toBeInTheDocument();
+    });
+  });
 });
