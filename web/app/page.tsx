@@ -9,7 +9,7 @@ import LandingFAQ from "@/components/landing/LandingFAQ";
 
 export default function HomePage() {
   return (
-    <div className="w-full flex flex-col items-stretch gap-6 sm:gap-10 animate-in fade-in duration-300">
+    <div className="w-full flex flex-col items-stretch gap-6 sm:gap-10">
       <HeroSection />
       <InfraMarquee />
       <StatsOverview />

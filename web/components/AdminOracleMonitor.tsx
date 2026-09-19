@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useTheme } from "./ThemeProvider";
 import { OracleFeedState, OracleSnapshotRecord } from "@/types/api";
 
 export type { OracleFeedState, OracleSnapshotRecord };
@@ -65,9 +64,6 @@ const INITIAL_SNAPSHOT_LOGS: OracleSnapshotRecord[] = [
 ];
 
 export default function AdminOracleMonitor() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [feeds, setFeeds] = useState<OracleFeedState[]>(DEFAULT_FEEDS);
   const [selectedAsset, setSelectedAsset] = useState<string>("ETH");
   const [snapshotType, setSnapshotType] = useState<string>("RESOLUTION");
@@ -211,12 +207,8 @@ export default function AdminOracleMonitor() {
           aria-label="Refresh Round Data"
           onClick={handleRefreshFeeds}
           disabled={isRefreshing}
-          className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-2 border ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-2 border bg-white hover:bg-emerald-50/50 border-emerald-500/20 text-accent-navy shadow-xs dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 dark:text-white dark:shadow-none ${
             isRefreshing ? "opacity-60 cursor-not-allowed" : ""
-          } ${
-            isDark
-              ? "bg-white/5 hover:bg-white/10 border-white/10 text-white"
-              : "bg-white hover:bg-emerald-50/50 border-emerald-500/20 text-accent-navy shadow-xs"
           }`}
         >
           <svg className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,9 +245,7 @@ export default function AdminOracleMonitor() {
         {feeds.map((feed) => (
           <div
             key={feed.symbol}
-            className={`p-6 rounded-2xl border transition-all hover-lift ${
-              isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/15 shadow-xs"
-            }`}
+            className="p-6 rounded-2xl border transition-all hover-lift bg-white border-emerald-500/15 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:shadow-none"
           >
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-text-muted dark:text-[#A9B3AD]">
@@ -295,11 +285,7 @@ export default function AdminOracleMonitor() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div
-          className={`p-6 rounded-2xl border lg:col-span-1 space-y-4 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/15 shadow-xs"
-          }`}
-        >
+        <div className="p-6 rounded-2xl border lg:col-span-1 space-y-4 bg-white border-emerald-500/15 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:shadow-none">
           <div>
             <h3 className="text-base font-extrabold text-accent-navy dark:text-white">
               Trigger Oracle Snapshot
@@ -318,11 +304,7 @@ export default function AdminOracleMonitor() {
                 aria-label="Oracle Snapshot Asset"
                 value={selectedAsset}
                 onChange={(e) => setSelectedAsset(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white"
-                    : "bg-gray-50 border-emerald-500/20 text-accent-navy"
-                }`}
+                className="w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 bg-gray-50 border-emerald-500/20 text-accent-navy dark:bg-black/40 dark:border-white/10 dark:text-white"
               >
                 <option value="ETH">ETH (Ethereum)</option>
                 <option value="BTC">BTC (Bitcoin)</option>
@@ -339,11 +321,7 @@ export default function AdminOracleMonitor() {
                 aria-label="Oracle Snapshot Type"
                 value={snapshotType}
                 onChange={(e) => setSnapshotType(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white"
-                    : "bg-gray-50 border-emerald-500/20 text-accent-navy"
-                }`}
+                className="w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 bg-gray-50 border-emerald-500/20 text-accent-navy dark:bg-black/40 dark:border-white/10 dark:text-white"
               >
                 <option value="RESOLUTION">RESOLUTION (End Time Settlement)</option>
                 <option value="DISPLAY">DISPLAY (Live Price Tick)</option>
@@ -361,11 +339,7 @@ export default function AdminOracleMonitor() {
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
                 placeholder="Enter ADMIN_SECRET_KEY"
-                className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white"
-                    : "bg-gray-50 border-emerald-500/20 text-accent-navy"
-                }`}
+                className="w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 bg-gray-50 border-emerald-500/20 text-accent-navy dark:bg-black/40 dark:border-white/10 dark:text-white"
               />
             </div>
 
@@ -396,11 +370,7 @@ export default function AdminOracleMonitor() {
           </div>
         </div>
 
-        <div
-          className={`p-6 rounded-2xl border lg:col-span-2 space-y-4 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/15 shadow-xs"
-          }`}
-        >
+        <div className="p-6 rounded-2xl border lg:col-span-2 space-y-4 bg-white border-emerald-500/15 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:shadow-none">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-extrabold text-accent-navy dark:text-white">

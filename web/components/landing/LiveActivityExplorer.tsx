@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useTheme } from "../ThemeProvider";
 
 export type ActivityMethod =
   | "stake_agree"
@@ -306,9 +305,7 @@ export interface LiveActivityExplorerProps {
   theme?: "dark" | "light";
 }
 
-export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityExplorerProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
+export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
 
   const [transactions, setTransactions] = useState<OnChainTx[]>(INITIAL_TRANSACTIONS);
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
@@ -501,26 +498,14 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-            <span
-              className={`text-xs font-mono font-bold uppercase tracking-widest ${
-                isDark ? "text-[#34D399]" : "text-[#0E7A4E]"
-              }`}
-            >
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#0E7A4E] dark:text-[#34D399]">
               Verifiable Dual-Chain Execution Ledger
             </span>
           </div>
-          <h2
-            className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-              isDark ? "text-white" : "text-[#0B1F16]"
-            }`}
-          >
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
             Live On-Chain Activity
           </h2>
-          <p
-            className={`text-xs sm:text-sm mt-1 max-w-2xl font-mono ${
-              isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-            }`}
-          >
+          <p className="text-xs sm:text-sm mt-1 max-w-2xl font-mono text-[#4B5D55] dark:text-[#A9B3AD]">
             Every stake, EIP-712 confirmation, and dual payout is recorded transparently on Ethereum Sepolia (11155111) and Robinhood Chain (46631).
           </p>
         </div>
@@ -539,12 +524,8 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
               onClick={() => setSelectedFilter(tab.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
                 selectedFilter === tab.id
-                  ? isDark
-                    ? "bg-emerald-500 text-black border-emerald-400 shadow-sm"
-                    : "bg-[#10221A] text-white border-[#10221A] shadow-sm"
-                  : isDark
-                    ? "bg-[#0A0F0C] border-white/10 text-[#A9B3AD] hover:text-white"
-                    : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-xs"
+                  ? "bg-[#10221A] dark:bg-emerald-500 text-white dark:text-black border-[#10221A] dark:border-emerald-400 shadow-sm"
+                  : "bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-[#A9B3AD] hover:text-zinc-900 dark:hover:text-white shadow-xs"
               }`}
             >
               {tab.label}
@@ -553,23 +534,11 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
         </div>
       </div>
 
-      <div
-        className={`rounded-2xl sm:rounded-3xl border overflow-hidden shadow-xl transition-all ${
-          isDark
-            ? "bg-[#070D09]/95 border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.7)]"
-            : "bg-white/95 border-emerald-500/15 shadow-[0_12px_32px_rgba(14,122,78,0.06)]"
-        }`}
-      >
+      <div className="rounded-2xl sm:rounded-3xl border overflow-hidden shadow-xl transition-all bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-emerald-500/20 shadow-[0_12px_32px_rgba(14,122,78,0.06)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr
-                className={`text-[11px] font-mono font-bold uppercase tracking-wider border-b ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-[#A9B3AD]"
-                    : "bg-zinc-50 border-zinc-200/80 text-zinc-600"
-                }`}
-              >
+              <tr className="text-[11px] font-mono font-bold uppercase tracking-wider border-b bg-zinc-50 dark:bg-black/40 border-zinc-200/80 dark:border-white/10 text-zinc-600 dark:text-[#A9B3AD]">
                 <th className="py-3.5 px-4 sm:px-6">Txn Hash</th>
                 <th className="py-3.5 px-4">Method</th>
                 <th className="py-3.5 px-4">Block & Age</th>
@@ -588,9 +557,7 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
                 return (
                   <tr
                     key={tx.id}
-                    className={`transition-colors animate-fade-in ${
-                      isDark ? "hover:bg-white/[0.03]" : "hover:bg-zinc-50/80"
-                    }`}
+                    className="transition-colors animate-fade-in hover:bg-zinc-50/80 dark:hover:bg-white/[0.03]"
                   >
                     <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
@@ -699,11 +666,7 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
                       <button
                         type="button"
                         onClick={() => setActiveModalTx(tx)}
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border ${
-                          isDark
-                            ? "bg-white/5 hover:bg-white/10 text-white border-white/10"
-                            : "bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border-zinc-200"
-                        }`}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer border bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-900 dark:text-white border-zinc-200 dark:border-white/10"
                       >
                         <span>Receipt</span>
                         <span>↗</span>
@@ -717,15 +680,9 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
         </div>
 
         {totalPages > 1 && (
-          <div
-            className={`px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs font-mono ${
-              isDark
-                ? "bg-black/40 border-white/10 text-[#A9B3AD]"
-                : "bg-zinc-50/90 border-zinc-200/80 text-zinc-600"
-            }`}
-          >
+          <div className="px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs font-mono bg-zinc-50/90 dark:bg-black/40 border-zinc-200/80 dark:border-white/10 text-zinc-600 dark:text-[#A9B3AD]">
             <span>
-              Showing <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{startIndex + 1}</strong> - <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{Math.min(startIndex + pageSize, filteredTxs.length)}</strong> of <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{filteredTxs.length}</strong> txns
+              Showing <strong className="text-[#0B1F16] dark:text-white">{startIndex + 1}</strong> - <strong className="text-[#0B1F16] dark:text-white">{Math.min(startIndex + pageSize, filteredTxs.length)}</strong> of <strong className="text-[#0B1F16] dark:text-white">{filteredTxs.length}</strong> txns
             </span>
 
             <div className="flex items-center gap-1.5">
@@ -733,16 +690,12 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
                 type="button"
                 onClick={() => handlePageChange(effectivePage - 1)}
                 disabled={effectivePage <= 1}
-                className={`px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-                  isDark
-                    ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
-                    : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-100 shadow-xs"
-                }`}
+                className="px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-white hover:bg-zinc-100 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-none"
               >
                 ← Prev
               </button>
 
-              <span className={`px-2 py-0.5 rounded-md font-bold ${isDark ? "text-emerald-400" : "text-emerald-700"}`}>
+              <span className="px-2 py-0.5 rounded-md font-bold text-emerald-700 dark:text-emerald-400">
                 Page {effectivePage} / {totalPages}
               </span>
 
@@ -750,11 +703,7 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
                 type="button"
                 onClick={() => handlePageChange(effectivePage + 1)}
                 disabled={effectivePage >= totalPages}
-                className={`px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-                  isDark
-                    ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
-                    : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-100 shadow-xs"
-                }`}
+                className="px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-white hover:bg-zinc-100 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-none"
               >
                 Next →
               </button>
@@ -762,13 +711,7 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
           </div>
         )}
 
-        <div
-          className={`p-3.5 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono ${
-            isDark
-              ? "bg-black/30 border-white/10 text-[#A9B3AD]"
-              : "bg-zinc-50 border-zinc-200/80 text-[#4B5D55]"
-          }`}
-        >
+        <div className="p-3.5 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono bg-zinc-50 dark:bg-black/30 border-zinc-200/80 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>Dual-chain consensus sync: Sepolia & Robinhood Chain active</span>
@@ -789,11 +732,7 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
           onClick={() => setActiveModalTx(null)}
         >
           <div
-            className={`w-full max-w-3xl rounded-3xl p-5 sm:p-7 border shadow-2xl relative max-h-[90vh] overflow-y-auto animate-scale-in ${
-              isDark
-                ? "bg-[#0A0F0C] border-emerald-500/20 text-white"
-                : "bg-white border-zinc-200 text-[#0B1F16]"
-            }`}
+            className="w-full max-w-3xl rounded-3xl p-5 sm:p-7 border shadow-2xl relative max-h-[90vh] overflow-y-auto animate-scale-in bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-emerald-500/20 text-[#0B1F16] dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-white/10 mb-5">

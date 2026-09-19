@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useTheme } from "./ThemeProvider";
 import { useAdminResolveMarket } from "@/hooks/useAdminResolveMarket";
 
 export type ResolutionOutcome = "YES" | "NO" | "CANCEL";
@@ -74,8 +73,6 @@ export default function AdminMarketResolutionTable({
   onResolveMarket,
   className = "",
 }: AdminMarketResolutionTableProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const { resolveMarket } = useAdminResolveMarket();
 
   const [markets, setMarkets] = useState<ResolvableMarketItem[]>(initialMarkets);
@@ -378,9 +375,7 @@ export default function AdminMarketResolutionTable({
                 filteredMarkets.map((market) => (
                   <tr
                     key={market.id}
-                    className={`transition-colors ${
-                      isDark ? "hover:bg-white/[0.02]" : "hover:bg-emerald-50/40"
-                    }`}
+                    className="transition-colors hover:bg-emerald-50/40 dark:hover:bg-white/[0.02]"
                   >
                     <td className="py-4 px-4 max-w-xs sm:max-w-sm">
                       <div className="flex items-center gap-2 mb-1">

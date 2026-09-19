@@ -1,16 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useTheme } from "../ThemeProvider";
 
 export interface OnboardingJourneyProps {
   theme?: "dark" | "light";
 }
 
-export default function OnboardingJourney({ theme: propTheme }: OnboardingJourneyProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
-
+export default function OnboardingJourney({}: OnboardingJourneyProps) {
   const STEPS = [
     {
       step: "01",
@@ -41,10 +37,10 @@ export default function OnboardingJourney({ theme: propTheme }: OnboardingJourne
   return (
     <section className="w-full my-8 sm:my-16">
       <div className="text-center max-w-2xl mx-auto mb-10">
-        <h2 className={`text-xs font-mono font-bold uppercase tracking-widest mb-2 ${isDark ? "text-[#34D399]" : "text-[#0E7A4E]"}`}>
+        <h2 className="text-xs font-mono font-bold uppercase tracking-widest mb-2 text-[#0E7A4E] dark:text-[#34D399]">
           Protocol Architecture
         </h2>
-        <p className={`text-2xl sm:text-4xl font-extrabold tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+        <p className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
           How Social Belief Markets Work
         </p>
       </div>
@@ -53,41 +49,31 @@ export default function OnboardingJourney({ theme: propTheme }: OnboardingJourne
         {STEPS.map((item) => (
           <div
             key={item.step}
-            className={`rounded-2xl p-6 sm:p-8 flex flex-col justify-between border transition-all duration-300 group ${
-              isDark
-                ? "bg-[#070D09]/80 border-emerald-500/20 hover:border-emerald-400/40 hover:bg-emerald-500/[0.04]"
-                : "bg-white/95 border-emerald-500/15 light-card-shine hover:shadow-lg hover:border-emerald-400/40"
-            }`}
+            className="rounded-2xl p-6 sm:p-8 flex flex-col justify-between border transition-all duration-300 group bg-white/95 dark:bg-[#070D09]/80 border-emerald-500/15 dark:border-emerald-500/20 light-card-shine hover:shadow-lg dark:hover:border-emerald-400/40 dark:hover:bg-emerald-500/[0.04]"
           >
             <div>
               <div className="flex items-center justify-between mb-6">
-                <span className={`text-3xl sm:text-4xl font-black font-mono tracking-tighter ${
-                  isDark ? "text-emerald-500/40 group-hover:text-[#34D399]" : "text-emerald-300 group-hover:text-[#0E7A4E]"
-                } transition-colors`}>
+                <span className="text-3xl sm:text-4xl font-black font-mono tracking-tighter transition-colors text-emerald-300 dark:text-emerald-500/40 group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399]">
                   {item.step}
                 </span>
-                <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border font-bold ${
-                  isDark ? "bg-emerald-950/60 border-emerald-500/30 text-[#34D399]" : "bg-emerald-50 border-emerald-500/20 text-[#0E7A4E]"
-                }`}>
+                <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full border font-bold bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500/20 dark:border-emerald-500/30 text-[#0E7A4E] dark:text-[#34D399]">
                   {item.badge}
                 </span>
               </div>
 
-              <h3 className={`text-lg sm:text-xl font-bold tracking-tight mb-3 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <h3 className="text-lg sm:text-xl font-bold tracking-tight mb-3 text-[#0B1F16] dark:text-white">
                 {item.title}
               </h3>
 
-              <p className={`text-xs sm:text-sm leading-relaxed mb-6 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+              <p className="text-xs sm:text-sm leading-relaxed mb-6 text-[#4B5D55] dark:text-[#A9B3AD]">
                 {item.description}
               </p>
             </div>
 
-            <div className={`pt-4 border-t ${isDark ? "border-emerald-500/10" : "border-emerald-500/10"}`}>
+            <div className="pt-4 border-t border-emerald-500/10">
               <Link
                 href={item.href}
-                className={`inline-flex items-center gap-1.5 text-xs font-mono font-bold ${
-                  isDark ? "text-[#34D399] hover:text-[#6EE7B7]" : "text-[#0E7A4E] hover:text-[#047857]"
-                }`}
+                className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#0E7A4E] dark:text-[#34D399] hover:text-[#047857] dark:hover:text-[#6EE7B7]"
               >
                 <span>{item.action}</span>
                 <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

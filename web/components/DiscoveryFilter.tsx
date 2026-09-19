@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { useTheme } from "./ThemeProvider";
 
 export type DiscoveryTab = "trending" | "newest" | "ending_soon" | "volume" | "confirmed";
 export type MarketCategoryFilter = "all" | "eth" | "btc" | "arb" | "macro";
@@ -39,11 +38,7 @@ export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
   onCategoryChange,
   searchQuery,
   onSearchChange,
-  theme: propTheme,
 }) => {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
-
   return (
     <div className="space-y-4 mb-8">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -55,12 +50,8 @@ export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
               onClick={() => onTabChange(tab.id)}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold font-mono uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border ${
                 activeTab === tab.id
-                  ? isDark
-                    ? "bg-emerald-500 text-black border-emerald-400 shadow-md"
-                    : "bg-[#10221A] text-white border-[#10221A] shadow-md"
-                  : isDark
-                    ? "bg-[#0A0F0C] border-white/10 text-[#A9B3AD] hover:text-white hover:border-white/20"
-                    : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 shadow-xs"
+                  ? "bg-[#10221A] text-white border-[#10221A] shadow-md dark:bg-emerald-500 dark:text-black dark:border-emerald-400"
+                  : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:text-[#A9B3AD] dark:hover:text-white dark:hover:border-white/20"
               }`}
             >
               {tab.label}
@@ -74,17 +65,11 @@ export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search markets by statement, creator, or topic..."
-            className={`w-full pl-9 pr-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 border ${
-              isDark
-                ? "bg-[#0A0F0C] border-white/10 text-white placeholder-zinc-500"
-                : "bg-white border-zinc-200 text-[#0B1F16] placeholder-zinc-400 shadow-xs"
-            }`}
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-xs sm:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 border bg-white border-zinc-200 text-[#0B1F16] placeholder-zinc-400 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:text-white dark:placeholder-zinc-500"
             aria-label="Search markets by statement, creator, or topic..."
           />
           <svg
-            className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${
-              isDark ? "text-zinc-500" : "text-zinc-400"
-            }`}
+            className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400 dark:text-zinc-500"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -102,12 +87,8 @@ export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
             onClick={() => onCategoryChange(cat.id)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
               activeCategory === cat.id
-                ? isDark
-                  ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-                  : "bg-emerald-50 text-[#0E7A4E] border-emerald-500/25"
-                : isDark
-                  ? "bg-white/5 border-transparent text-[#A9B3AD] hover:text-white hover:bg-white/10"
-                  : "bg-zinc-100/80 border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200"
+                ? "bg-emerald-50 text-[#0E7A4E] border-emerald-500/25 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/30"
+                : "bg-zinc-100/80 border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 dark:bg-white/5 dark:text-[#A9B3AD] dark:hover:text-white dark:hover:bg-white/10"
             }`}
           >
             <span>{cat.label}</span>

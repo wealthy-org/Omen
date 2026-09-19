@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useTheme } from "../ThemeProvider";
 
 export interface ActivityItem {
   id: string;
@@ -118,10 +117,7 @@ export interface LandingActivityStreamProps {
   theme?: "dark" | "light";
 }
 
-export default function LandingActivityStream({ theme: propTheme }: LandingActivityStreamProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
-
+export default function LandingActivityStream(_props: LandingActivityStreamProps) {
   const [creatorIndex, setCreatorIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activities, setActivities] = useState<ActivityItem[]>(INITIAL_ACTIVITIES);
@@ -172,26 +168,14 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
       <div className="flex flex-col mb-8">
         <div className="flex items-center gap-2 mb-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span
-            className={`text-xs font-mono font-bold uppercase tracking-widest ${
-              isDark ? "text-[#34D399]" : "text-[#0E7A4E]"
-            }`}
-          >
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#0E7A4E] dark:text-[#34D399]">
             Reputation & Consensus Ledger
           </span>
         </div>
-        <h2
-          className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-            isDark ? "text-white" : "text-[#0B1F16]"
-          }`}
-        >
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
           Conviction Becomes a Record
         </h2>
-        <p
-          className={`text-sm sm:text-base mt-1.5 max-w-2xl ${
-            isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-          }`}
-        >
+        <p className="text-sm sm:text-base mt-1.5 max-w-2xl text-[#4B5D55] dark:text-[#A9B3AD]">
           Every resolved belief is scored on-chain. Being loud is free, but being right is permanently measured.
         </p>
       </div>
@@ -200,20 +184,16 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
         <div
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
-          className={`p-6 sm:p-7 rounded-2xl border transition-all duration-300 relative flex flex-col justify-between hover-lift shadow-xl ${
-            isDark
-              ? "bg-[#070D09]/95 border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.7)] text-white"
-              : "bg-white/95 border-emerald-500/15 shadow-[0_12px_32px_rgba(14,122,78,0.06)] text-[#0B1F16]"
-          }`}
+          className="p-6 sm:p-7 rounded-2xl border transition-all duration-300 relative flex flex-col justify-between hover-lift shadow-xl bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-emerald-500/20 shadow-[0_12px_32px_rgba(14,122,78,0.06)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] text-[#0B1F16] dark:text-white"
         >
           <div>
             <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-emerald-500/10">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-500 border border-emerald-500/20">
                   Top Thinkers ({creatorIndex + 1}/{CREATOR_SPOTLIGHTS.length})
                 </span>
                 {isPaused && (
-                  <span className="text-[11px] font-mono text-[#A9B3AD] animate-pulse">
+                  <span className="text-[11px] font-mono text-[#4B5D55] dark:text-[#A9B3AD] animate-pulse">
                     [Paused]
                   </span>
                 )}
@@ -223,11 +203,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
                   type="button"
                   onClick={handlePrevCreator}
                   aria-label="Previous Creator"
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
-                    isDark
-                      ? "bg-white/5 border-white/10 hover:bg-white/15 text-white"
-                      : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200 text-zinc-800"
-                  }`}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
@@ -237,11 +213,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
                   type="button"
                   onClick={handleNextCreator}
                   aria-label="Next Creator"
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
-                    isDark
-                      ? "bg-white/5 border-white/10 hover:bg-white/15 text-white"
-                      : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200 text-zinc-800"
-                  }`}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
@@ -249,11 +221,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
                 </button>
                 <Link
                   href="/creators"
-                  className={`text-xs font-bold font-mono px-2.5 py-1 rounded-lg border transition-colors ${
-                    isDark
-                      ? "bg-white/5 border-white/10 hover:bg-white/10 text-[#34D399]"
-                      : "bg-emerald-50 border-emerald-500/20 hover:bg-emerald-100 text-[#0E7A4E]"
-                  }`}
+                  className="text-xs font-bold font-mono px-2.5 py-1 rounded-lg border transition-colors bg-emerald-50 dark:bg-white/5 border-emerald-500/20 dark:border-white/10 hover:bg-emerald-100 dark:hover:bg-white/10 text-[#0E7A4E] dark:text-[#34D399]"
                 >
                   All Creators ↗
                 </Link>
@@ -281,8 +249,8 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-lg font-extrabold tracking-tight">{currentCreator.name}</h3>
-                      <span className="text-xs font-mono font-bold text-zinc-400">{currentCreator.handle}</span>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                      <span className="text-xs font-mono font-bold text-zinc-500 dark:text-zinc-400">{currentCreator.handle}</span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-500 border border-emerald-500/30">
                         ✓ Verified
                       </span>
                       <a
@@ -298,59 +266,51 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
                         <span className="text-[11px] font-mono">X ↗</span>
                       </a>
                     </div>
-                    <p className={`text-xs font-mono mt-0.5 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                    <p className="text-xs font-mono mt-0.5 text-[#4B5D55] dark:text-[#A9B3AD]">
                       Tracking convictions since {currentCreator.since}
                     </p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-mono font-black px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 inline-block shadow-xs">
+                  <span className="text-xs font-mono font-black px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-500 border border-emerald-500/30 inline-block shadow-xs">
                     {currentCreator.accuracyRate}% Accuracy
                   </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 rounded-xl border border-emerald-500/15 mb-5 text-center font-mono bg-black/20">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 rounded-xl border border-emerald-500/15 mb-5 text-center font-mono bg-zinc-50 dark:bg-black/20">
                 <div className="p-1.5">
-                  <div className="text-xl font-black text-emerald-500">{currentCreator.confirmed}</div>
-                  <div className={`text-[11px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Confirmed</div>
+                  <div className="text-xl font-black text-emerald-600 dark:text-emerald-500">{currentCreator.confirmed}</div>
+                  <div className="text-[11px] text-[#4B5D55] dark:text-[#A9B3AD]">Confirmed</div>
                 </div>
                 <div className="p-1.5">
                   <div className="text-xl font-black">{currentCreator.resolved}</div>
-                  <div className={`text-[11px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Resolved</div>
+                  <div className="text-[11px] text-[#4B5D55] dark:text-[#A9B3AD]">Resolved</div>
                 </div>
                 <div className="p-1.5">
                   <div className="text-xl font-black">{currentCreator.correct}</div>
-                  <div className={`text-[11px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Correct</div>
+                  <div className="text-[11px] text-[#4B5D55] dark:text-[#A9B3AD]">Correct</div>
                 </div>
                 <div className="p-1.5">
-                  <div className="text-xl font-black text-emerald-400">{currentCreator.volumeEth} ETH</div>
-                  <div className={`text-[11px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Volume</div>
+                  <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">{currentCreator.volumeEth} ETH</div>
+                  <div className="text-[11px] text-[#4B5D55] dark:text-[#A9B3AD]">Volume</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                <div
-                  className={`p-3.5 rounded-xl border ${
-                    isDark ? "bg-[#030906] border-emerald-500/20" : "bg-emerald-50/60 border-emerald-500/15"
-                  }`}
-                >
-                  <div className={`text-xs font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                <div className="p-3.5 rounded-xl border bg-emerald-50/60 dark:bg-[#030906] border-emerald-500/15 dark:border-emerald-500/20">
+                  <div className="text-xs font-mono text-[#4B5D55] dark:text-[#A9B3AD]">
                     Top Alpha Category
                   </div>
-                  <div className="text-sm font-bold text-emerald-500 mt-0.5">
+                  <div className="text-sm font-bold text-emerald-600 dark:text-emerald-500 mt-0.5">
                     {currentCreator.topCategory.name} ({currentCreator.topCategory.winRate}% win)
                   </div>
                 </div>
-                <div
-                  className={`p-3.5 rounded-xl border ${
-                    isDark ? "bg-[#030906] border-rose-500/20" : "bg-rose-50/60 border-rose-500/15"
-                  }`}
-                >
-                  <div className={`text-xs font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                <div className="p-3.5 rounded-xl border bg-rose-50/60 dark:bg-[#030906] border-rose-500/15 dark:border-rose-500/20">
+                  <div className="text-xs font-mono text-[#4B5D55] dark:text-[#A9B3AD]">
                     Weakest Category
                   </div>
-                  <div className="text-sm font-bold text-rose-500 mt-0.5">
+                  <div className="text-sm font-bold text-rose-600 dark:text-rose-500 mt-0.5">
                     {currentCreator.weakestCategory.name} ({currentCreator.weakestCategory.winRate}% win)
                   </div>
                 </div>
@@ -368,7 +328,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
                   className={`h-2 rounded-full transition-all cursor-pointer ${
                     creatorIndex === idx
                       ? "w-7 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
-                      : "w-2 bg-zinc-600/40 hover:bg-zinc-500/60"
+                      : "w-2 bg-zinc-300 dark:bg-zinc-600/40 hover:bg-zinc-400 dark:hover:bg-zinc-500/60"
                   }`}
                   aria-label={`Go to creator ${creator.name}`}
                 />
@@ -377,7 +337,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
 
             <Link
               href={`/creator/${currentCreator.address}`}
-              className="text-xs font-bold font-mono px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-white/10 transition-all flex items-center gap-1.5"
+              className="text-xs font-bold font-mono px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-transparent dark:border-white/10 transition-all flex items-center gap-1.5"
             >
               <span>View Profile</span>
               <span>↗</span>
@@ -385,23 +345,13 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
           </div>
         </div>
 
-        <div
-          className={`p-6 sm:p-7 rounded-2xl border transition-all duration-200 hover-lift ${
-            isDark
-              ? "bg-[#070D09]/90 border-white/10 shadow-lg text-white"
-              : "bg-white/95 border-emerald-500/15 shadow-xs text-[#0B1F16]"
-          }`}
-        >
+        <div className="p-6 sm:p-7 rounded-2xl border transition-all duration-200 hover-lift bg-white/95 dark:bg-[#070D09]/90 border-emerald-500/15 dark:border-white/10 shadow-xs dark:shadow-lg text-[#0B1F16] dark:text-white">
           <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-emerald-500/10">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
               <h3 className="text-base font-extrabold tracking-tight">Live On-Chain Activity</h3>
             </div>
-            <span
-              className={`text-[11px] font-mono px-2 py-0.5 rounded border ${
-                isDark ? "bg-emerald-950/60 border-emerald-500/20 text-[#34D399]" : "bg-emerald-50 border-emerald-500/20 text-[#0E7A4E]"
-              }`}
-            >
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded border bg-emerald-50 dark:bg-emerald-950/60 border-emerald-500/20 text-[#0E7A4E] dark:text-[#34D399]">
               Verifiable Dual-Testnet
             </span>
           </div>
@@ -410,19 +360,15 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
             {activities.map((act) => (
               <div
                 key={act.id}
-                className={`flex items-center justify-between gap-3 p-3 rounded-xl border transition-all animate-feed-slide ${
-                  isDark
-                    ? "bg-[#030906]/60 border-white/5 hover:border-white/15"
-                    : "bg-zinc-50/80 border-zinc-200/70 hover:border-zinc-300"
-                }`}
+                className="flex items-center justify-between gap-3 p-3 rounded-xl border transition-all animate-feed-slide bg-zinc-50/80 dark:bg-[#030906]/60 border-zinc-200/70 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/15"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="text-xs font-mono text-zinc-500 shrink-0">{act.address}</span>
                   <span
                     className={`text-xs font-bold font-mono px-2 py-0.5 rounded uppercase shrink-0 ${
                       act.action === "agreed"
-                        ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/25"
-                        : "bg-rose-500/15 text-rose-500 border border-rose-500/25"
+                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-500 border border-emerald-500/25"
+                        : "bg-rose-500/15 text-rose-600 dark:text-rose-500 border border-rose-500/25"
                     }`}
                   >
                     {act.action}
@@ -431,7 +377,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
                 </div>
                 <div className="flex items-center gap-2 shrink-0 text-xs font-mono">
                   <span className="font-bold">{act.amount}</span>
-                  <span className={`text-[11px] ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>{act.timeAgo}</span>
+                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500">{act.timeAgo}</span>
                 </div>
               </div>
             ))}

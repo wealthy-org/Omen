@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTheme } from "@/components/ThemeProvider";
 import LeaderboardTable, { LeaderboardEntry } from "@/components/LeaderboardTable";
 import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
 
@@ -13,9 +12,6 @@ export interface CurrentUserProfile {
 }
 
 export default function LeaderboardPage() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [searchQuery, setSearchQuery] = useState("");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,13 +101,7 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div
-          className={`p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-1 ${
-            isDark
-              ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-              : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"
-          }`}
-        >
+        <div className="p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-1 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
               Your Current Rank
@@ -133,13 +123,7 @@ export default function LeaderboardPage() {
           </p>
         </div>
 
-        <div
-          className={`p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-2 ${
-            isDark
-              ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-              : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"
-          }`}
-        >
+        <div className="p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-2 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
               Your Total Points
@@ -156,13 +140,7 @@ export default function LeaderboardPage() {
           </p>
         </div>
 
-        <div
-          className={`p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-3 ${
-            isDark
-              ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
-              : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"
-          }`}
-        >
+        <div className="p-6 rounded-2xl border transition-all hover-lift animate-slide-up stagger-3 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
               Gap to Next Tier
@@ -198,11 +176,7 @@ export default function LeaderboardPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by ENS name or 0x... address"
-              className={`w-full pl-10 pr-10 py-2.5 rounded-xl border text-xs sm:text-sm font-mono transition-all outline-none ${
-                isDark
-                  ? "bg-[#0A0F0C] border-white/10 text-white placeholder:text-text-muted/60 focus:border-primary-blue/50"
-                  : "bg-white border-border-subtle text-accent-navy placeholder:text-text-muted/60 focus:border-primary-blue/50"
-              }`}
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border text-xs sm:text-sm font-mono transition-all outline-none bg-white dark:bg-[#0A0F0C] border-border-subtle dark:border-white/10 text-accent-navy dark:text-white placeholder:text-text-muted/60 focus:border-primary-blue/50"
             />
             {searchQuery && (
               <button

@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useTheme } from "../ThemeProvider";
 import BeliefMarketCard, { BeliefMarket } from "../BeliefMarketCard";
 
 export interface TrendingMarketsTeaserProps {
@@ -24,22 +23,112 @@ export const CATEGORY_TABS: CategoryTabItem[] = [
   { id: "macro", label: "Macro" },
 ];
 
-export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMarketsTeaserProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
+export const INITIAL_MARKETS: BeliefMarket[] = [
+  {
+    id: "mkt-1",
+    statement: "Ethereum spot ETF weekly net inflows will exceed $1.5 Billion before Q4 ends",
+    author: "sassal0x",
+    authorHandle: "@sassal0x",
+    isConfirmed: true,
+    status: "OPEN",
+    agreePool: 84.5,
+    disagreePool: 32.1,
+    agreeParticipants: 320,
+    disagreeParticipants: 115,
+    closeTime: new Date(Date.now() + 86400000 * 14).toISOString(),
+    category: "ETH",
+    volume: 116.6,
+  },
+  {
+    id: "mkt-2",
+    statement: "Bitcoin breaks through the $100k landmark resistance before the close of this quarter",
+    author: "planb",
+    authorHandle: "@100trillionUSD",
+    isConfirmed: true,
+    status: "OPEN",
+    agreePool: 142.0,
+    disagreePool: 89.4,
+    agreeParticipants: 512,
+    disagreeParticipants: 240,
+    closeTime: new Date(Date.now() + 86400000 * 18).toISOString(),
+    category: "BTC",
+    volume: 231.4,
+  },
+  {
+    id: "mkt-3",
+    statement: "Arbitrum daily active user transactions will surpass all other Ethereum Layer-2s combined",
+    author: "ercwl",
+    authorHandle: "@ercwl",
+    isConfirmed: true,
+    status: "OPEN",
+    agreePool: 45.2,
+    disagreePool: 58.8,
+    agreeParticipants: 180,
+    disagreeParticipants: 210,
+    closeTime: new Date(Date.now() + 86400000 * 9).toISOString(),
+    category: "ARB",
+    volume: 104.0,
+  },
+  {
+    id: "mkt-4",
+    statement: "Federal Reserve cuts interest rates by 25 basis points at the upcoming FOMC session",
+    author: "macrojack",
+    authorHandle: "@macrojack",
+    isConfirmed: true,
+    status: "OPEN",
+    agreePool: 98.4,
+    disagreePool: 22.0,
+    agreeParticipants: 410,
+    disagreeParticipants: 85,
+    closeTime: new Date(Date.now() + 86400000 * 7).toISOString(),
+    category: "Macro",
+    volume: 120.4,
+  },
+  {
+    id: "mkt-5",
+    statement: "Solana total value locked (TVL) will surpass $12 Billion before end of this quarter",
+    author: "rajgokal",
+    authorHandle: "@rajgokal",
+    isConfirmed: true,
+    status: "OPEN",
+    agreePool: 73.1,
+    disagreePool: 61.2,
+    agreeParticipants: 290,
+    disagreeParticipants: 230,
+    closeTime: new Date(Date.now() + 86400000 * 21).toISOString(),
+    category: "ETH",
+    volume: 134.3,
+  },
+  {
+    id: "mkt-6",
+    statement: "US CPI inflation rate reports below 2.6% annualized in next macroeconomic release",
+    author: "lynx_capital",
+    authorHandle: "@lynx_capital",
+    isConfirmed: true,
+    status: "OPEN",
+    agreePool: 62.0,
+    disagreePool: 41.5,
+    agreeParticipants: 245,
+    disagreeParticipants: 160,
+    closeTime: new Date(Date.now() + 86400000 * 12).toISOString(),
+    category: "Macro",
+    volume: 103.5,
+  },
+];
+
+export default function TrendingMarketsTeaser({}: TrendingMarketsTeaserProps) {
   const [activeTab, setActiveTab] = useState<TabCategory>("all");
-  const [markets, setMarkets] = useState<BeliefMarket[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [markets, setMarkets] = useState<BeliefMarket[]>(INITIAL_MARKETS);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
     async function fetchTrendingMarkets() {
       try {
-        setIsLoading(true);
         const res = await fetch("/api/markets");
         if (res.ok) {
           const data = await res.json();
-          if (isMounted && data.markets && Array.isArray(data.markets)) {
+          if (isMounted && data.markets && Array.isArray(data.markets) && data.markets.length > 0) {
             const mapped: BeliefMarket[] = data.markets
               .filter((m: any) => m && (m.statement || m.title))
               .map((m: any, idx: number) => {
@@ -129,29 +218,17 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span
-              className={`text-xs font-mono font-bold uppercase tracking-widest ${
-                isDark ? "text-[#34D399]" : "text-[#0E7A4E]"
-              }`}
-            >
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#0E7A4E] dark:text-[#34D399]">
               Live Conviction Markets
             </span>
           </div>
-          <h2
-            className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-              isDark ? "text-white" : "text-[#0B1F16]"
-            }`}
-          >
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
             Trending Belief Markets
           </h2>
         </div>
         <Link
           href="/markets"
-          className={`text-sm font-semibold flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all border ${
-            isDark
-              ? "bg-white/5 border-white/10 text-[#34D399] hover:bg-emerald-500/10 hover:border-emerald-400/40"
-              : "bg-white border-emerald-500/20 text-[#0E7A4E] hover:bg-emerald-50 shadow-xs"
-          }`}
+          className="text-sm font-semibold flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all border bg-white dark:bg-white/5 border-emerald-500/20 dark:border-white/10 text-[#0E7A4E] dark:text-[#34D399] hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:border-emerald-400/40 shadow-xs dark:shadow-none"
         >
           <span>Explore All Markets</span>
           <svg
@@ -173,12 +250,8 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
               activeTab === tab.id
-                ? isDark
-                  ? "bg-emerald-500 text-black border-emerald-400 shadow-md"
-                  : "bg-[#10221A] text-white border-[#10221A] shadow-md"
-                : isDark
-                  ? "bg-[#0A0F0C] border-white/10 text-[#A9B3AD] hover:text-white hover:border-white/20"
-                  : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 shadow-xs"
+                ? "bg-[#10221A] dark:bg-emerald-500 text-white dark:text-black border-[#10221A] dark:border-emerald-400 shadow-md"
+                : "bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-[#A9B3AD] hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20 shadow-xs dark:shadow-none"
             }`}
           >
             <span>{tab.label}</span>
@@ -219,7 +292,7 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMarkets.slice(0, 6).map((market, idx) => (
               <div key={market.id} className={idx >= 3 ? "hidden sm:block" : ""}>
                 <BeliefMarketCard market={market} />
@@ -230,11 +303,7 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
           <div className="mt-6 flex sm:hidden justify-center">
             <Link
               href="/markets"
-              className={`w-full text-sm font-semibold flex items-center justify-center gap-2 px-5 py-3 rounded-xl transition-all border ${
-                isDark
-                  ? "bg-white/5 border-white/10 text-[#34D399] hover:bg-emerald-500/10 hover:border-emerald-400/40"
-                  : "bg-white border-emerald-500/20 text-[#0E7A4E] hover:bg-emerald-50 shadow-xs"
-              }`}
+              className="w-full text-sm font-semibold flex items-center justify-center gap-2 px-5 py-3 rounded-xl transition-all border bg-white dark:bg-white/5 border-emerald-500/20 dark:border-white/10 text-[#0E7A4E] dark:text-[#34D399] hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:border-emerald-400/40 shadow-xs dark:shadow-none"
             >
               <span>Explore All Markets</span>
               <svg

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useTheme } from "./ThemeProvider";
 
 export type QuestCategory = "ONBOARDING" | "SOCIAL" | "ON-CHAIN" | "DAILY";
 export type QuestStatus = "AVAILABLE" | "VERIFYING" | "COMPLETED";
@@ -33,9 +32,6 @@ export default function QuestCard({
   onVerify,
   className = "",
 }: QuestCardProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [currentStatus, setCurrentStatus] = useState<QuestStatus>(status);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -82,11 +78,7 @@ export default function QuestCard({
     <article
       role="article"
       aria-label={`Quest: ${title}`}
-      className={`rounded-2xl border p-5 sm:p-6 transition-all duration-200 hover-lift flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ${
-        isDark
-          ? "bg-[#0A0F0C] border-white/10 hover:border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-          : "bg-white border-emerald-500/10 hover:border-emerald-500/20 shadow-[0_4px_16px_rgba(14,122,78,0.04)]"
-      } ${className}`}
+      className={`rounded-2xl border p-5 sm:p-6 transition-all duration-200 hover-lift flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 hover:border-emerald-500/20 dark:hover:border-white/20 shadow-[0_4px_16px_rgba(14,122,78,0.04)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.4)] ${className}`}
     >
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1.5">
@@ -103,11 +95,7 @@ export default function QuestCard({
           {title}
         </h3>
 
-        <p
-          className={`text-xs sm:text-sm mt-1 leading-relaxed max-w-xl ${
-            isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-          }`}
-        >
+        <p className="text-xs sm:text-sm mt-1 leading-relaxed max-w-xl text-[#4B5D55] dark:text-[#A9B3AD]">
           {description}
         </p>
       </div>
@@ -134,11 +122,7 @@ export default function QuestCard({
           <button
             type="button"
             disabled
-            className={`px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 cursor-wait border ${
-              isDark
-                ? "bg-white/10 border-white/10 text-[#A9B3AD]"
-                : "bg-slate-100 border-border-subtle text-text-muted"
-            }`}
+            className="px-5 py-2.5 rounded-xl font-medium text-xs sm:text-sm flex items-center gap-2 cursor-wait border bg-slate-100 dark:bg-white/10 border-border-subtle dark:border-white/10 text-text-muted dark:text-[#A9B3AD]"
           >
             <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />

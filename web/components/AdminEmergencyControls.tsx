@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useTheme } from "./ThemeProvider";
 
 export interface EmergencyActionLog {
   id: string;
@@ -25,9 +24,6 @@ const INITIAL_LOGS: EmergencyActionLog[] = [
 ];
 
 export default function AdminEmergencyControls() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [isProtocolPaused, setIsProtocolPaused] = useState<boolean>(false);
   const [targetMarketId, setTargetMarketId] = useState<string>("");
   const [emergencyReason, setEmergencyReason] = useState<string>("");
@@ -197,11 +193,7 @@ export default function AdminEmergencyControls() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div
-          className={`p-6 rounded-2xl border space-y-4 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-rose-500/15 shadow-xs"
-          }`}
-        >
+        <div className="p-6 rounded-2xl border space-y-4 bg-white border-rose-500/15 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:shadow-none">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-extrabold text-accent-navy dark:text-white">
@@ -232,11 +224,7 @@ export default function AdminEmergencyControls() {
               value={emergencyReason}
               onChange={(e) => setEmergencyReason(e.target.value)}
               placeholder="e.g., Routine smart contract migration / upstream oracle maintenance"
-              className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-rose-500 ${
-                isDark
-                  ? "bg-black/40 border-white/10 text-white"
-                  : "bg-gray-50 border-rose-500/20 text-accent-navy"
-              }`}
+              className="w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-rose-500 bg-gray-50 border-rose-500/20 text-accent-navy dark:bg-black/40 dark:border-white/10 dark:text-white"
             />
           </div>
 
@@ -253,11 +241,7 @@ export default function AdminEmergencyControls() {
           </button>
         </div>
 
-        <div
-          className={`p-6 rounded-2xl border space-y-4 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-rose-500/15 shadow-xs"
-          }`}
-        >
+        <div className="p-6 rounded-2xl border space-y-4 bg-white border-rose-500/15 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:shadow-none">
           <div>
             <h3 className="text-base font-extrabold text-accent-navy dark:text-white">
               Emergency Market Void (100% Refund)
@@ -278,11 +262,7 @@ export default function AdminEmergencyControls() {
                 value={targetMarketId}
                 onChange={(e) => setTargetMarketId(e.target.value)}
                 placeholder="e.g., 0 or UUID"
-                className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-rose-500 ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white"
-                    : "bg-gray-50 border-rose-500/20 text-accent-navy"
-                }`}
+                className="w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-rose-500 bg-gray-50 border-rose-500/20 text-accent-navy dark:bg-black/40 dark:border-white/10 dark:text-white"
               />
             </div>
 
@@ -296,11 +276,7 @@ export default function AdminEmergencyControls() {
                 value={adminSecretKey}
                 onChange={(e) => setAdminSecretKey(e.target.value)}
                 placeholder="Enter ADMIN_SECRET_KEY"
-                className={`w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-rose-500 ${
-                  isDark
-                    ? "bg-black/40 border-white/10 text-white"
-                    : "bg-gray-50 border-rose-500/20 text-accent-navy"
-                }`}
+                className="w-full px-3 py-2 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-rose-500 bg-gray-50 border-rose-500/20 text-accent-navy dark:bg-black/40 dark:border-white/10 dark:text-white"
               />
             </div>
 
@@ -315,11 +291,7 @@ export default function AdminEmergencyControls() {
         </div>
       </div>
 
-      <div
-        className={`p-6 rounded-2xl border space-y-4 ${
-          isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-rose-500/15 shadow-xs"
-        }`}
-      >
+      <div className="p-6 rounded-2xl border space-y-4 bg-white border-rose-500/15 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:shadow-none">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-extrabold text-accent-navy dark:text-white">
@@ -376,11 +348,7 @@ export default function AdminEmergencyControls() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 dark:bg-black/75 backdrop-blur-sm overflow-hidden animate-fade-in"
         >
-          <div
-            className={`w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden ${
-              isDark ? "bg-[#0A0F0C] border-rose-500/30 text-white" : "bg-white border-rose-500/30 text-accent-navy"
-            }`}
-          >
+          <div className="w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden bg-white border-rose-500/30 text-accent-navy dark:bg-[#0A0F0C] dark:border-rose-500/30 dark:text-white">
             <div className="p-4 sm:p-5 border-b border-rose-500/20 flex items-center gap-3 shrink-0">
               <span className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/30 shrink-0">
                 <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -412,9 +380,7 @@ export default function AdminEmergencyControls() {
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                  isDark ? "border-white/10 hover:bg-white/5" : "border-border-subtle hover:bg-gray-100"
-                }`}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer border-border-subtle hover:bg-gray-100 dark:border-white/10 dark:hover:bg-white/5"
               >
                 Cancel
               </button>

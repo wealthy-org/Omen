@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTheme } from "../../components/ThemeProvider";
 import { AdminMarketCreateForm, AdminMarketFormData } from "../../components/AdminMarketCreateForm";
 import AdminMarketResolutionTable, {
   ResolvableMarketItem,
@@ -35,9 +34,6 @@ export default function AdminDashboardPage({
   initialConnectedAddress = "",
   initialTab = "create-market",
 }: AdminDashboardProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [connectedAddress, setConnectedAddress] = useState<string | null>(
     initialConnectedAddress || null
   );
@@ -205,11 +201,7 @@ export default function AdminDashboardPage({
         </div>
 
         <div className="flex items-center gap-3">
-          <div
-            className={`px-3 py-1.5 rounded-xl border text-xs font-mono flex items-center gap-2 ${
-              isDark ? "bg-white/5 border-white/10 text-text-muted" : "bg-white border-border-subtle text-accent-navy"
-            }`}
-          >
+          <div className="px-3 py-1.5 rounded-xl border text-xs font-mono flex items-center gap-2 bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 text-accent-navy dark:text-text-muted">
             <span className="w-2 h-2 rounded-full bg-yes-green" />
             <span>{connectedAddress ? `${connectedAddress.slice(0, 6)}...${connectedAddress.slice(-4)}` : "0xAdmin"}</span>
           </div>
@@ -217,11 +209,7 @@ export default function AdminDashboardPage({
             type="button"
             onClick={handleDisconnect}
             aria-label="Disconnect Admin Session"
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-              isDark
-                ? "border-no-red/30 text-no-red hover:bg-no-red/10"
-                : "border-no-red/40 text-no-red hover:bg-rose-50"
-            }`}
+            className="px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer border-no-red/40 dark:border-no-red/30 text-no-red hover:bg-rose-50 dark:hover:bg-no-red/10"
           >
             Disconnect
           </button>
@@ -255,11 +243,7 @@ export default function AdminDashboardPage({
         aria-label="Admin Metrics Overview"
         className="grid grid-cols-1 sm:grid-cols-4 gap-4"
       >
-        <div
-          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-1 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
-          }`}
-        >
+        <div className="p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-1 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-xs dark:shadow-none">
           <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
             Total Markets Created
           </div>
@@ -271,11 +255,7 @@ export default function AdminDashboardPage({
           </div>
         </div>
 
-        <div
-          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-2 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
-          }`}
-        >
+        <div className="p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-2 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-xs dark:shadow-none">
           <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
             Beliefs Pipeline
           </div>
@@ -287,11 +267,7 @@ export default function AdminDashboardPage({
           </div>
         </div>
 
-        <div
-          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-3 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
-          }`}
-        >
+        <div className="p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-3 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-xs dark:shadow-none">
           <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
             Oracle Price Feeds
           </div>
@@ -303,11 +279,7 @@ export default function AdminDashboardPage({
           </div>
         </div>
 
-        <div
-          className={`p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-4 ${
-            isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/10 shadow-xs"
-          }`}
-        >
+        <div className="p-5 rounded-2xl border transition-all hover-lift animate-slide-up stagger-4 bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-xs dark:shadow-none">
           <div className="text-xs font-mono font-semibold uppercase text-text-muted dark:text-[#A9B3AD]">
             Pending Resolutions
           </div>

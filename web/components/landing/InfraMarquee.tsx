@@ -2,7 +2,6 @@
 
 import React from "react";
 import Image from "next/image";
-import { useTheme } from "../ThemeProvider";
 
 export interface InfraItem {
   name: string;
@@ -26,29 +25,19 @@ export interface InfraMarqueeProps {
   theme?: "dark" | "light";
 }
 
-export default function InfraMarquee({ theme: propTheme }: InfraMarqueeProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
+export default function InfraMarquee(_props: InfraMarqueeProps) {
   const marqueeItems = [...INFRA_STACK, ...INFRA_STACK, ...INFRA_STACK];
 
   return (
     <div className="w-full py-4 sm:py-6 overflow-hidden relative select-none">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className={`w-1.5 h-1.5 rounded-full ${isDark ? "bg-[#34D399]" : "bg-[#22C55E]"}`} />
-          <span
-            className={`text-[11px] font-mono font-bold uppercase tracking-widest ${
-              isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-            }`}
-          >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] dark:bg-[#34D399]" />
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#4B5D55] dark:text-[#A9B3AD]">
             Protocol Infrastructure & Ecosystem Stack
           </span>
         </div>
-        <span
-          className={`text-[10px] font-mono px-2 py-0.5 rounded border hidden sm:inline-block ${
-            isDark ? "bg-white/5 border-white/10 text-[#A9B3AD]" : "bg-emerald-50 border-emerald-500/15 text-[#0E7A4E]"
-          }`}
-        >
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded border hidden sm:inline-block bg-emerald-50 dark:bg-white/5 border-emerald-500/15 dark:border-white/10 text-[#0E7A4E] dark:text-[#A9B3AD]">
           Continuous Verification
         </span>
       </div>
@@ -69,11 +58,7 @@ export default function InfraMarquee({ theme: propTheme }: InfraMarqueeProps) {
                   className="w-full h-full object-contain"
                 />
               </div>
-              <span
-                className={`text-xs sm:text-sm font-bold tracking-tight ${
-                  isDark ? "text-zinc-200" : "text-zinc-800"
-                }`}
-              >
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-zinc-800 dark:text-zinc-200">
                 {item.name}
               </span>
             </div>

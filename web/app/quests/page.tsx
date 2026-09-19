@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTheme } from "@/components/ThemeProvider";
 import DailyCheckinWidget from "@/components/DailyCheckinWidget";
 import QuestCard, { QuestCategory, QuestStatus } from "@/components/QuestCard";
 import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
@@ -20,9 +19,6 @@ export interface QuestItem {
 export type FilterCategory = "ALL" | QuestCategory;
 
 export default function QuestsPage() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [quests, setQuests] = useState<QuestItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("ALL");
@@ -152,13 +148,7 @@ export default function QuestsPage() {
         </p>
       </div>
 
-      <div
-        className={`rounded-2xl border p-6 sm:p-8 transition-all animate-slide-up stagger-1 ${
-          isDark
-            ? "bg-gradient-to-r from-[#0A0F0C] via-[#0D1612] to-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
-            : "bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 border-emerald-500/15 shadow-[0_4px_24px_rgba(14,122,78,0.06)]"
-        }`}
-      >
+      <div className="rounded-2xl border p-6 sm:p-8 transition-all animate-slide-up stagger-1 bg-gradient-to-r from-emerald-50/70 via-white to-emerald-50/40 dark:from-[#0A0F0C] dark:via-[#0D1612] dark:to-[#0A0F0C] border-emerald-500/15 dark:border-white/10 shadow-[0_4px_24px_rgba(14,122,78,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
             <span className="text-xs font-mono font-semibold uppercase tracking-wider text-text-muted dark:text-[#A9B3AD]">
@@ -178,21 +168,21 @@ export default function QuestsPage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <div className={`p-4 rounded-xl border hover-lift ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
+            <div className="p-4 rounded-xl border hover-lift bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 shadow-xs dark:shadow-none">
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Quests Done</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-accent-navy dark:text-white">
                 {completedCount}/{quests.length}
               </div>
             </div>
 
-            <div className={`p-4 rounded-xl border hover-lift ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
+            <div className="p-4 rounded-xl border hover-lift bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 shadow-xs dark:shadow-none">
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Active Streak</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-warning-amber">
                 {streakCount} Days
               </div>
             </div>
 
-            <div className={`col-span-2 sm:col-span-1 p-4 rounded-xl border hover-lift ${isDark ? "bg-white/5 border-white/10" : "bg-white border-border-subtle shadow-xs"}`}>
+            <div className="col-span-2 sm:col-span-1 p-4 rounded-xl border hover-lift bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 shadow-xs dark:shadow-none">
               <span className="text-[11px] font-mono text-text-muted dark:text-[#A9B3AD] uppercase">Airdrop Rank</span>
               <div className="text-xl sm:text-2xl font-black font-mono mt-0.5 text-yes-green">
                 {airdropRank}
@@ -236,9 +226,7 @@ export default function QuestsPage() {
                   className={`px-3 py-1.5 rounded-xl font-mono text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border ${
                     isActive
                       ? "bg-primary-blue text-white border-primary-blue shadow-xs"
-                      : isDark
-                        ? "bg-white/5 border-white/10 text-[#A9B3AD] hover:text-white hover:bg-white/10"
-                        : "bg-white border-border-subtle text-text-muted hover:text-accent-navy hover:bg-slate-50"
+                      : "bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 text-text-muted dark:text-[#A9B3AD] hover:text-accent-navy dark:hover:text-white hover:bg-slate-50 dark:hover:bg-white/10"
                   }`}
                 >
                   <span>{opt.label}</span>
@@ -246,9 +234,7 @@ export default function QuestsPage() {
                     className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                       isActive
                         ? "bg-white/20 text-white"
-                        : isDark
-                          ? "bg-white/10 text-[#A9B3AD]"
-                          : "bg-slate-100 text-text-muted"
+                        : "bg-slate-100 dark:bg-white/10 text-text-muted dark:text-[#A9B3AD]"
                     }`}
                   >
                     {count}
@@ -264,18 +250,12 @@ export default function QuestsPage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`p-6 rounded-2xl border ${
-                  isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-border-subtle"
-                } h-28`}
+                className="p-6 rounded-2xl border bg-slate-100 dark:bg-white/5 border-border-subtle dark:border-white/10 h-28"
               />
             ))}
           </div>
         ) : filteredQuests.length === 0 ? (
-          <div
-            className={`p-10 rounded-2xl border text-center ${
-              isDark ? "bg-white/5 border-white/10" : "bg-slate-50 border-border-subtle"
-            }`}
-          >
+          <div className="p-10 rounded-2xl border text-center bg-slate-50 dark:bg-white/5 border-border-subtle dark:border-white/10">
             <p className="text-sm text-text-muted dark:text-[#A9B3AD]">
               No quests found in this category.
             </p>

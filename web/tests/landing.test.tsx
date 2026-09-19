@@ -114,10 +114,10 @@ describe("Landing Page V1 Components", () => {
 
     expect(screen.getByText(/Trending Belief Markets/i)).toBeInTheDocument();
     expect(screen.getByText("All")).toBeInTheDocument();
-    expect(screen.getByText("ETH")).toBeInTheDocument();
-    expect(screen.getByText("BTC")).toBeInTheDocument();
-    expect(screen.getByText("ARB")).toBeInTheDocument();
-    expect(screen.getByText("Macro")).toBeInTheDocument();
+    expect(screen.getAllByText("ETH").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("BTC").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("ARB").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Macro").length).toBeGreaterThan(0);
   });
 
   it("renders the 5-stage protocol lifecycle flow", () => {

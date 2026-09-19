@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useTheme } from "./ThemeProvider";
 
 const PLATFORM_LINKS = [
   { label: "Trending Markets", href: "/#markets" },
@@ -29,17 +28,11 @@ export interface FooterProps {
   theme?: "dark" | "light";
 }
 
-export default function Footer({ theme: propTheme }: FooterProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
+export default function Footer(_props: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer
-      className={`w-full border-t mt-auto transition-colors duration-300 ${
-        isDark ? "bg-[#030906] border-white/10" : "bg-white/95 border-emerald-500/10 shadow-[0_-4px_24px_rgba(14,122,78,0.03)]"
-      }`}
-    >
+    <footer className="w-full border-t mt-auto transition-colors duration-300 bg-white/95 dark:bg-[#030906] border-emerald-500/10 dark:border-white/10 shadow-[0_-4px_24px_rgba(14,122,78,0.03)] dark:shadow-none">
       <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-12 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           <div className="space-y-4 lg:col-span-1">
@@ -53,22 +46,16 @@ export default function Footer({ theme: propTheme }: FooterProps) {
                   className="w-7 h-7 object-contain"
                 />
               </div>
-              <span className={`font-bold text-lg tracking-tight ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <span className="font-bold text-lg tracking-tight text-[#0B1F16] dark:text-white">
                 OMEN
               </span>
             </div>
 
-            <p className={`text-sm leading-relaxed max-w-sm ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+            <p className="text-sm leading-relaxed max-w-sm text-[#4B5D55] dark:text-[#A9B3AD]">
               Social Belief Market Protocol turning opinions into tradable on-chain markets across Ethereum Sepolia & Robinhood Chain Testnet.
             </p>
 
-            <div
-              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border ${
-                isDark
-                  ? "bg-emerald-950/60 border-emerald-500/20 text-white/80"
-                  : "bg-emerald-50/80 border-emerald-500/15 text-[#0E7A4E]"
-              }`}
-            >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border bg-emerald-50/80 dark:bg-emerald-950/60 border-emerald-500/15 dark:border-emerald-500/20 text-[#0E7A4E] dark:text-white/80">
               <span className="w-2 h-2 rounded-full bg-yes-green animate-pulse" />
               <span className="text-xs font-mono font-medium">
                 Dual-Testnet Active
@@ -78,7 +65,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
 
           <div className="grid grid-cols-2 gap-8 lg:col-span-2">
             <div>
-              <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider mb-4 text-[#0B1F16] dark:text-white">
                 Platform
               </h3>
               <ul className="space-y-2.5">
@@ -86,9 +73,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className={`text-sm transition-colors ${
-                        isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
-                      }`}
+                      className="text-sm transition-colors text-[#4B5D55] hover:text-[#0E7A4E] dark:text-[#A9B3AD] dark:hover:text-[#34D399]"
                     >
                       {link.label}
                     </Link>
@@ -98,7 +83,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
             </div>
 
             <div>
-              <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider mb-4 text-[#0B1F16] dark:text-white">
                 Developers
               </h3>
               <ul className="space-y-2.5">
@@ -109,13 +94,11 @@ export default function Footer({ theme: propTheme }: FooterProps) {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`text-sm transition-colors inline-flex items-center gap-1 group ${
-                          isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
-                        }`}
+                        className="text-sm transition-colors inline-flex items-center gap-1 group text-[#4B5D55] hover:text-[#0E7A4E] dark:text-[#A9B3AD] dark:hover:text-[#34D399]"
                       >
                         {link.label}
                         <svg
-                          className={`w-3.5 h-3.5 transition-colors ${isDark ? "text-[#A9B3AD]/60 group-hover:text-[#34D399]" : "text-[#4B5D55]/60 group-hover:text-[#0E7A4E]"}`}
+                          className="w-3.5 h-3.5 transition-colors text-[#4B5D55]/60 group-hover:text-[#0E7A4E] dark:text-[#A9B3AD]/60 dark:group-hover:text-[#34D399]"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -126,9 +109,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
                     ) : (
                       <Link
                         href={link.href}
-                        className={`text-sm transition-colors ${
-                          isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
-                        }`}
+                        className="text-sm transition-colors text-[#4B5D55] hover:text-[#0E7A4E] dark:text-[#A9B3AD] dark:hover:text-[#34D399]"
                       >
                         {link.label}
                       </Link>
@@ -140,7 +121,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
           </div>
 
           <div className="lg:col-span-1">
-            <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider mb-4 text-[#0B1F16] dark:text-white">
               Community
             </h3>
             <ul className="space-y-2.5">
@@ -150,13 +131,11 @@ export default function Footer({ theme: propTheme }: FooterProps) {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`text-sm transition-colors inline-flex items-center gap-1 group ${
-                      isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
-                    }`}
+                    className="text-sm transition-colors inline-flex items-center gap-1 group text-[#4B5D55] hover:text-[#0E7A4E] dark:text-[#A9B3AD] dark:hover:text-[#34D399]"
                   >
                     {link.label}
                     <svg
-                      className={`w-3.5 h-3.5 transition-colors ${isDark ? "text-[#A9B3AD]/60 group-hover:text-[#34D399]" : "text-[#4B5D55]/60 group-hover:text-[#0E7A4E]"}`}
+                      className="w-3.5 h-3.5 transition-colors text-[#4B5D55]/60 group-hover:text-[#0E7A4E] dark:text-[#A9B3AD]/60 dark:group-hover:text-[#34D399]"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -170,11 +149,7 @@ export default function Footer({ theme: propTheme }: FooterProps) {
           </div>
         </div>
 
-        <div
-          className={`pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs ${
-            isDark ? "border-white/10 text-[#A9B3AD]" : "border-emerald-500/10 text-[#4B5D55]"
-          }`}
-        >
+        <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs border-emerald-500/10 text-[#4B5D55] dark:border-white/10 dark:text-[#A9B3AD]">
           <p>© {currentYear} Omen Protocol. All rights reserved.</p>
           <p className="font-mono text-center sm:text-right">
             Demonstration and testnet platform only. Not financial advice.
@@ -184,4 +159,3 @@ export default function Footer({ theme: propTheme }: FooterProps) {
     </footer>
   );
 }
-

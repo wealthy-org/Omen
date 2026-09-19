@@ -2,16 +2,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useTheme } from "../ThemeProvider";
 
 export interface FeaturedBeliefHeroProps {
   theme?: "dark" | "light";
 }
 
-export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefHeroProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
-
+export default function FeaturedBeliefHero({}: FeaturedBeliefHeroProps) {
   const [side, setSide] = useState<"agree" | "disagree">("agree");
   const [amount, setAmount] = useState<string>("1.0");
 
@@ -27,13 +23,7 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
       : 0;
 
   return (
-    <div
-      className={`rounded-2xl sm:rounded-3xl p-5 sm:p-7 border transition-all duration-300 relative flex flex-col justify-between hover-lift shadow-xl ${
-        isDark
-          ? "bg-[#070D09]/95 border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.7)]"
-          : "bg-white/95 border-emerald-500/20 shadow-[0_12px_36px_rgba(14,122,78,0.08),_inset_0_1px_0_rgba(255,255,255,1)]"
-      }`}
-    >
+    <div className="rounded-2xl sm:rounded-3xl p-5 sm:p-7 border transition-all duration-300 relative flex flex-col justify-between hover-lift shadow-xl bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/20 shadow-[0_12px_36px_rgba(14,122,78,0.08),_inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)]">
       <div>
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2.5">
@@ -49,7 +39,7 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
               />
             </div>
             <div className="flex items-center gap-1.5">
-              <span className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <span className="text-sm font-bold text-[#0B1F16] dark:text-white">
                 @TraderX
               </span>
               <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
@@ -57,28 +47,24 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
               </span>
             </div>
           </div>
-          <span className={`text-xs font-mono font-semibold ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+          <span className="text-xs font-mono font-semibold text-[#4B5D55] dark:text-[#A9B3AD]">
             Ends in 12 days
           </span>
         </div>
 
-        <div className={`text-xs font-mono mb-4 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+        <div className="text-xs font-mono mb-4 text-[#4B5D55] dark:text-[#A9B3AD]">
           Detected from X, 2 hours ago • Resolves via Chainlink
         </div>
 
-        <h3
-          className={`text-xl sm:text-2xl font-black tracking-tight leading-tight mb-5 ${
-            isDark ? "text-white" : "text-[#0B1F16]"
-          }`}
-        >
+        <h3 className="text-xl sm:text-2xl font-black tracking-tight leading-tight mb-5 text-[#0B1F16] dark:text-white">
           SOL will outperform ETH this month
         </h3>
 
         <div className="space-y-3 mb-4">
           <div>
             <div className="flex justify-between text-xs font-semibold mb-1">
-              <span className={isDark ? "text-[#DCE5DF]" : "text-[#17241D]"}>
-                People <span className={`text-[11px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>what they say</span>
+              <span className="text-[#17241D] dark:text-[#DCE5DF]">
+                People <span className="text-[11px] text-[#4B5D55] dark:text-[#A9B3AD]">what they say</span>
               </span>
               <span className="font-mono font-bold text-emerald-500">72% agree</span>
             </div>
@@ -92,8 +78,8 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
 
           <div>
             <div className="flex justify-between text-xs font-semibold mb-1">
-              <span className={isDark ? "text-[#DCE5DF]" : "text-[#17241D]"}>
-                Capital <span className={`text-[11px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>where money is</span>
+              <span className="text-[#17241D] dark:text-[#DCE5DF]">
+                Capital <span className="text-[11px] text-[#4B5D55] dark:text-[#A9B3AD]">where money is</span>
               </span>
               <span className="font-mono font-bold text-emerald-500">58% agree</span>
             </div>
@@ -106,13 +92,7 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
           </div>
         </div>
 
-        <div
-          className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs leading-relaxed mb-5 ${
-            isDark
-              ? "bg-[#030906]/80 border-emerald-500/20 text-[#DCE5DF]"
-              : "bg-emerald-50/70 border-emerald-500/15 text-[#17241D]"
-          }`}
-        >
+        <div className="flex items-center gap-2.5 p-3 rounded-xl border text-xs leading-relaxed mb-5 bg-emerald-50/70 dark:bg-[#030906]/80 border-emerald-500/15 dark:border-emerald-500/20 text-[#17241D] dark:text-[#DCE5DF]">
           <span className="font-mono font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 shrink-0">
             14-pt gap
           </span>
@@ -120,7 +100,7 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
         </div>
       </div>
 
-      <div className={`pt-4 border-t ${isDark ? "border-white/10" : "border-emerald-500/15"}`}>
+      <div className="pt-4 border-t border-emerald-500/15 dark:border-white/10">
         <div className="grid grid-cols-2 gap-2.5 mb-3">
           <button
             type="button"
@@ -153,30 +133,24 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
           </button>
         </div>
 
-        <div
-          className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border mb-3 ${
-            isDark ? "bg-[#030906] border-white/10" : "bg-white border-zinc-200"
-          }`}
-        >
+        <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border mb-3 bg-white dark:bg-[#030906] border-zinc-200 dark:border-white/10">
           <input
             type="number"
             step="0.1"
             min="0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className={`bg-transparent outline-none font-mono font-bold text-base w-full ${
-              isDark ? "text-white" : "text-[#0B1F16]"
-            }`}
+            className="bg-transparent outline-none font-mono font-bold text-base w-full text-[#0B1F16] dark:text-white"
             placeholder="1.0"
             aria-label="Stake amount in test ETH"
           />
-          <span className={`text-xs font-mono font-bold shrink-0 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+          <span className="text-xs font-mono font-bold shrink-0 text-[#4B5D55] dark:text-[#A9B3AD]">
             test ETH
           </span>
         </div>
 
         <div className="flex items-center justify-between text-xs mb-4">
-          <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>
+          <span className="text-[#4B5D55] dark:text-[#A9B3AD]">
             If <strong className="uppercase font-mono">{side}</strong> wins, you receive:
           </span>
           <span
@@ -188,13 +162,9 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
           </span>
         </div>
 
-        <div
-          className={`pt-3 border-t flex items-center justify-between text-xs font-mono ${
-            isDark ? "border-white/10 text-[#A9B3AD]" : "border-emerald-500/15 text-[#4B5D55]"
-          }`}
-        >
-          <span>≈ <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>$482K</strong> pool</span>
-          <span><strong className={isDark ? "text-white" : "text-[#0B1F16]"}>2,842</strong> traders</span>
+        <div className="pt-3 border-t flex items-center justify-between text-xs font-mono border-emerald-500/15 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+          <span>≈ <strong className="text-[#0B1F16] dark:text-white">$482K</strong> pool</span>
+          <span><strong className="text-[#0B1F16] dark:text-white">2,842</strong> traders</span>
           <Link
             href="/market/sol-outperform-eth"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-mono bg-zinc-100 hover:bg-zinc-200 dark:bg-white/10 dark:hover:bg-emerald-500 dark:hover:text-black text-zinc-800 dark:text-zinc-200 transition-all active:scale-95 cursor-pointer shadow-xs"

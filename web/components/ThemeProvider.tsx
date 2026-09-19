@@ -38,7 +38,9 @@ export function ThemeProvider({
   children: React.ReactNode;
 }) {
   const [theme, setThemeState] = useState<Theme>(initialTheme);
-  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">("dark");
+  const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">(
+    initialTheme === "light" ? "light" : "dark"
+  );
 
   useEffect(() => {
     let saved: Theme = initialTheme;
@@ -103,13 +105,8 @@ export function ThemeProvider({
   };
 
   const toggleTheme = () => {
-    if (theme === "system") {
-      setTheme("dark");
-    } else if (theme === "dark") {
-      setTheme("light");
-    } else {
-      setTheme("system");
-    }
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(next);
   };
 
   return (

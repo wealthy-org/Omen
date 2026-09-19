@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTheme } from "./ThemeProvider";
 import { mockPredictionMarket } from "../lib/mockPredictionMarket";
 
 export interface DailyCheckinWidgetProps {
@@ -25,9 +24,6 @@ export default function DailyCheckinWidget({
   onCheckIn,
   className = "",
 }: DailyCheckinWidgetProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [streak, setStreak] = useState(currentStreak);
   const [canCheckIn, setCanCheckIn] = useState(initialCanCheckIn);
   const [timeLeft, setTimeLeft] = useState(cooldownSeconds);
@@ -116,11 +112,7 @@ export default function DailyCheckinWidget({
     <section
       role="region"
       aria-label="Daily Check-in Streak"
-      className={`rounded-2xl border p-6 sm:p-8 transition-all ${
-        isDark
-          ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-          : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"
-      } ${className}`}
+      className={`rounded-2xl border p-6 sm:p-8 transition-all bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${className}`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border-subtle dark:border-white/10">
         <div className="flex items-center gap-3">
@@ -195,11 +187,7 @@ export default function DailyCheckinWidget({
           return (
             <div
               key={dayNum}
-              className={`p-3 rounded-xl border text-center font-mono flex flex-col items-center justify-between min-h-[96px] ${
-                isDark
-                  ? "bg-white/5 border-white/10 text-[#A9B3AD]"
-                  : "bg-slate-50 border-border-subtle text-text-muted"
-              }`}
+              className="p-3 rounded-xl border text-center font-mono flex flex-col items-center justify-between min-h-[96px] bg-slate-50 dark:bg-white/5 border-border-subtle dark:border-white/10 text-text-muted dark:text-[#A9B3AD]"
             >
               <div className="flex items-center justify-between w-full text-[11px] font-medium opacity-70">
                 <span>Day {dayNum}</span>
@@ -260,11 +248,7 @@ export default function DailyCheckinWidget({
       ) : (
         <div
           aria-live="polite"
-          className={`w-full py-3.5 px-4 rounded-xl font-mono text-sm border flex items-center justify-center gap-2.5 cursor-not-allowed ${
-            isDark
-              ? "bg-white/5 border-white/10 text-[#A9B3AD]"
-              : "bg-slate-100 border-border-subtle text-text-muted"
-          }`}
+          className="w-full py-3.5 px-4 rounded-xl font-mono text-sm border flex items-center justify-center gap-2.5 cursor-not-allowed bg-slate-100 dark:bg-white/5 border-border-subtle dark:border-white/10 text-text-muted dark:text-[#A9B3AD]"
         >
           <svg className="w-4 h-4 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

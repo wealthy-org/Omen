@@ -2,16 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useTheme } from "@/components/ThemeProvider";
 import BeliefMarketCard, { BeliefMarket } from "@/components/BeliefMarketCard";
 import DiscoveryFilter, { DiscoveryTab, MarketCategoryFilter } from "@/components/DiscoveryFilter";
 
 const PAGE_SIZE = 9;
 
 export default function MarketsPage() {
-  const contextTheme = useTheme();
-  const isDark = (contextTheme.theme || "dark") === "dark";
-
   const [markets, setMarkets] = useState<BeliefMarket[]>([]);
   const [activeTab, setActiveTab] = useState<DiscoveryTab>("trending");
   const [activeCategory, setActiveCategory] = useState<MarketCategoryFilter>("all");
@@ -164,26 +160,14 @@ export default function MarketsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span
-              className={`text-xs font-mono font-bold uppercase tracking-widest ${
-                isDark ? "text-[#34D399]" : "text-[#0E7A4E]"
-              }`}
-            >
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#0E7A4E] dark:text-[#34D399]">
               Dual-Chain Belief Markets
             </span>
           </div>
-          <h1
-            className={`text-3xl sm:text-4xl font-extrabold tracking-tight ${
-              isDark ? "text-white" : "text-[#0B1F16]"
-            }`}
-          >
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
             Explore Belief Markets
           </h1>
-          <p
-            className={`text-sm sm:text-base mt-1 ${
-              isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-            }`}
-          >
+          <p className="text-sm sm:text-base mt-1 text-[#4B5D55] dark:text-[#A9B3AD]">
             Discover conviction pools, back social beliefs with AGREE / DISAGREE stakes, and earn decentralized payouts.
           </p>
         </div>
@@ -239,8 +223,8 @@ export default function MarketsPage() {
 
           {totalPages > 1 && (
             <div className="mt-10 pt-6 border-t border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
-              <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>
-                Showing <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{startIndex + 1}</strong> - <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{Math.min(startIndex + PAGE_SIZE, filteredAndSortedMarkets.length)}</strong> of <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{filteredAndSortedMarkets.length}</strong> markets
+              <span className="text-[#4B5D55] dark:text-[#A9B3AD]">
+                Showing <strong className="text-[#0B1F16] dark:text-white">{startIndex + 1}</strong> - <strong className="text-[#0B1F16] dark:text-white">{Math.min(startIndex + PAGE_SIZE, filteredAndSortedMarkets.length)}</strong> of <strong className="text-[#0B1F16] dark:text-white">{filteredAndSortedMarkets.length}</strong> markets
               </span>
 
               <div className="flex items-center gap-1.5">
@@ -248,11 +232,7 @@ export default function MarketsPage() {
                   type="button"
                   onClick={() => handlePageChange(effectiveCurrentPage - 1)}
                   disabled={effectiveCurrentPage <= 1}
-                  className={`px-3 py-1.5 rounded-xl font-bold transition-all border cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-                    isDark
-                      ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
-                      : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 shadow-xs"
-                  }`}
+                  className="px-3 py-1.5 rounded-xl font-bold transition-all border cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-white hover:bg-zinc-50 dark:hover:border-emerald-500/40 shadow-xs"
                 >
                   ← Prev
                 </button>
@@ -264,12 +244,8 @@ export default function MarketsPage() {
                     onClick={() => handlePageChange(pageNum)}
                     className={`w-8 h-8 rounded-xl font-bold transition-all border cursor-pointer flex items-center justify-center ${
                       effectiveCurrentPage === pageNum
-                        ? isDark
-                          ? "bg-emerald-500 text-black border-emerald-400 shadow-md font-black"
-                          : "bg-[#10221A] text-white border-[#10221A] shadow-md font-black"
-                        : isDark
-                          ? "bg-[#0A0F0C] border-white/10 text-[#A9B3AD] hover:text-white"
-                          : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-xs"
+                        ? "bg-[#10221A] text-white border-[#10221A] shadow-md font-black dark:bg-emerald-500 dark:text-black dark:border-emerald-400"
+                        : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-xs dark:bg-[#0A0F0C] dark:border-white/10 dark:text-[#A9B3AD] dark:hover:text-white"
                     }`}
                   >
                     {pageNum}
@@ -280,11 +256,7 @@ export default function MarketsPage() {
                   type="button"
                   onClick={() => handlePageChange(effectiveCurrentPage + 1)}
                   disabled={effectiveCurrentPage >= totalPages}
-                  className={`px-3 py-1.5 rounded-xl font-bold transition-all border cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-                    isDark
-                      ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
-                      : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 shadow-xs"
-                  }`}
+                  className="px-3 py-1.5 rounded-xl font-bold transition-all border cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-white/10 text-zinc-800 dark:text-white hover:bg-zinc-50 dark:hover:border-emerald-500/40 shadow-xs"
                 >
                   Next →
                 </button>

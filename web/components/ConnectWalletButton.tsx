@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useTheme } from "./ThemeProvider";
 import { mockPredictionMarket } from "../lib/mockPredictionMarket";
 
 export interface ConnectWalletButtonProps {
@@ -21,9 +20,6 @@ export default function ConnectWalletButton({
   onConnect,
   onDisconnect,
 }: ConnectWalletButtonProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const defaultDemo = mockPredictionMarket.getDemoWallet();
   const activeAddress = initialAddress !== undefined ? initialAddress : defaultDemo.address;
   const activeBalance = initialBalance !== undefined ? initialBalance : defaultDemo.formattedBalance;
@@ -149,17 +145,9 @@ export default function ConnectWalletButton({
     return (
       <div
         ref={dropdownRef}
-        className={`relative inline-flex items-center rounded-xl p-1 border transition-all ${
-          isDark
-            ? "bg-white/5 border-white/10 hover:border-white/20"
-            : "bg-white/90 border-emerald-500/10 hover:border-emerald-500/20 shadow-xs"
-        } ${className}`}
+        className={`relative inline-flex items-center rounded-xl p-1 border transition-all bg-white/90 dark:bg-white/5 border-emerald-500/10 dark:border-white/10 hover:border-emerald-500/20 dark:hover:border-white/20 shadow-xs dark:shadow-none ${className}`}
       >
-        <span
-          className={`px-3 text-xs font-mono font-medium hidden sm:inline-block ${
-            isDark ? "text-[#DCE5DF]" : "text-[#4B5D55]"
-          }`}
-        >
+        <span className="px-3 text-xs font-mono font-medium hidden sm:inline-block text-[#4B5D55] dark:text-[#DCE5DF]">
           {balance}
         </span>
 
@@ -169,11 +157,7 @@ export default function ConnectWalletButton({
           aria-haspopup="menu"
           aria-expanded={isDropdownOpen}
           aria-label="Wallet menu"
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-xs text-xs font-mono font-semibold transition-all cursor-pointer ${
-            isDark
-              ? "bg-[#0A0F0C] border-white/10 text-white hover:bg-white/10"
-              : "bg-white border-border-subtle text-accent-navy hover:bg-slate-50"
-          }`}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border shadow-xs text-xs font-mono font-semibold transition-all cursor-pointer bg-white dark:bg-[#0A0F0C] border-border-subtle dark:border-white/10 text-accent-navy dark:text-white hover:bg-slate-50 dark:hover:bg-white/10"
         >
           <span className="w-2 h-2 rounded-full bg-yes-green animate-pulse" />
           <span className="font-mono">{formatAddress(address)}</span>
@@ -193,14 +177,10 @@ export default function ConnectWalletButton({
           <div
             role="menu"
             aria-label="Wallet options"
-            className={`absolute right-0 top-full mt-2 w-56 rounded-xl shadow-xl py-1.5 z-50 border backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150 ${
-              isDark
-                ? "bg-[#0A0F0C]/95 border-white/10 text-white shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
-                : "bg-white/95 border-emerald-500/10 text-[#0B1F16] shadow-[0_8px_30px_rgba(14,122,78,0.1)]"
-            }`}
+            className="absolute right-0 top-full mt-2 w-56 rounded-xl shadow-xl py-1.5 z-50 border backdrop-blur-xl animate-in fade-in slide-in-from-top-1 duration-150 bg-white/95 dark:bg-[#0A0F0C]/95 border-emerald-500/10 dark:border-white/10 text-[#0B1F16] dark:text-white shadow-[0_8px_30px_rgba(14,122,78,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
           >
-            <div className="px-3.5 py-1.5 mb-1 border-b border-white/5">
-              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400">
+            <div className="px-3.5 py-1.5 mb-1 border-b border-black/5 dark:border-white/5">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
                 Demo Wallet (Mock Mode)
               </span>
             </div>
@@ -209,11 +189,7 @@ export default function ConnectWalletButton({
               type="button"
               role="menuitem"
               onClick={handleCopyAddress}
-              className={`w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
-                isDark
-                  ? "hover:bg-white/10 text-[#DCE5DF] hover:text-white"
-                  : "hover:bg-emerald-50/70 text-[#17241D] hover:text-[#0B1F16]"
-              }`}
+              className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer hover:bg-emerald-50/70 dark:hover:bg-white/10 text-[#17241D] dark:text-[#DCE5DF] hover:text-[#0B1F16] dark:hover:text-white"
             >
               <span className="flex items-center gap-2">
                 {copied ? (
@@ -235,11 +211,7 @@ export default function ConnectWalletButton({
               href={`https://sepolia.arbiscan.io/address/${address}`}
               target="_blank"
               rel="noopener noreferrer"
-              className={`w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium rounded-lg transition-colors ${
-                isDark
-                  ? "hover:bg-white/10 text-[#DCE5DF] hover:text-white"
-                  : "hover:bg-emerald-50/70 text-[#17241D] hover:text-[#0B1F16]"
-              }`}
+              className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium rounded-lg transition-colors hover:bg-emerald-50/70 dark:hover:bg-white/10 text-[#17241D] dark:text-[#DCE5DF] hover:text-[#0B1F16] dark:hover:text-white"
             >
               <span className="flex items-center gap-2">
                 <svg className="w-3.5 h-3.5 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -252,15 +224,13 @@ export default function ConnectWalletButton({
               </svg>
             </a>
 
-            <div className={`h-[1px] my-1 mx-2 ${isDark ? "bg-white/10" : "bg-emerald-500/10"}`} />
+            <div className="h-[1px] my-1 mx-2 bg-emerald-500/10 dark:bg-white/10" />
 
             <button
               type="button"
               role="menuitem"
               onClick={handleDisconnect}
-              className={`w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium rounded-lg text-no-red transition-colors cursor-pointer ${
-                isDark ? "hover:bg-no-red/10" : "hover:bg-no-red-soft"
-              }`}
+              className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium rounded-lg text-no-red transition-colors cursor-pointer hover:bg-no-red-soft dark:hover:bg-no-red/10"
             >
               <span className="flex items-center gap-2">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

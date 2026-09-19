@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useTheme } from "./ThemeProvider";
 
 export interface LeaderboardEntry {
   rank: number;
@@ -32,9 +31,6 @@ export default function LeaderboardTable({
   pageSize = 10,
   className = "",
 }: LeaderboardTableProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(entries.length / pageSize) || 1;
@@ -100,9 +96,7 @@ export default function LeaderboardTable({
       <div
         role="region"
         aria-label="Points Leaderboard Table"
-        className={`p-12 rounded-2xl border text-center ${
-          isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-border-subtle"
-        } ${className}`}
+        className={`p-12 rounded-2xl border text-center bg-white dark:bg-[#0A0F0C] border-border-subtle dark:border-white/10 ${className}`}
       >
         <p className="text-sm text-text-muted dark:text-[#A9B3AD]">
           No ranked traders found.
@@ -115,20 +109,12 @@ export default function LeaderboardTable({
     <div
       role="region"
       aria-label="Points Leaderboard Table"
-      className={`rounded-2xl border overflow-hidden transition-all ${
-        isDark
-          ? "bg-[#0A0F0C] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-          : "bg-white border-emerald-500/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)]"
-      } ${className}`}
+      className={`rounded-2xl border overflow-hidden transition-all bg-white dark:bg-[#0A0F0C] border-emerald-500/10 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${className}`}
     >
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className={`border-b text-[11px] font-mono font-bold uppercase tracking-wider ${
-              isDark
-                ? "bg-white/[0.02] border-white/10 text-[#A9B3AD]"
-                : "bg-slate-50 border-border-subtle text-text-muted"
-            }`}>
+            <tr className="border-b text-[11px] font-mono font-bold uppercase tracking-wider bg-slate-50 dark:bg-white/[0.02] border-border-subtle dark:border-white/10 text-text-muted dark:text-[#A9B3AD]">
               <th scope="col" className="py-3.5 px-4 sm:px-6 w-16">Rank</th>
               <th scope="col" className="py-3.5 px-4 sm:px-6">Trader / Wallet</th>
               <th scope="col" className="py-3.5 px-4 sm:px-6 text-center">Accuracy / Win Rate</th>
@@ -153,12 +139,8 @@ export default function LeaderboardTable({
                   key={entry.address}
                   className={`transition-colors ${
                     isCurrentUser
-                      ? isDark
-                        ? "bg-primary-blue/10 hover:bg-primary-blue/15"
-                        : "bg-primary-blue-soft/50 hover:bg-primary-blue-soft/70"
-                      : isDark
-                        ? "hover:bg-white/[0.02]"
-                        : "hover:bg-slate-50/80"
+                      ? "bg-primary-blue-soft/50 hover:bg-primary-blue-soft/70 dark:bg-primary-blue/10 dark:hover:bg-primary-blue/15"
+                      : "hover:bg-slate-50/80 dark:hover:bg-white/[0.02]"
                   }`}
                 >
                   <td className="py-3.5 px-4 sm:px-6 font-bold">
@@ -185,7 +167,7 @@ export default function LeaderboardTable({
                     {winRateDisplay}
                   </td>
                   <td className="py-3.5 px-4 sm:px-6 text-center text-text-muted dark:text-[#A9B3AD]">
-                    <span className="text-white font-semibold">{correctCount}</span> / <span>{resolvedCount}</span>
+                    <span className="text-zinc-900 dark:text-white font-semibold">{correctCount}</span> / <span>{resolvedCount}</span>
                   </td>
                   <td className="py-3.5 px-4 sm:px-6 text-center">
                     {renderTierBadge(entry.tier, winRateDisplay)}
@@ -201,9 +183,7 @@ export default function LeaderboardTable({
       </div>
 
       {totalPages > 1 && (
-        <div className={`flex items-center justify-between px-4 sm:px-6 py-3 border-t text-xs font-mono ${
-          isDark ? "border-white/10 text-[#A9B3AD]" : "border-border-subtle text-text-muted"
-        }`}>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-t text-xs font-mono border-border-subtle dark:border-white/10 text-text-muted dark:text-[#A9B3AD]">
           <span>
             Page {currentPage} of {totalPages}
           </span>
@@ -215,9 +195,7 @@ export default function LeaderboardTable({
               className={`px-3 py-1 rounded-lg border font-semibold transition-all ${
                 currentPage <= 1
                   ? "opacity-40 cursor-not-allowed border-transparent"
-                  : isDark
-                    ? "border-white/10 hover:bg-white/10 text-white"
-                    : "border-border-subtle hover:bg-slate-100 text-accent-navy"
+                  : "border-border-subtle hover:bg-slate-100 text-accent-navy dark:border-white/10 dark:hover:bg-white/10 dark:text-white"
               }`}
             >
               Previous
@@ -229,9 +207,7 @@ export default function LeaderboardTable({
               className={`px-3 py-1 rounded-lg border font-semibold transition-all ${
                 currentPage >= totalPages
                   ? "opacity-40 cursor-not-allowed border-transparent"
-                  : isDark
-                    ? "border-white/10 hover:bg-white/10 text-white"
-                    : "border-border-subtle hover:bg-slate-100 text-accent-navy"
+                  : "border-border-subtle hover:bg-slate-100 text-accent-navy dark:border-white/10 dark:hover:bg-white/10 dark:text-white"
               }`}
             >
               Next

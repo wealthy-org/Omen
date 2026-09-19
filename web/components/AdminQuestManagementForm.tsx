@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useTheme } from "./ThemeProvider";
 import { QuestCategory } from "./QuestCard";
 
 export type QuestRecurrence = "ONE_TIME" | "DAILY" | "WEEKLY";
@@ -35,9 +34,6 @@ export default function AdminQuestManagementForm({
   onDeleteQuest,
   className = "",
 }: AdminQuestManagementFormProps) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [quests, setQuests] = useState<AdminQuestItem[]>(initialQuests);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -612,9 +608,7 @@ export default function AdminQuestManagementForm({
                 filteredQuests.map((quest) => (
                   <tr
                     key={quest.id}
-                    className={`transition-colors ${
-                      isDark ? "hover:bg-white/[0.02]" : "hover:bg-emerald-50/40"
-                    }`}
+                    className="transition-colors hover:bg-emerald-50/40 dark:hover:bg-white/[0.02]"
                   >
                     <td className="py-4 px-4 max-w-xs sm:max-w-md">
                       <div className="font-bold text-accent-navy dark:text-white leading-tight">

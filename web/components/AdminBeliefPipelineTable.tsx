@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useTheme } from "./ThemeProvider";
 
 export interface BeliefPipelineItem {
   id: string;
@@ -79,9 +78,6 @@ const MOCK_PIPELINE_ITEMS: BeliefPipelineItem[] = [
 ];
 
 export default function AdminBeliefPipelineTable() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
   const [items, setItems] = useState<BeliefPipelineItem[]>(MOCK_PIPELINE_ITEMS);
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -219,11 +215,7 @@ export default function AdminBeliefPipelineTable() {
           type="button"
           aria-label="Sync Pipeline"
           onClick={fetchBeliefs}
-          className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-2 border ${
-            isDark
-              ? "bg-white/5 hover:bg-white/10 border-white/10 text-white"
-              : "bg-white hover:bg-emerald-50/50 border-emerald-500/20 text-accent-navy shadow-xs"
-          }`}
+          className="px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-2 border bg-white hover:bg-emerald-50/50 dark:bg-white/5 dark:hover:bg-white/10 border-emerald-500/20 dark:border-white/10 text-accent-navy dark:text-white shadow-xs dark:shadow-none"
         >
           <svg
             className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`}
@@ -245,11 +237,7 @@ export default function AdminBeliefPipelineTable() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search belief statement, author address, or handle..."
-            className={`w-full px-4 py-2.5 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 ${
-              isDark
-                ? "bg-[#0A0F0C] border-white/10 text-white placeholder:text-[#A9B3AD]/60"
-                : "bg-white border-emerald-500/20 text-accent-navy placeholder:text-text-muted shadow-xs"
-            }`}
+            className="w-full px-4 py-2.5 rounded-xl text-xs font-mono border focus:outline-hidden focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-[#0A0F0C] border-emerald-500/20 dark:border-white/10 text-accent-navy dark:text-white placeholder:text-text-muted dark:placeholder:text-[#A9B3AD]/60 shadow-xs dark:shadow-none"
           />
         </div>
 
@@ -262,9 +250,7 @@ export default function AdminBeliefPipelineTable() {
               className={`px-3 py-2 rounded-xl text-xs font-mono font-bold whitespace-nowrap transition-all cursor-pointer border ${
                 filterStatus === stage
                   ? "bg-emerald-600 border-emerald-600 text-white shadow-xs"
-                  : isDark
-                  ? "bg-white/5 border-white/10 text-text-muted hover:text-white"
-                  : "bg-white border-border-subtle text-accent-navy hover:bg-emerald-50/50"
+                  : "bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 text-accent-navy dark:text-text-muted hover:bg-emerald-50/50 dark:hover:text-white"
               }`}
             >
               {stage}
@@ -273,11 +259,7 @@ export default function AdminBeliefPipelineTable() {
         </div>
       </div>
 
-      <div
-        className={`rounded-2xl border overflow-hidden ${
-          isDark ? "bg-[#0A0F0C] border-white/10" : "bg-white border-emerald-500/15 shadow-xs"
-        }`}
-      >
+      <div className="rounded-2xl border overflow-hidden bg-white dark:bg-[#0A0F0C] border-emerald-500/15 dark:border-white/10 shadow-xs dark:shadow-none">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
             <thead>

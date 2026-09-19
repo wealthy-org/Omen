@@ -20,10 +20,9 @@ export interface NavbarProps {
   isWrongNetwork?: boolean;
 }
 
-export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork = false }: NavbarProps) {
+export default function Navbar({ onToggleTheme, isWrongNetwork = false }: NavbarProps) {
   const pathname = usePathname();
   const contextTheme = useTheme();
-  const activeTheme = propTheme || contextTheme.theme || "dark";
   const handleToggle = onToggleTheme || contextTheme.toggleTheme;
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,26 +53,16 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
     };
   }, []);
 
-  const isDark = activeTheme === "dark";
-
   return (
-    <header className="sticky top-0 z-50 w-full pt-4 px-4 sm:px-6 lg:px-8 xl:px-10 animate-slide-down">
+    <header className="sticky top-0 z-50 w-full pt-4 px-4 sm:px-6 lg:px-8 xl:px-10">
       <div
         className={`max-w-[1400px] w-full mx-auto rounded-[20px] transition-all duration-300 relative ${
-          isDark
-            ? isScrolled
-              ? "bg-[#0A0F0C]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
-              : "bg-[#0A0F0C]/80 backdrop-blur-md border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
-            : isScrolled
-              ? "bg-white/90 backdrop-blur-xl border border-emerald-500/10 shadow-[0_8px_30px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)]"
-              : "bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_4px_20px_rgba(14,122,78,0.04),_inset_0_1px_0_rgba(255,255,255,0.9)]"
+          isScrolled
+            ? "bg-white/90 dark:bg-[#0A0F0C]/95 backdrop-blur-xl border border-emerald-500/10 dark:border-white/10 shadow-[0_8px_30px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
+            : "bg-white/60 dark:bg-[#0A0F0C]/80 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.04),_inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
         }`}
       >
-        <div
-          className={`absolute top-0 inset-x-8 h-[1px] pointer-events-none ${
-            isDark ? "dark-emerald-seam" : "light-emerald-seam"
-          }`}
-        />
+        <div className="absolute top-0 inset-x-8 h-[1px] pointer-events-none light-emerald-seam dark:dark-emerald-seam" />
 
         <div className="flex items-center justify-between h-[64px] px-6 sm:px-8">
           <div className="flex items-center gap-3">
@@ -91,21 +80,11 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
                   priority
                 />
               </div>
-              <span
-                className={`text-[20px] sm:text-[22px] font-extrabold tracking-tight ${
-                  isDark ? "text-white" : "text-[#0B1F16]"
-                }`}
-              >
+              <span className="text-[20px] sm:text-[22px] font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
                 OMEN
               </span>
             </Link>
-            <span
-              className={`hidden sm:inline-flex text-[11px] font-mono font-medium px-2 py-0.5 rounded-full border ${
-                isDark
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "bg-emerald-50 text-[#0E7A4E] border-emerald-500/15"
-              }`}
-            >
+            <span className="hidden sm:inline-flex text-[11px] font-mono font-medium px-2 py-0.5 rounded-full border bg-emerald-50 dark:bg-emerald-500/10 text-[#0E7A4E] dark:text-emerald-400 border-emerald-500/15 dark:border-emerald-500/20">
               TESTNET
             </span>
           </div>
@@ -125,12 +104,8 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
                   href={item.href}
                   className={`text-[16px] transition-colors ${
                     isActive
-                      ? isDark
-                        ? "text-white font-bold"
-                        : "text-[#0B1F16] font-bold"
-                      : isDark
-                        ? "text-[#DCE5DF] font-medium hover:text-white"
-                        : "text-[#17241D] font-medium hover:text-emerald-800"
+                      ? "text-[#0B1F16] dark:text-white font-bold"
+                      : "text-[#17241D] dark:text-[#DCE5DF] font-medium hover:text-emerald-800 dark:hover:text-white"
                   }`}
                   aria-current={isActive ? "page" : undefined}
                 >
@@ -144,37 +119,18 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
             <button
               type="button"
               onClick={handleToggle}
-              suppressHydrationWarning
-              className={`p-2 rounded-xl border transition-all flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer ${
-                isDark
-                  ? "bg-white/5 border-white/10 text-[#A9B3AD] hover:text-white hover:bg-white/10"
-                  : "bg-white/90 border-emerald-500/10 text-[#4B5D55] hover:text-[#0B1F16] hover:bg-white shadow-xs"
-              }`}
-              title={`Theme: ${contextTheme.rawTheme || "system"}`}
+              className="p-2 rounded-xl border transition-all flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer bg-white/90 dark:bg-white/5 border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD] hover:text-[#0B1F16] dark:hover:text-white hover:bg-white dark:hover:bg-white/10 shadow-xs dark:shadow-none"
+              title="Toggle theme"
               aria-label="Toggle theme"
             >
-              {contextTheme.rawTheme === "system" ? (
-                <>
-                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <span suppressHydrationWarning>Auto</span>
-                </>
-              ) : isDark ? (
-                <>
-                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                  <span suppressHydrationWarning>Dark</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 text-emerald-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                  <span suppressHydrationWarning>Light</span>
-                </>
-              )}
+              <svg className="w-4 h-4 text-emerald-700 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <svg className="w-4 h-4 text-emerald-400 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+              <span className="dark:hidden font-mono">Light</span>
+              <span className="hidden dark:inline-block font-mono">Dark</span>
             </button>
 
             <Link
@@ -206,32 +162,21 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
             <button
               type="button"
               onClick={handleToggle}
-              className={`p-2 rounded-xl border flex items-center justify-center cursor-pointer ${
-                isDark ? "bg-white/5 border-white/10 text-emerald-400" : "bg-white/90 border-emerald-500/10 text-emerald-800"
-              }`}
+              className="p-2 rounded-xl border flex items-center justify-center cursor-pointer bg-white/90 dark:bg-white/5 border-emerald-500/10 dark:border-white/10 text-emerald-800 dark:text-emerald-400"
               aria-label="Toggle theme"
             >
-              {contextTheme.rawTheme === "system" ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              ) : isDark ? (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              )}
+              <svg className="w-4 h-4 text-emerald-700 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <svg className="w-4 h-4 text-emerald-400 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
             </button>
 
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`p-2 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center ${
-                isDark ? "text-white/90 hover:bg-white/10" : "text-[#0B1F16] hover:bg-black/5"
-              }`}
+              className="p-2 min-h-[44px] min-w-[44px] rounded-xl flex items-center justify-center text-[#0B1F16] dark:text-white/90 hover:bg-black/5 dark:hover:bg-white/10"
               aria-label="Toggle navigation menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -250,9 +195,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
 
         {isMobileMenuOpen && (
           <div
-            className={`md:hidden border-t px-6 pt-4 pb-6 space-y-3 rounded-b-[20px] ${
-              isDark ? "border-white/10 bg-[#0A0F0C]" : "border-emerald-500/10 bg-white"
-            }`}
+            className="md:hidden border-t px-6 pt-4 pb-6 space-y-3 rounded-b-[20px] border-emerald-500/10 dark:border-white/10 bg-white dark:bg-[#0A0F0C]"
             data-testid="mobile-menu"
           >
             <nav className="flex flex-col gap-1" aria-label="Mobile Navigation">
@@ -268,12 +211,8 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`h-12 flex items-center px-4 rounded-xl text-base font-medium transition-colors ${
                       isActive
-                        ? isDark
-                          ? "bg-white/15 text-white font-semibold"
-                          : "bg-emerald-50 text-[#0B1F16] font-semibold"
-                        : isDark
-                          ? "text-[#DCE5DF] hover:text-white hover:bg-white/5"
-                          : "text-[#17241D] hover:text-emerald-900 hover:bg-emerald-50/50"
+                        ? "bg-emerald-50 dark:bg-white/15 text-[#0B1F16] dark:text-white font-semibold"
+                        : "text-[#17241D] dark:text-[#DCE5DF] hover:text-emerald-900 dark:hover:text-white hover:bg-emerald-50/50 dark:hover:bg-white/5"
                     }`}
                     aria-current={isActive ? "page" : undefined}
                   >
@@ -293,7 +232,7 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
               </Link>
             </nav>
 
-            <div className={`pt-3 border-t flex flex-col gap-2 ${isDark ? "border-white/10" : "border-emerald-500/10"}`}>
+            <div className="pt-3 border-t border-emerald-500/10 dark:border-white/10 flex flex-col gap-2">
               {isWrongNetworkState && (
                 <button
                   type="button"

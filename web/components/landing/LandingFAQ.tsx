@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useTheme } from "../ThemeProvider";
 
 export interface FAQItem {
   question: string;
@@ -39,9 +38,7 @@ export interface LandingFAQProps {
   theme?: "dark" | "light";
 }
 
-export default function LandingFAQ({ theme: propTheme }: LandingFAQProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
+export default function LandingFAQ({}: LandingFAQProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   const toggle = (idx: number) => {
@@ -53,26 +50,14 @@ export default function LandingFAQ({ theme: propTheme }: LandingFAQProps) {
       <div className="flex flex-col mb-8 text-center max-w-2xl mx-auto">
         <div className="inline-flex items-center justify-center gap-2 mb-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span
-            className={`text-xs font-mono font-bold uppercase tracking-widest ${
-              isDark ? "text-[#34D399]" : "text-[#0E7A4E]"
-            }`}
-          >
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#0E7A4E] dark:text-[#34D399]">
             Protocol Insights & Verification
           </span>
         </div>
-        <h2
-          className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-            isDark ? "text-white" : "text-[#0B1F16]"
-          }`}
-        >
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
           Frequently Asked Questions
         </h2>
-        <p
-          className={`text-sm sm:text-base mt-1.5 ${
-            isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-          }`}
-        >
+        <p className="text-sm sm:text-base mt-1.5 text-[#4B5D55] dark:text-[#A9B3AD]">
           Everything you need to know about social conviction markets, oracle resolution, and creator reputation.
         </p>
       </div>
@@ -84,13 +69,9 @@ export default function LandingFAQ({ theme: propTheme }: LandingFAQProps) {
             <div
               key={item.question}
               className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-                isDark
-                  ? isOpen
-                    ? "bg-[#0A0F0C] border-emerald-500/40 shadow-lg"
-                    : "bg-[#070D09]/90 border-white/10 hover:border-white/20"
-                  : isOpen
-                    ? "bg-white border-emerald-500/35 shadow-sm"
-                    : "bg-white/95 border-emerald-500/15 hover:border-emerald-500/30"
+                isOpen
+                  ? "bg-white dark:bg-[#0A0F0C] border-emerald-500/35 dark:border-emerald-500/40 shadow-sm dark:shadow-lg"
+                  : "bg-white/95 dark:bg-[#070D09]/90 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/30 dark:hover:border-white/20"
               }`}
             >
               <button
@@ -101,9 +82,7 @@ export default function LandingFAQ({ theme: propTheme }: LandingFAQProps) {
               >
                 <span
                   className={`text-sm sm:text-base font-bold tracking-tight ${
-                    isDark
-                      ? isOpen ? "text-[#34D399]" : "text-white"
-                      : isOpen ? "text-[#0E7A4E]" : "text-[#0B1F16]"
+                    isOpen ? "text-[#0E7A4E] dark:text-[#34D399]" : "text-[#0B1F16] dark:text-white"
                   }`}
                 >
                   {item.question}
@@ -120,11 +99,7 @@ export default function LandingFAQ({ theme: propTheme }: LandingFAQProps) {
               </button>
 
               {isOpen && (
-                <div
-                  className={`px-5 sm:px-6 pb-5 pt-1 text-xs sm:text-sm leading-relaxed border-t ${
-                    isDark ? "border-white/5 text-[#A9B3AD]" : "border-emerald-500/10 text-[#4B5D55]"
-                  } animate-fade-in`}
-                >
+                <div className="px-5 sm:px-6 pb-5 pt-1 text-xs sm:text-sm leading-relaxed border-t border-emerald-500/10 dark:border-white/5 text-[#4B5D55] dark:text-[#A9B3AD] animate-fade-in">
                   {item.answer}
                 </div>
               )}

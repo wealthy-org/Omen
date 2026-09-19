@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useTheme } from "../ThemeProvider";
 
 export interface SignalCase {
   id: string;
@@ -168,10 +167,7 @@ export interface SignalGapVisualizerProps {
   theme?: "dark" | "light";
 }
 
-export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisualizerProps) {
-  const contextTheme = useTheme();
-  const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
-
+export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
   const [selectedCaseId, setSelectedCaseId] = useState<string>("sol-eth");
   const [creatorIndex, setCreatorIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -202,26 +198,14 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
       <div className="flex flex-col mb-8">
         <div className="flex items-center gap-2 mb-2">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span
-            className={`text-xs font-mono font-bold uppercase tracking-widest ${
-              isDark ? "text-[#34D399]" : "text-[#0E7A4E]"
-            }`}
-          >
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-[#0E7A4E] dark:text-[#34D399]">
             Dual-Track Consensus Engine & Reputation Ledger
           </span>
         </div>
-        <h2
-          className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-            isDark ? "text-white" : "text-[#0B1F16]"
-          }`}
-        >
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
           The Signal Gap: Words vs. Capital & Top Thinkers Record
         </h2>
-        <p
-          className={`text-sm sm:text-base mt-1.5 max-w-3xl ${
-            isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-          }`}
-        >
+        <p className="text-sm sm:text-base mt-1.5 max-w-3xl text-[#4B5D55] dark:text-[#A9B3AD]">
           Social sentiment reveals what the crowd says. Staked capital reveals what people truly believe. Compare the divergence in the Signal Gap and track the top thinkers whose convictions turn into immutable on-chain records.
         </p>
       </div>
@@ -238,24 +222,16 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                   onClick={() => setSelectedCaseId(item.id)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${
                     isActive
-                      ? isDark
-                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm"
-                        : "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                      : isDark
-                        ? "bg-[#070D09]/80 border-white/10 text-[#A9B3AD] hover:text-white hover:bg-white/5"
-                        : "bg-white border-zinc-200 text-[#4B5D55] hover:text-[#0B1F16] hover:bg-zinc-50 shadow-xs"
+                      ? "bg-emerald-600 dark:bg-emerald-500/20 text-white dark:text-emerald-400 border-emerald-600 dark:border-emerald-500/40 shadow-sm"
+                      : "bg-white dark:bg-[#070D09]/80 border-zinc-200 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD] hover:text-[#0B1F16] dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5 shadow-xs"
                   }`}
                 >
                   <span>{item.category}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${
                       isActive
-                        ? isDark
-                          ? "bg-emerald-500/30 text-emerald-300"
-                          : "bg-emerald-700 text-white"
-                        : isDark
-                          ? "bg-white/5 text-zinc-400"
-                          : "bg-zinc-100 text-zinc-600"
+                        ? "bg-emerald-700 dark:bg-emerald-500/30 text-white dark:text-emerald-300"
+                        : "bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400"
                     }`}
                   >
                     {item.gapPct}% Gap
@@ -265,13 +241,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
             })}
           </div>
 
-          <div
-            className={`p-6 sm:p-7 rounded-3xl border transition-all duration-300 hover-lift shadow-xl flex-1 flex flex-col justify-between ${
-              isDark
-                ? "bg-[#070D09]/95 border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.7)] text-white"
-                : "bg-white/95 border-emerald-500/15 shadow-[0_12px_32px_rgba(14,122,78,0.06)] text-[#0B1F16]"
-            }`}
-          >
+          <div className="p-6 sm:p-7 rounded-3xl border transition-all duration-300 hover-lift shadow-xl flex-1 flex flex-col justify-between bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-emerald-500/20 shadow-[0_12px_32px_rgba(14,122,78,0.06)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] text-[#0B1F16] dark:text-white">
             <div key={currentCase.id} className="animate-scale-in flex-1 flex flex-col justify-between">
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-emerald-500/10">
@@ -320,11 +290,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                 </div>
 
                 <div className="space-y-3.5 mb-5">
-                  <div
-                    className={`p-4 rounded-2xl border ${
-                      isDark ? "bg-[#030906]/80 border-white/10" : "bg-zinc-50 border-zinc-200/80"
-                    }`}
-                  >
+                  <div className="p-4 rounded-2xl border bg-zinc-50 dark:bg-[#030906]/80 border-zinc-200/80 dark:border-white/10">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500">
                         Track 1: Social Sentiments ({currentCase.peopleTotal.toLocaleString()} votes)
@@ -346,11 +312,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                     </div>
                   </div>
 
-                  <div
-                    className={`p-4 rounded-2xl border ${
-                      isDark ? "bg-[#030906]/80 border-white/10" : "bg-zinc-50 border-zinc-200/80"
-                    }`}
-                  >
+                  <div className="p-4 rounded-2xl border bg-zinc-50 dark:bg-[#030906]/80 border-zinc-200/80 dark:border-white/10">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
                         Track 2: Staked Capital Pool ({currentCase.moneyTotalEth} ETH Staked)
@@ -374,13 +336,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                 </div>
               </div>
 
-              <div
-                className={`p-3.5 sm:p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
-                  isDark
-                    ? "bg-emerald-950/20 border-emerald-500/25 text-[#DCE5DF]"
-                    : "bg-emerald-50/80 border-emerald-500/20 text-[#0B1F16]"
-                }`}
-              >
+              <div className="p-3.5 sm:p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-500/20 dark:border-emerald-500/25 text-[#0B1F16] dark:text-[#DCE5DF]">
                 <div className="flex items-start gap-2.5">
                   <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30 font-bold text-xs">
                     ⚡
@@ -408,11 +364,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
           <div className="h-10 flex items-center justify-between gap-2 mb-4 shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <h3
-                className={`text-xs sm:text-sm font-extrabold tracking-tight ${
-                  isDark ? "text-white" : "text-[#0B1F16]"
-                }`}
-              >
+              <h3 className="text-xs sm:text-sm font-extrabold tracking-tight text-[#0B1F16] dark:text-white">
                 Conviction Becomes a Record
               </h3>
             </div>
@@ -421,11 +373,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                 type="button"
                 onClick={handlePrevCreator}
                 aria-label="Previous Creator"
-                className={`w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
-                  isDark
-                    ? "bg-white/5 border-white/10 hover:bg-white/15 text-white"
-                    : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200 text-zinc-800"
-                }`}
+                className="w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
@@ -435,11 +383,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                 type="button"
                 onClick={handleNextCreator}
                 aria-label="Next Creator"
-                className={`w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
-                  isDark
-                    ? "bg-white/5 border-white/10 hover:bg-white/15 text-white"
-                    : "bg-zinc-100 border-zinc-200 hover:bg-zinc-200 text-zinc-800"
-                }`}
+                className="w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
@@ -447,11 +391,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
               </button>
               <Link
                 href="/creators"
-                className={`text-xs font-bold font-mono px-2.5 py-1 rounded-lg border transition-colors ${
-                  isDark
-                    ? "bg-white/5 border-white/10 hover:bg-white/10 text-[#34D399]"
-                    : "bg-emerald-50 border-emerald-500/20 hover:bg-emerald-100 text-[#0E7A4E]"
-                }`}
+                className="text-xs font-bold font-mono px-2.5 py-1 rounded-lg border transition-colors bg-emerald-50 dark:bg-white/5 border-emerald-500/20 dark:border-white/10 hover:bg-emerald-100 dark:hover:bg-white/10 text-[#0E7A4E] dark:text-[#34D399]"
               >
                 Directory ↗
               </Link>
@@ -461,11 +401,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
           <div
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
-            className={`p-6 sm:p-7 rounded-3xl border transition-all duration-300 hover-lift shadow-xl flex-1 flex flex-col justify-between ${
-              isDark
-                ? "bg-[#070D09]/95 border-emerald-500/20 shadow-[0_16px_40px_rgba(0,0,0,0.7)] text-white"
-                : "bg-white/95 border-emerald-500/15 shadow-[0_12px_32px_rgba(14,122,78,0.06)] text-[#0B1F16]"
-            }`}
+            className="p-6 sm:p-7 rounded-3xl border transition-all duration-300 hover-lift shadow-xl flex-1 flex flex-col justify-between bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-emerald-500/20 shadow-[0_12px_32px_rgba(14,122,78,0.06)] dark:shadow-[0_16px_40px_rgba(0,0,0,0.7)] text-[#0B1F16] dark:text-white"
           >
             <div className="flex-1 flex flex-col justify-between">
               <div>
@@ -516,7 +452,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                             <span className="text-[10px] font-mono">X ↗</span>
                           </a>
                         </div>
-                        <p className={`text-[11px] font-mono mt-0.5 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                        <p className="text-[11px] font-mono mt-0.5 text-[#4B5D55] dark:text-[#A9B3AD]">
                           Conviction tracked since {currentCreator.since}
                         </p>
                       </div>
@@ -532,41 +468,33 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                   <div className="grid grid-cols-4 gap-2 p-3 rounded-xl border border-emerald-500/15 mb-4 text-center font-mono bg-black/20 text-xs">
                     <div>
                       <div className="text-base font-black text-emerald-500">{currentCreator.confirmed}</div>
-                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Confirmed</div>
+                      <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">Confirmed</div>
                     </div>
                     <div>
                       <div className="text-base font-black">{currentCreator.resolved}</div>
-                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Resolved</div>
+                      <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">Resolved</div>
                     </div>
                     <div>
                       <div className="text-base font-black">{currentCreator.correct}</div>
-                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Correct</div>
+                      <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">Correct</div>
                     </div>
                     <div>
                       <div className="text-base font-black text-emerald-400">{currentCreator.volumeEth}</div>
-                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>ETH Vol</div>
+                      <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">ETH Vol</div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
-                    <div
-                      className={`p-3 rounded-xl border ${
-                        isDark ? "bg-[#030906] border-emerald-500/20" : "bg-emerald-50/60 border-emerald-500/15"
-                      }`}
-                    >
-                      <div className={`text-[11px] font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                    <div className="p-3 rounded-xl border bg-emerald-50/60 dark:bg-[#030906] border-emerald-500/15 dark:border-emerald-500/20">
+                      <div className="text-[11px] font-mono text-[#4B5D55] dark:text-[#A9B3AD]">
                         Top Alpha
                       </div>
                       <div className="text-xs font-bold text-emerald-500 mt-0.5 truncate">
                         {currentCreator.topCategory.name} ({currentCreator.topCategory.winRate}%)
                       </div>
                     </div>
-                    <div
-                      className={`p-3 rounded-xl border ${
-                        isDark ? "bg-[#030906] border-rose-500/20" : "bg-rose-50/60 border-rose-500/15"
-                      }`}
-                    >
-                      <div className={`text-[11px] font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                    <div className="p-3 rounded-xl border bg-rose-50/60 dark:bg-[#030906] border-rose-500/15 dark:border-rose-500/20">
+                      <div className="text-[11px] font-mono text-[#4B5D55] dark:text-[#A9B3AD]">
                         Weakest
                       </div>
                       <div className="text-xs font-bold text-rose-500 mt-0.5 truncate">
