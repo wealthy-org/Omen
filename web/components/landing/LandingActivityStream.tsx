@@ -63,7 +63,8 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
   }, []);
 
   return (
-    <section className="w-full my-8 sm:my-12">
+    <section id="creators" className="w-full my-8 sm:my-12 scroll-mt-28 relative">
+      <div id="activity" className="absolute -top-28 pointer-events-none" />
       <div className="flex flex-col mb-8">
         <div className="flex items-center gap-2 mb-2">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -93,8 +94,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
         <div
-          id="creators"
-          className={`p-6 sm:p-7 rounded-2xl border transition-all duration-200 hover-lift scroll-mt-24 ${
+          className={`p-6 sm:p-7 rounded-2xl border transition-all duration-200 hover-lift ${
             isDark
               ? "bg-[#070D09]/90 border-white/10 shadow-lg text-white"
               : "bg-white/95 border-emerald-500/15 shadow-xs text-[#0B1F16]"
@@ -173,8 +173,7 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
         </div>
 
         <div
-          id="activity"
-          className={`p-6 sm:p-7 rounded-2xl border transition-all duration-200 hover-lift scroll-mt-24 ${
+          className={`p-6 sm:p-7 rounded-2xl border transition-all duration-200 hover-lift ${
             isDark
               ? "bg-[#070D09]/90 border-white/10 shadow-lg text-white"
               : "bg-white/95 border-emerald-500/15 shadow-xs text-[#0B1F16]"
