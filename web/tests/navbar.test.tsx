@@ -25,10 +25,10 @@ describe("Navbar Component", () => {
   it("renders all V1 desktop navigation links", () => {
     render(<Navbar />);
 
-    expect(screen.getByRole("link", { name: /markets/i })).toHaveAttribute("href", "/markets");
-    expect(screen.getByRole("link", { name: /beliefs/i })).toHaveAttribute("href", "/beliefs");
-    expect(screen.getByRole("link", { name: /creators/i })).toHaveAttribute("href", "/creators");
-    expect(screen.getByRole("link", { name: /activity/i })).toHaveAttribute("href", "/activity");
+    expect(screen.getByRole("link", { name: /markets/i })).toHaveAttribute("href", "/#markets");
+    expect(screen.getByRole("link", { name: /beliefs/i })).toHaveAttribute("href", "/#markets");
+    expect(screen.getByRole("link", { name: /creators/i })).toHaveAttribute("href", "/#creators");
+    expect(screen.getByRole("link", { name: /activity/i })).toHaveAttribute("href", "/#activity");
   });
 
   it("highlights the active link based on current pathname", () => {

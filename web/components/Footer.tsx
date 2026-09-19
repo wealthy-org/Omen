@@ -4,10 +4,11 @@ import Image from "next/image";
 import { useTheme } from "./ThemeProvider";
 
 const PLATFORM_LINKS = [
-  { label: "Markets Feed", href: "/markets" },
-  { label: "Beliefs Catalog", href: "/beliefs" },
-  { label: "Creators Directory", href: "/creators" },
-  { label: "Activity Feed", href: "/activity" },
+  { label: "Trending Markets", href: "/#markets" },
+  { label: "Protocol Lifecycle", href: "/#how-it-works" },
+  { label: "Creators Directory", href: "/#creators" },
+  { label: "Live Activity", href: "/#activity" },
+  { label: "Protocol FAQ", href: "/#faq" },
   { label: "Submit Belief", href: "/create" },
 ];
 

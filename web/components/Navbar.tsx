@@ -8,10 +8,10 @@ import ConnectWalletButton from "./ConnectWalletButton";
 import NetworkSwitcherModal from "./NetworkSwitcherModal";
 
 const NAV_ITEMS = [
-  { label: "Markets", href: "/markets" },
-  { label: "Beliefs", href: "/beliefs" },
-  { label: "Creators", href: "/creators" },
-  { label: "Activity", href: "/activity" },
+  { label: "Markets", href: "/#markets" },
+  { label: "Beliefs", href: "/#markets" },
+  { label: "Creators", href: "/#creators" },
+  { label: "Activity", href: "/#activity" },
 ];
 
 export interface NavbarProps {
@@ -117,11 +117,11 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
             {NAV_ITEMS.map((item) => {
               const isActive =
                 pathname === item.href ||
-                (item.href !== "/" && pathname?.startsWith(item.href));
+                (item.href !== "/" && (pathname?.startsWith(item.href) || pathname === item.href.replace("/#", "/")));
 
               return (
                 <Link
-                  key={item.href}
+                  key={item.label}
                   href={item.href}
                   className={`text-[16px] transition-colors ${
                     isActive
@@ -248,11 +248,11 @@ export default function Navbar({ theme: propTheme, onToggleTheme, isWrongNetwork
               {NAV_ITEMS.map((item) => {
                 const isActive =
                   pathname === item.href ||
-                  (item.href !== "/" && pathname?.startsWith(item.href));
+                  (item.href !== "/" && (pathname?.startsWith(item.href) || pathname === item.href.replace("/#", "/")));
 
                 return (
                   <Link
-                    key={item.href}
+                    key={item.label}
                     href={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`h-12 flex items-center px-4 rounded-xl text-base font-medium transition-colors ${

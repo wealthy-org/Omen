@@ -30,10 +30,11 @@ describe("Footer Component", () => {
   it("renders V1 platform navigation links", () => {
     render(<Footer />);
 
-    expect(screen.getByRole("link", { name: /markets feed/i })).toHaveAttribute("href", "/markets");
-    expect(screen.getByRole("link", { name: /beliefs catalog/i })).toHaveAttribute("href", "/beliefs");
-    expect(screen.getByRole("link", { name: /creators directory/i })).toHaveAttribute("href", "/creators");
-    expect(screen.getByRole("link", { name: /activity feed/i })).toHaveAttribute("href", "/activity");
+    expect(screen.getByRole("link", { name: /trending markets/i })).toHaveAttribute("href", "/#markets");
+    expect(screen.getByRole("link", { name: /protocol lifecycle/i })).toHaveAttribute("href", "/#how-it-works");
+    expect(screen.getByRole("link", { name: /creators directory/i })).toHaveAttribute("href", "/#creators");
+    expect(screen.getByRole("link", { name: /live activity/i })).toHaveAttribute("href", "/#activity");
+    expect(screen.getByRole("link", { name: /protocol faq/i })).toHaveAttribute("href", "/#faq");
     expect(screen.getByRole("link", { name: /submit belief/i })).toHaveAttribute("href", "/create");
   });
 

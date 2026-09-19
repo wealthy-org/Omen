@@ -1,36 +1,35 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import HomePage from "@/app/page";
-import HeroSection from "@/components/landing/HeroSection";
 
 const MOCK_LANDING_MARKETS = [
   {
     id: "market-1",
-    statement: "Will ETH reach $5,000 before end of Q4 2026?",
-    author: "VitalikFan",
-    authorHandle: "@vitalikfan",
+    statement: "SOL will outperform ETH this month",
+    author: "TraderX",
+    authorHandle: "@TraderX",
     isConfirmed: true,
     status: "OPEN",
-    agreePool: 45.5,
-    disagreePool: 15.2,
-    agreeParticipants: 58,
-    disagreeParticipants: 22,
-    closeTime: new Date(Date.now() + 86400000 * 5).toISOString(),
-    category: "Crypto",
+    agreePool: 87.5,
+    disagreePool: 34.0,
+    agreeParticipants: 2046,
+    disagreeParticipants: 796,
+    closeTime: new Date(Date.now() + 86400000 * 12).toISOString(),
+    category: "ETH",
   },
   {
     id: "market-2",
-    statement: "AI agent transaction volume will surpass 20% on L2s.",
-    author: "CryptoOracle",
-    authorHandle: "@cryptooracle",
+    statement: "BTC prints a new all-time high in Q4",
+    author: "OnchainWitch",
+    authorHandle: "@onchainwitch",
     isConfirmed: false,
     status: "DETECTED",
-    agreePool: 20.0,
-    disagreePool: 30.0,
-    agreeParticipants: 35,
-    disagreeParticipants: 65,
-    closeTime: new Date(Date.now() + 86400000 * 2).toISOString(),
-    category: "AI",
+    agreePool: 63.0,
+    disagreePool: 37.0,
+    agreeParticipants: 610,
+    disagreeParticipants: 350,
+    closeTime: new Date(Date.now() + 86400000 * 68).toISOString(),
+    category: "BTC",
   },
 ];
 
@@ -66,41 +65,51 @@ describe("Landing Page V1 Components", () => {
     });
   });
 
-  it("renders the social belief hero section headline and dual-testnet badge", () => {
+  it("renders the hero headline, dual-testnet badge, and 2-column layout", () => {
     render(<HomePage />);
 
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: /the internet is full of opinions\. omen gives them a market\./i,
+        name: /turn opinions into markets\./i,
       })
     ).toBeInTheDocument();
 
     expect(screen.getAllByText(/Dual-Testnet Active/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/SOL will outperform ETH this month/i).length).toBeGreaterThan(0);
   });
 
-  it("renders primary and secondary CTA buttons in the hero section", () => {
+  it("renders CTA buttons linking to single-page anchor sections", () => {
     render(<HomePage />);
 
     const exploreButton = screen.getAllByRole("link", { name: /explore markets/i })[0];
-    expect(exploreButton).toHaveAttribute("href", "/markets");
+    expect(exploreButton).toHaveAttribute("href", "#markets");
 
-    const submitButton = screen.getAllByRole("link", { name: /submit belief/i })[0];
-    expect(submitButton).toHaveAttribute("href", "/create");
+    const resolutionButton = screen.getAllByRole("link", { name: /how resolution works/i })[0];
+    expect(resolutionButton).toHaveAttribute("href", "#how-it-works");
   });
 
-  it("renders the 4 V1 platform metrics overview cards in StatsOverview", async () => {
+  it("renders the infinite marquee tech stack items", () => {
+    render(<HomePage />);
+
+    expect(screen.getByText(/Protocol Infrastructure & Ecosystem Stack/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Ethereum Sepolia/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Robinhood Chain/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Chainlink/i).length).toBeGreaterThan(0);
+  });
+
+  it("renders the redesigned platform metrics cards in StatsOverview", async () => {
     render(<HomePage />);
 
     await waitFor(() => {
-      expect(screen.getByText("320.50 ETH")).toBeInTheDocument();
-      expect(screen.getByText("18 Markets")).toBeInTheDocument();
-      expect(screen.getByText("142 Beliefs")).toBeInTheDocument();
-      expect(screen.getByText("38 Creators")).toBeInTheDocument();
+      expect(screen.getByText(/320\.50 ETH/)).toBeInTheDocument();
+      expect(screen.getByText("18")).toBeInTheDocument();
+      expect(screen.getByText("142")).toBeInTheDocument();
+      expect(screen.getByText("38")).toBeInTheDocument();
     });
   });
 
-  it("renders dynamic trending belief markets and category icon tabs", async () => {
+  it("renders trending belief markets and category tab filters", async () => {
     render(<HomePage />);
 
     expect(screen.getByText(/Trending Belief Markets/i)).toBeInTheDocument();
@@ -109,39 +118,31 @@ describe("Landing Page V1 Components", () => {
     expect(screen.getByText("BTC")).toBeInTheDocument();
     expect(screen.getByText("ARB")).toBeInTheDocument();
     expect(screen.getByText("Macro")).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.getByText(/Will ETH reach \$5,000 before end of Q4 2026\?/i)).toBeInTheDocument();
-      expect(screen.getByText(/AI agent transaction volume will surpass 20% on L2s\./i)).toBeInTheDocument();
-    });
   });
 
-  it("renders the 3-step Social Belief protocol onboarding journey", () => {
+  it("renders the 5-stage protocol lifecycle flow", () => {
     render(<HomePage />);
 
-    expect(screen.getByText(/How Social Belief Markets Work/i)).toBeInTheDocument();
-    expect(screen.getByText("01")).toBeInTheDocument();
-    expect(screen.getByText("02")).toBeInTheDocument();
-    expect(screen.getByText("03")).toBeInTheDocument();
+    expect(screen.getByText(/From a Take to a Track Record/i)).toBeInTheDocument();
+    expect(screen.getByText("A belief appears")).toBeInTheDocument();
+    expect(screen.getByText("The market opens")).toBeInTheDocument();
+    expect(screen.getByText("The author confirms")).toBeInTheDocument();
+    expect(screen.getByText("Oracle resolves")).toBeInTheDocument();
+    expect(screen.getByText("Record remembered")).toBeInTheDocument();
   });
 
-  it("renders empty state notification when no trending belief markets exist", async () => {
-    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-      const urlString = String(url);
-      if (urlString.includes("/api/markets")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ success: true, markets: [] }),
-        } as Response);
-      }
-      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
-    });
-
+  it("renders creator reputation highlight and live activity stream", () => {
     render(<HomePage />);
 
-    await waitFor(() => {
-      expect(screen.getByText(/No trending belief markets found/i)).toBeInTheDocument();
-      expect(screen.getByText(/Be the first to create one!/i)).toBeInTheDocument();
-    });
+    expect(screen.getByText(/Conviction Becomes a Record/i)).toBeInTheDocument();
+    expect(screen.getAllByText("@TraderX").length).toBeGreaterThan(0);
+    expect(screen.getByText(/Live On-Chain Activity/i)).toBeInTheDocument();
+  });
+
+  it("renders the interactive FAQ accordion section", () => {
+    render(<HomePage />);
+
+    expect(screen.getByText(/Frequently Asked Questions/i)).toBeInTheDocument();
+    expect(screen.getByText(/What is an Omen Social Belief Market\?/i)).toBeInTheDocument();
   });
 });
