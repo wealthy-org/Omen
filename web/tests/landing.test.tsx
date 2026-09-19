@@ -139,6 +139,15 @@ describe("Landing Page V1 Components", () => {
     expect(screen.getByText(/Live On-Chain Activity/i)).toBeInTheDocument();
   });
 
+  it("renders the dual-track consensus signal gap visualizer", () => {
+    render(<HomePage />);
+
+    expect(screen.getByText(/The Signal Gap: Words vs\. Capital/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dual-Track Consensus Engine/i)).toBeInTheDocument();
+    expect(screen.getByText(/Track 1: Social Sentiments/i)).toBeInTheDocument();
+    expect(screen.getByText(/Track 2: Staked Capital Pool/i)).toBeInTheDocument();
+  });
+
   it("renders the interactive FAQ accordion section", () => {
     render(<HomePage />);
 
