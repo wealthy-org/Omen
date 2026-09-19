@@ -9,7 +9,6 @@ import NetworkSwitcherModal from "./NetworkSwitcherModal";
 
 const NAV_ITEMS = [
   { label: "Markets", href: "/#markets" },
-  { label: "Beliefs", href: "/#markets" },
   { label: "Creators", href: "/#creators" },
   { label: "Activity", href: "/#activity" },
 ];

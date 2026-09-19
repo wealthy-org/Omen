@@ -26,9 +26,9 @@ describe("Navbar Component", () => {
     render(<Navbar />);
 
     expect(screen.getByRole("link", { name: /markets/i })).toHaveAttribute("href", "/#markets");
-    expect(screen.getByRole("link", { name: /beliefs/i })).toHaveAttribute("href", "/#markets");
     expect(screen.getByRole("link", { name: /creators/i })).toHaveAttribute("href", "/#creators");
     expect(screen.getByRole("link", { name: /activity/i })).toHaveAttribute("href", "/#activity");
+    expect(screen.queryByRole("link", { name: /^beliefs$/i })).not.toBeInTheDocument();
   });
 
   it("highlights the active link based on current pathname", () => {
@@ -108,8 +108,8 @@ describe("Navbar Component", () => {
     const mobileMenu = screen.getByTestId("mobile-menu");
     expect(mobileMenu).toBeInTheDocument();
 
-    const mobileBeliefsLink = screen.getAllByRole("link", { name: /beliefs/i })[1];
-    fireEvent.click(mobileBeliefsLink);
+    const mobileMarketsLink = screen.getAllByRole("link", { name: /markets/i })[1];
+    fireEvent.click(mobileMarketsLink);
 
     expect(screen.queryByTestId("mobile-menu")).not.toBeInTheDocument();
   });

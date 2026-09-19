@@ -368,12 +368,12 @@ export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
                 Conviction Becomes a Record
               </h3>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={handlePrevCreator}
                 aria-label="Previous Creator"
-                className="w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white"
+                className="w-8 h-8 rounded-xl flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white shadow-2xs hover:scale-105"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
@@ -383,7 +383,7 @@ export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
                 type="button"
                 onClick={handleNextCreator}
                 aria-label="Next Creator"
-                className="w-7 h-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white"
+                className="w-8 h-8 rounded-xl flex items-center justify-center border transition-all cursor-pointer bg-zinc-100 dark:bg-white/5 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/15 text-zinc-800 dark:text-white shadow-2xs hover:scale-105"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
@@ -391,9 +391,10 @@ export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
               </button>
               <Link
                 href="/creators"
-                className="text-xs font-bold font-mono px-2.5 py-1 rounded-lg border transition-colors bg-emerald-50 dark:bg-white/5 border-emerald-500/20 dark:border-white/10 hover:bg-emerald-100 dark:hover:bg-white/10 text-[#0E7A4E] dark:text-[#34D399]"
+                className="text-xs sm:text-sm font-bold font-mono px-3.5 sm:px-4 py-1.5 rounded-xl border transition-all duration-200 bg-emerald-50 dark:bg-white/5 border-emerald-500/25 dark:border-white/10 hover:bg-emerald-100 dark:hover:bg-white/15 text-[#0E7A4E] dark:text-[#34D399] hover:border-emerald-500/40 dark:hover:border-white/20 shadow-2xs hover:shadow-xs active:scale-95 flex items-center gap-1.5"
               >
-                Directory ↗
+                <span>See All</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">↗</span>
               </Link>
             </div>
           </div>
