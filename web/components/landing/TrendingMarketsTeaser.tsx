@@ -228,7 +228,7 @@ export default function TrendingMarketsTeaser({}: TrendingMarketsTeaserProps) {
         </div>
         <Link
           href="/markets"
-          className="text-sm font-semibold flex items-center gap-1.5 px-4 py-2 rounded-xl transition-all border bg-white dark:bg-white/5 border-emerald-500/20 dark:border-white/10 text-[#0E7A4E] dark:text-[#34D399] hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:border-emerald-400/40 shadow-xs dark:shadow-none"
+          className="hidden sm:flex text-sm font-semibold items-center gap-1.5 px-4 py-2 rounded-xl transition-all border bg-white dark:bg-white/5 border-emerald-500/20 dark:border-white/10 text-[#0E7A4E] dark:text-[#34D399] hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:border-emerald-400/40 shadow-xs dark:shadow-none"
         >
           <span>Explore All Markets</span>
           <svg

@@ -36,116 +36,116 @@ export default function StatsOverview({}: StatsOverviewProps) {
 
   return (
     <section className="w-full my-6 sm:my-8">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div className="rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E] dark:bg-[#34D399] animate-pulse" />
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD]">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="w-2 h-2 rounded-full bg-[#22C55E] dark:bg-[#34D399] animate-pulse shrink-0" />
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
                   Protocol Volume
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded border font-bold bg-emerald-100/70 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-500/30 text-[#0E7A4E] dark:text-[#34D399]">
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded border font-bold shrink-0 bg-emerald-100/70 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-500/30 text-[#0E7A4E] dark:text-[#34D399]">
                 Dual-Chain
               </span>
             </div>
 
-            <div className="my-2">
-              <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399]">
+            <div className="my-1.5 sm:my-2">
+              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] truncate">
                 {stats.totalVolume}
               </div>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t flex items-center justify-between text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
-            <span className="font-semibold text-emerald-500">Sepolia & Robinhood</span>
-            <span>Escrow Verified</span>
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+            <span className="font-semibold text-emerald-500 truncate">Sepolia & Robinhood</span>
+            <span className="hidden sm:inline">Escrow Verified</span>
           </div>
         </div>
 
-        <div className="rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-emerald-500 font-bold text-xs">●</span>
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD]">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="text-emerald-500 font-bold text-xs shrink-0">●</span>
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
                   Active Markets
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded border font-bold bg-emerald-100/70 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-500/30 text-[#0E7A4E] dark:text-[#34D399]">
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded border font-bold shrink-0 bg-emerald-100/70 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-500/30 text-[#0E7A4E] dark:text-[#34D399]">
                 Live Consensus
               </span>
             </div>
 
-            <div className="my-2">
-              <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399]">
-                {stats.activeMarkets} <span className="text-lg font-bold font-sans text-zinc-500">Markets</span>
+            <div className="my-1.5 sm:my-2">
+              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] truncate">
+                {stats.activeMarkets} <span className="text-xs sm:text-lg font-bold font-sans text-zinc-500">Markets</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t flex items-center justify-between text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
-            <div className="flex items-center gap-1.5 font-bold">
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+            <div className="flex items-center gap-1 sm:gap-1.5 font-bold">
               <span className="text-emerald-500">AGREE</span>
               <span className="text-zinc-500">/</span>
               <span className="text-rose-500">DISAGREE</span>
             </div>
-            <span className="font-semibold text-emerald-500">24/7 Staking</span>
+            <span className="font-semibold text-emerald-500 hidden sm:inline">24/7 Staking</span>
           </div>
         </div>
 
-        <div className="rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-blue-500 font-bold text-xs">◆</span>
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD]">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="text-blue-500 font-bold text-xs shrink-0">◆</span>
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
                   Total Beliefs
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded border font-bold bg-blue-100/70 dark:bg-blue-950/80 border-blue-300 dark:border-blue-500/30 text-blue-700 dark:text-blue-400">
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded border font-bold shrink-0 bg-blue-100/70 dark:bg-blue-950/80 border-blue-300 dark:border-blue-500/30 text-blue-700 dark:text-blue-400">
                 AI Extracted
               </span>
             </div>
 
-            <div className="my-2">
-              <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                {stats.totalBeliefs} <span className="text-lg font-bold font-sans text-zinc-500">Beliefs</span>
+            <div className="my-1.5 sm:my-2">
+              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
+                {stats.totalBeliefs} <span className="text-xs sm:text-lg font-bold font-sans text-zinc-500">Beliefs</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t flex items-center justify-between text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
-            <span className="text-blue-400 font-semibold">Social Signals</span>
-            <span>Twitter & Farcaster</span>
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+            <span className="text-blue-400 font-semibold truncate">Social Signals</span>
+            <span className="hidden sm:inline">Twitter & Farcaster</span>
           </div>
         </div>
 
-        <div className="rounded-2xl p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-emerald-500 font-bold text-xs">✓</span>
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD]">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="text-emerald-500 font-bold text-xs shrink-0">✓</span>
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
                   Verified Creators
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded border font-bold bg-emerald-100/70 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-500/30 text-[#0E7A4E] dark:text-[#34D399]">
+              <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded border font-bold shrink-0 bg-emerald-100/70 dark:bg-emerald-950/80 border-emerald-300 dark:border-emerald-500/30 text-[#0E7A4E] dark:text-[#34D399]">
                 EIP-712
               </span>
             </div>
 
-            <div className="my-2">
-              <div className="text-3xl sm:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399]">
-                {stats.verifiedCreators} <span className="text-lg font-bold font-sans text-zinc-500">Creators</span>
+            <div className="my-1.5 sm:my-2">
+              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] truncate">
+                {stats.verifiedCreators} <span className="text-xs sm:text-lg font-bold font-sans text-zinc-500">Creators</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t flex items-center justify-between text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
-            <span>Signed Conviction</span>
-            <span className="font-bold text-emerald-500">1.5% Fee Share</span>
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+            <span className="truncate">Signed Conviction</span>
+            <span className="font-bold text-emerald-500 shrink-0">1.5% Fee</span>
           </div>
         </div>
       </div>
