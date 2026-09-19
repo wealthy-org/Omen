@@ -92,4 +92,17 @@ describe("CreatorsPage (/creators)", () => {
     const profileLinks = screen.getAllByRole("link", { name: /view profile/i });
     expect(profileLinks[0]).toHaveAttribute("href", "/creator/0x1111111111111111111111111111111111111111");
   });
+
+  it("provides direct redirect links to creator profile on X", async () => {
+    render(<CreatorsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Vitalik Buterin")).toBeInTheDocument();
+    });
+
+    const xLinks = screen.getAllByRole("link", { name: /Open @vitalik\.eth on X/i });
+    expect(xLinks.length).toBeGreaterThanOrEqual(1);
+    expect(xLinks[0]).toHaveAttribute("href", "https://x.com/vitalik.eth");
+    expect(xLinks[0]).toHaveAttribute("target", "_blank");
+  });
 });
