@@ -117,35 +117,31 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
           <button
             type="button"
             onClick={() => setSide("agree")}
-            className={`p-3 rounded-xl border text-left transition-all ${
+            className={`flex items-center justify-between px-3.5 py-3 rounded-xl font-mono font-bold text-xs transition-all cursor-pointer active:scale-[0.98] ${
               side === "agree"
-                ? isDark
-                  ? "bg-emerald-500/20 border-emerald-500 text-white shadow-xs"
-                  : "bg-emerald-50 border-emerald-500 text-emerald-900 shadow-xs"
-                : isDark
-                  ? "bg-white/5 border-white/10 text-[#A9B3AD] hover:border-white/20"
-                  : "bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300"
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/30 ring-2 ring-emerald-400 ring-offset-2 ring-offset-[#070D09]"
+                : "bg-emerald-600/85 hover:bg-emerald-600 text-white shadow-xs"
             }`}
           >
-            <div className="text-xs font-bold font-mono uppercase">Agree</div>
-            <div className="text-lg font-mono font-extrabold text-emerald-500">1.72×</div>
+            <span className="font-sans font-bold text-xs">Agree</span>
+            <span className="px-1.5 py-0.5 rounded bg-black/25 text-emerald-100 font-mono text-xs font-bold">
+              1.72×
+            </span>
           </button>
 
           <button
             type="button"
             onClick={() => setSide("disagree")}
-            className={`p-3 rounded-xl border text-left transition-all ${
+            className={`flex items-center justify-between px-3.5 py-3 rounded-xl font-mono font-bold text-xs transition-all cursor-pointer active:scale-[0.98] ${
               side === "disagree"
-                ? isDark
-                  ? "bg-rose-500/20 border-rose-500 text-white shadow-xs"
-                  : "bg-rose-50 border-rose-500 text-rose-900 shadow-xs"
-                : isDark
-                  ? "bg-white/5 border-white/10 text-[#A9B3AD] hover:border-white/20"
-                  : "bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300"
+                ? "bg-rose-600 text-white shadow-md shadow-rose-500/30 ring-2 ring-rose-400 ring-offset-2 ring-offset-[#070D09]"
+                : "bg-rose-600/85 hover:bg-rose-600 text-white shadow-xs"
             }`}
           >
-            <div className="text-xs font-bold font-mono uppercase">Disagree</div>
-            <div className="text-lg font-mono font-extrabold text-rose-500">2.38×</div>
+            <span className="font-sans font-bold text-xs">Disagree</span>
+            <span className="px-1.5 py-0.5 rounded bg-black/25 text-rose-100 font-mono text-xs font-bold">
+              2.38×
+            </span>
           </button>
         </div>
 
@@ -193,9 +189,10 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
           <span><strong className={isDark ? "text-white" : "text-[#0B1F16]"}>2,842</strong> traders</span>
           <Link
             href="/market/sol-outperform-eth"
-            className="text-emerald-500 font-bold hover:underline"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-mono bg-zinc-100 hover:bg-zinc-200 dark:bg-white/10 dark:hover:bg-emerald-500 dark:hover:text-black text-zinc-800 dark:text-zinc-200 transition-all active:scale-95 cursor-pointer shadow-xs"
           >
-            Trade ↗
+            <span>Trade</span>
+            <span className="text-xs">↗</span>
           </Link>
         </div>
       </div>
