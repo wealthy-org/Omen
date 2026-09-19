@@ -59,7 +59,7 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
               className={`px-7 py-3.5 rounded-xl text-[15px] font-extrabold transition-all duration-200 active:scale-[0.98] hover-lift flex items-center justify-center gap-2 group ${
                 isDark
                   ? "text-black bg-emerald-400 hover:bg-emerald-300 shadow-[0_4px_24px_rgba(52,211,153,0.35)]"
-                  : "text-white bg-[#10221A] hover:bg-[#183428] shadow-[0_4px_20px_rgba(16,34,26,0.25)]"
+                  : "text-black bg-emerald-400 hover:bg-emerald-300 shadow-[0_4px_24px_rgba(16,185,129,0.35)] border border-emerald-500/20"
               }`}
             >
               <span>Explore markets</span>
@@ -85,28 +85,28 @@ export default function HeroSection({ theme: propTheme }: HeroSectionProps) {
             </Link>
           </div>
 
-          <div className={`pt-6 border-t grid grid-cols-3 gap-4 font-mono ${isDark ? "border-white/10" : "border-zinc-200"}`}>
+          <div className={`pt-6 border-t grid grid-cols-3 gap-2 sm:gap-4 font-mono ${isDark ? "border-white/10" : "border-zinc-200"}`}>
             <div>
-              <div className={`text-2xl sm:text-3xl font-black ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <div className={`text-base sm:text-2xl lg:text-3xl font-black tracking-tight truncate ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
                 1,284
               </div>
-              <div className={`text-xs ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"} mt-0.5`}>
+              <div className={`text-[10px] sm:text-xs leading-tight ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"} mt-0.5 line-clamp-1 sm:line-clamp-none`}>
                 Beliefs detected
               </div>
             </div>
             <div>
-              <div className={`text-2xl sm:text-3xl font-black ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <div className={`text-base sm:text-2xl lg:text-3xl font-black tracking-tight truncate ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
                 412
               </div>
-              <div className={`text-xs ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"} mt-0.5`}>
+              <div className={`text-[10px] sm:text-xs leading-tight ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"} mt-0.5 line-clamp-1 sm:line-clamp-none`}>
                 Markets open
               </div>
             </div>
             <div>
-              <div className={`text-2xl sm:text-3xl font-black ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+              <div className={`text-base sm:text-2xl lg:text-3xl font-black tracking-tight truncate ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
                 3,960 ETH
               </div>
-              <div className={`text-xs ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"} mt-0.5`}>
+              <div className={`text-[10px] sm:text-xs leading-tight ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"} mt-0.5 line-clamp-1 sm:line-clamp-none`}>
                 Test ETH committed
               </div>
             </div>

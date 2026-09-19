@@ -218,11 +218,36 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">
-          {filteredMarkets.map((market) => (
-            <BeliefMarketCard key={market.id} market={market} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">
+            {filteredMarkets.slice(0, 6).map((market, idx) => (
+              <div key={market.id} className={idx >= 3 ? "hidden sm:block" : ""}>
+                <BeliefMarketCard market={market} />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex sm:hidden justify-center">
+            <Link
+              href="/markets"
+              className={`w-full text-sm font-semibold flex items-center justify-center gap-2 px-5 py-3 rounded-xl transition-all border ${
+                isDark
+                  ? "bg-white/5 border-white/10 text-[#34D399] hover:bg-emerald-500/10 hover:border-emerald-400/40"
+                  : "bg-white border-emerald-500/20 text-[#0E7A4E] hover:bg-emerald-50 shadow-xs"
+              }`}
+            >
+              <span>Explore All Markets</span>
+              <svg
+                className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
+          </div>
+        </>
       )}
     </section>
   );

@@ -77,33 +77,38 @@ export default function ProtocolFlow({ theme: propTheme }: ProtocolFlowProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        {PROTOCOL_STEPS.map((step) => (
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        {PROTOCOL_STEPS.map((step, idx) => (
           <div
             key={step.number}
-            className={`p-5 rounded-2xl border transition-all duration-200 hover-lift flex flex-col justify-between ${isDark
+            className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 hover-lift flex flex-col justify-between ${
+              idx === 4 ? "col-span-2 lg:col-span-1" : ""
+            } ${
+              isDark
                 ? "bg-[#070D09]/90 border-white/10 hover:border-emerald-500/40 text-white"
                 : "bg-white/95 border-emerald-500/15 hover:border-emerald-500/35 text-[#0B1F16] shadow-xs"
-              }`}
+            }`}
           >
             <div>
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 font-mono font-black text-sm flex items-center justify-center mb-4">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 font-mono font-black text-sm flex items-center justify-center mb-3 sm:mb-4">
                 {step.number}
               </div>
-              <h3 className="text-base font-bold mb-2 tracking-tight">{step.title}</h3>
+              <h3 className="text-sm sm:text-base font-bold mb-1.5 sm:mb-2 tracking-tight">{step.title}</h3>
               <p
-                className={`text-xs leading-relaxed mb-4 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
-                  }`}
+                className={`text-xs leading-relaxed mb-3 sm:mb-4 ${
+                  isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
+                }`}
               >
                 {step.description}
               </p>
             </div>
-            <div className="pt-3 border-t border-emerald-500/10 flex items-center">
+            <div className="pt-2.5 sm:pt-3 border-t border-emerald-500/10 flex items-center">
               <span
-                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${isDark
+                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
+                  isDark
                     ? "bg-emerald-950/60 border-emerald-500/20 text-[#34D399]"
                     : "bg-emerald-50 border-emerald-500/20 text-[#0E7A4E]"
-                  }`}
+                }`}
               >
                 {step.tag}
               </span>

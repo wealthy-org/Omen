@@ -109,11 +109,13 @@ export default function LandingFAQ({ theme: propTheme }: LandingFAQProps) {
                   {item.question}
                 </span>
                 <span
-                  className={`w-6 h-6 rounded-full flex items-center justify-center font-mono font-bold text-xs shrink-0 transition-transform duration-200 ${
-                    isOpen ? "rotate-180 bg-emerald-500/20 text-emerald-500" : "bg-zinc-200/50 dark:bg-white/10 text-zinc-500 dark:text-zinc-400"
+                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 ${
+                    isOpen ? "rotate-180 bg-emerald-500/20 text-emerald-500" : "bg-zinc-200/60 dark:bg-white/10 text-zinc-500 dark:text-zinc-400"
                   }`}
                 >
-                  ▼
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </span>
               </button>
 

@@ -41,9 +41,19 @@ export function ThemeProvider({
   const [resolvedTheme, setResolvedTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
-    const saved = getCookieTheme();
+    let saved: Theme = initialTheme;
+    try {
+      const local = localStorage.getItem("omen-theme") as Theme;
+      if (local === "dark" || local === "light" || local === "system") {
+        saved = local;
+      } else {
+        saved = getCookieTheme();
+      }
+    } catch {
+      saved = getCookieTheme();
+    }
     setThemeState(saved);
-  }, []);
+  }, [initialTheme]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -105,7 +115,7 @@ export function ThemeProvider({
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme, setTheme, toggleTheme }}>
       <div
-        className={resolvedTheme === "dark" ? "bg-[#030906] text-white min-h-screen" : "bg-[#F3FAF6] text-[#0B1F16] min-h-screen"}
+        className="min-h-screen bg-[#F3FAF6] dark:bg-[#030906] text-[#0B1F16] dark:text-white"
         suppressHydrationWarning
       >
         {children}

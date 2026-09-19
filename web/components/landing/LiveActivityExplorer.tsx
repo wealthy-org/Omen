@@ -314,12 +314,27 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [activeModalTx, setActiveModalTx] = useState<OnChainTx | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedFilter, isMobile]);
 
   useEffect(() => {
     let isMounted = true;
     async function loadActivityFromApi() {
       try {
-        const res = await fetch("/api/activity?limit=10");
+        const res = await fetch("/api/activity?limit=25");
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.activities && Array.isArray(data.activities) && data.activities.length > 0) {
@@ -442,7 +457,7 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
         },
       };
 
-      setTransactions((prev) => [newTx, ...prev.slice(0, 7)]);
+      setTransactions((prev) => [newTx, ...prev.slice(0, 24)]);
     }, 4500);
 
     return () => {
@@ -467,6 +482,18 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
     if (selectedFilter === "payouts") return tx.method === "claim_payout";
     return true;
   });
+
+  const pageSize = isMobile ? 5 : 10;
+  const totalPages = Math.max(1, Math.ceil(filteredTxs.length / pageSize));
+  const effectivePage = Math.min(currentPage, totalPages);
+  const startIndex = (effectivePage - 1) * pageSize;
+  const displayedTxs = filteredTxs.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
 
   return (
     <section id="activity" className="w-full my-8 sm:my-14 scroll-mt-28 relative">
@@ -554,7 +581,7 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200/60 dark:divide-white/5 text-xs font-mono">
-              {filteredTxs.map((tx) => {
+              {displayedTxs.map((tx) => {
                 const shortTx = `${tx.txHash.slice(0, 8)}...${tx.txHash.slice(-6)}`;
                 const shortFrom = `${tx.fromAddress.slice(0, 6)}...${tx.fromAddress.slice(-4)}`;
 
@@ -688,6 +715,52 @@ export default function LiveActivityExplorer({ theme: propTheme }: LiveActivityE
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div
+            className={`px-4 py-3 border-t flex flex-col sm:flex-row items-center justify-between gap-2.5 text-xs font-mono ${
+              isDark
+                ? "bg-black/40 border-white/10 text-[#A9B3AD]"
+                : "bg-zinc-50/90 border-zinc-200/80 text-zinc-600"
+            }`}
+          >
+            <span>
+              Showing <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{startIndex + 1}</strong> - <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{Math.min(startIndex + pageSize, filteredTxs.length)}</strong> of <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{filteredTxs.length}</strong> txns
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handlePageChange(effectivePage - 1)}
+                disabled={effectivePage <= 1}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
+                    : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-100 shadow-xs"
+                }`}
+              >
+                ← Prev
+              </button>
+
+              <span className={`px-2 py-0.5 rounded-md font-bold ${isDark ? "text-emerald-400" : "text-emerald-700"}`}>
+                Page {effectivePage} / {totalPages}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => handlePageChange(effectivePage + 1)}
+                disabled={effectivePage >= totalPages}
+                className={`px-2.5 py-1 rounded-lg font-bold border transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
+                    : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-100 shadow-xs"
+                }`}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
 
         <div
           className={`p-3.5 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono ${

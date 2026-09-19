@@ -6,6 +6,8 @@ import { useTheme } from "@/components/ThemeProvider";
 import BeliefMarketCard, { BeliefMarket } from "@/components/BeliefMarketCard";
 import DiscoveryFilter, { DiscoveryTab, MarketCategoryFilter } from "@/components/DiscoveryFilter";
 
+const PAGE_SIZE = 9;
+
 export default function MarketsPage() {
   const contextTheme = useTheme();
   const isDark = (contextTheme.theme || "dark") === "dark";
@@ -15,10 +17,15 @@ export default function MarketsPage() {
   const [activeCategory, setActiveCategory] = useState<MarketCategoryFilter>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, activeCategory, searchQuery]);
 
   useEffect(() => {
     let isMounted = true;
@@ -29,6 +36,7 @@ export default function MarketsPage() {
         if (activeTab) queryParams.set("tab", activeTab);
         if (activeCategory !== "all") queryParams.set("category", activeCategory);
         if (searchQuery) queryParams.set("search", searchQuery);
+        queryParams.set("limit", "100");
 
         const res = await fetch(`/api/markets?${queryParams.toString()}`);
         if (res.ok) {
@@ -138,6 +146,18 @@ export default function MarketsPage() {
       return (b.agreePool + b.disagreePool) - (a.agreePool + a.disagreePool);
     });
 
+  const totalPages = Math.max(1, Math.ceil(filteredAndSortedMarkets.length / PAGE_SIZE));
+  const effectiveCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (effectiveCurrentPage - 1) * PAGE_SIZE;
+  const paginatedMarkets = filteredAndSortedMarkets.slice(startIndex, startIndex + PAGE_SIZE);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 animate-slide-down">
@@ -210,11 +230,68 @@ export default function MarketsPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-slide-up stagger-2">
-          {filteredAndSortedMarkets.map((market) => (
-            <BeliefMarketCard key={market.id} market={market} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-slide-up stagger-2">
+            {paginatedMarkets.map((market) => (
+              <BeliefMarketCard key={market.id} market={market} />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-10 pt-6 border-t border-zinc-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
+              <span className={isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}>
+                Showing <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{startIndex + 1}</strong> - <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{Math.min(startIndex + PAGE_SIZE, filteredAndSortedMarkets.length)}</strong> of <strong className={isDark ? "text-white" : "text-[#0B1F16]"}>{filteredAndSortedMarkets.length}</strong> markets
+              </span>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(effectiveCurrentPage - 1)}
+                  disabled={effectiveCurrentPage <= 1}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all border cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                    isDark
+                      ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
+                      : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 shadow-xs"
+                  }`}
+                >
+                  ← Prev
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`w-8 h-8 rounded-xl font-bold transition-all border cursor-pointer flex items-center justify-center ${
+                      effectiveCurrentPage === pageNum
+                        ? isDark
+                          ? "bg-emerald-500 text-black border-emerald-400 shadow-md font-black"
+                          : "bg-[#10221A] text-white border-[#10221A] shadow-md font-black"
+                        : isDark
+                          ? "bg-[#0A0F0C] border-white/10 text-[#A9B3AD] hover:text-white"
+                          : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 shadow-xs"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() => handlePageChange(effectiveCurrentPage + 1)}
+                  disabled={effectiveCurrentPage >= totalPages}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all border cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
+                    isDark
+                      ? "bg-[#0A0F0C] border-white/10 text-white hover:border-emerald-500/40"
+                      : "bg-white border-zinc-200 text-zinc-800 hover:bg-zinc-50 shadow-xs"
+                  }`}
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

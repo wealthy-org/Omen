@@ -41,8 +41,8 @@ export default function Footer({ theme: propTheme }: FooterProps) {
       }`}
     >
       <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+          <div className="space-y-4 lg:col-span-1">
             <div className="flex items-center gap-2.5">
               <div className="relative w-7 h-7 rounded-md overflow-hidden flex items-center justify-center">
                 <Image
@@ -76,53 +76,14 @@ export default function Footer({ theme: propTheme }: FooterProps) {
             </div>
           </div>
 
-          <div>
-            <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
-              Platform
-            </h3>
-            <ul className="space-y-2.5">
-              {PLATFORM_LINKS.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className={`text-sm transition-colors ${
-                      isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
-              Developers
-            </h3>
-            <ul className="space-y-2.5">
-              {DEVELOPER_LINKS.map((link) => (
-                <li key={link.label}>
-                  {link.external ? (
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`text-sm transition-colors inline-flex items-center gap-1 group ${
-                        isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
-                      }`}
-                    >
-                      {link.label}
-                      <svg
-                        className={`w-3.5 h-3.5 transition-colors ${isDark ? "text-[#A9B3AD]/60 group-hover:text-[#34D399]" : "text-[#4B5D55]/60 group-hover:text-[#0E7A4E]"}`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  ) : (
+          <div className="grid grid-cols-2 gap-8 lg:col-span-2">
+            <div>
+              <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+                Platform
+              </h3>
+              <ul className="space-y-2.5">
+                {PLATFORM_LINKS.map((link) => (
+                  <li key={link.href}>
                     <Link
                       href={link.href}
                       className={`text-sm transition-colors ${
@@ -131,13 +92,54 @@ export default function Footer({ theme: propTheme }: FooterProps) {
                     >
                       {link.label}
                     </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
+                Developers
+              </h3>
+              <ul className="space-y-2.5">
+                {DEVELOPER_LINKS.map((link) => (
+                  <li key={link.label}>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`text-sm transition-colors inline-flex items-center gap-1 group ${
+                          isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
+                        }`}
+                      >
+                        {link.label}
+                        <svg
+                          className={`w-3.5 h-3.5 transition-colors ${isDark ? "text-[#A9B3AD]/60 group-hover:text-[#34D399]" : "text-[#4B5D55]/60 group-hover:text-[#0E7A4E]"}`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className={`text-sm transition-colors ${
+                          isDark ? "text-[#A9B3AD] hover:text-[#34D399]" : "text-[#4B5D55] hover:text-[#0E7A4E]"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
-          <div>
+          <div className="lg:col-span-1">
             <h3 className={`text-xs font-mono font-bold uppercase tracking-wider mb-4 ${isDark ? "text-white" : "text-[#0B1F16]"}`}>
               Community
             </h3>

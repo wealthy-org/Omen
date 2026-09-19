@@ -125,9 +125,9 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
           <button
             type="button"
             onClick={() => setSide("agree")}
-            className={`flex items-center justify-between px-3.5 py-3 rounded-xl font-mono font-bold text-xs transition-all cursor-pointer active:scale-[0.98] ${
+            className={`flex items-center justify-between px-3.5 py-3 rounded-xl font-mono font-bold text-xs transition-all cursor-pointer active:scale-[0.98] outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
               side === "agree"
-                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/30 ring-2 ring-emerald-400 ring-offset-2 ring-offset-[#070D09]"
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/30 ring-2 ring-emerald-400 ring-offset-2 ring-offset-white dark:ring-offset-[#070D09]"
                 : "bg-emerald-600/85 hover:bg-emerald-600 text-white shadow-xs"
             }`}
           >
@@ -140,9 +140,9 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
           <button
             type="button"
             onClick={() => setSide("disagree")}
-            className={`flex items-center justify-between px-3.5 py-3 rounded-xl font-mono font-bold text-xs transition-all cursor-pointer active:scale-[0.98] ${
+            className={`flex items-center justify-between px-3.5 py-3 rounded-xl font-mono font-bold text-xs transition-all cursor-pointer active:scale-[0.98] outline-none focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
               side === "disagree"
-                ? "bg-rose-600 text-white shadow-md shadow-rose-500/30 ring-2 ring-rose-400 ring-offset-2 ring-offset-[#070D09]"
+                ? "bg-rose-600 text-white shadow-md shadow-rose-500/30 ring-2 ring-rose-400 ring-offset-2 ring-offset-white dark:ring-offset-[#070D09]"
                 : "bg-rose-600/85 hover:bg-rose-600 text-white shadow-xs"
             }`}
           >

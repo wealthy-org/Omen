@@ -90,8 +90,11 @@ export default async function RootLayout({
             __html: `
               (function() {
                 try {
+                  var stored = null;
+                  try { stored = localStorage.getItem('omen-theme'); } catch(e) {}
                   var cookieMatch = document.cookie.match(/(?:^|; )omen-theme=([^;]*)/);
-                  var theme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : 'system';
+                  var cookieTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
+                  var theme = stored || cookieTheme || 'system';
                   var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
                   var root = document.documentElement;
                   if (isDark) {
@@ -109,7 +112,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen antialiased font-sans" suppressHydrationWarning>
+      <body className="min-h-screen antialiased font-sans bg-[#F3FAF6] dark:bg-[#030906] text-[#0B1F16] dark:text-white" suppressHydrationWarning>
         <ThemeProvider initialTheme={savedTheme}>
           <Web3Providers>
             <div className="min-h-screen flex flex-col w-full">
