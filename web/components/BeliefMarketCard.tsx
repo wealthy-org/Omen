@@ -64,7 +64,7 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
     market.authorHandle.toLowerCase() !== market.author.toLowerCase();
 
   return (
-    <div className="bg-white dark:bg-[#0A0F0C] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-5 shadow-xs hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:shadow-lg transition-all hover-lift flex flex-col justify-between group">
+    <div className="h-full bg-white dark:bg-[#0A0F0C] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-5 shadow-xs hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:shadow-lg transition-all hover-lift flex flex-col justify-between group">
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 min-w-0">
@@ -97,7 +97,7 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
         </div>
 
         <Link href={`/market/${market.id}`} className="block">
-          <h3 className="text-base font-extrabold text-zinc-900 dark:text-white leading-snug my-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2">
+          <h3 className="text-base font-extrabold text-zinc-900 dark:text-white leading-snug my-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-2 min-h-[2.75rem]">
             {market.statement}
           </h3>
         </Link>

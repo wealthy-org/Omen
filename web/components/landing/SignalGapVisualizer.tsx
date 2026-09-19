@@ -438,7 +438,7 @@ export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
                       <div>
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <h4 className="text-base font-extrabold tracking-tight">{currentCreator.name}</h4>
-                          <span className="text-xs font-mono font-bold text-zinc-400">{currentCreator.handle}</span>
+                          <span className="text-xs font-mono font-bold text-zinc-500 dark:text-zinc-400">{currentCreator.handle}</span>
                           <a
                             href={`https://x.com/${currentCreator.handle.replace('@', '')}`}
                             target="_blank"
@@ -459,27 +459,27 @@ export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="text-xs font-mono font-black px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 inline-block shadow-xs">
+                      <span className="text-xs font-mono font-black px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 inline-block shadow-xs">
                         {currentCreator.accuracyRate}% Win
                       </span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-2 p-3 rounded-xl border border-emerald-500/15 mb-4 text-center font-mono bg-black/20 text-xs">
+                  <div className="grid grid-cols-4 gap-2 p-3 rounded-xl border border-emerald-500/15 dark:border-white/10 mb-4 text-center font-mono bg-emerald-50/70 dark:bg-black/20 text-xs">
                     <div>
-                      <div className="text-base font-black text-emerald-500">{currentCreator.confirmed}</div>
+                      <div className="text-base font-black text-emerald-600 dark:text-emerald-400">{currentCreator.confirmed}</div>
                       <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">Confirmed</div>
                     </div>
                     <div>
-                      <div className="text-base font-black">{currentCreator.resolved}</div>
+                      <div className="text-base font-black text-[#0B1F16] dark:text-white">{currentCreator.resolved}</div>
                       <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">Resolved</div>
                     </div>
                     <div>
-                      <div className="text-base font-black">{currentCreator.correct}</div>
+                      <div className="text-base font-black text-[#0B1F16] dark:text-white">{currentCreator.correct}</div>
                       <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">Correct</div>
                     </div>
                     <div>
-                      <div className="text-base font-black text-emerald-400">{currentCreator.volumeEth}</div>
+                      <div className="text-base font-black text-emerald-600 dark:text-emerald-400">{currentCreator.volumeEth}</div>
                       <div className="text-[10px] text-[#4B5D55] dark:text-[#A9B3AD]">ETH Vol</div>
                     </div>
                   </div>

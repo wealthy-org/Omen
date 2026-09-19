@@ -714,7 +714,7 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
         <div className="p-3.5 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono bg-zinc-50 dark:bg-black/30 border-zinc-200/80 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Dual-chain consensus sync: Sepolia & Robinhood Chain active</span>
+            <span className="text-[11px] sm:text-xs">Dual-chain consensus sync: Sepolia & Robinhood Chain active</span>
           </div>
           <Link
             href="#markets"
@@ -732,10 +732,10 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
           onClick={() => setActiveModalTx(null)}
         >
           <div
-            className="w-full max-w-3xl rounded-3xl p-5 sm:p-7 border shadow-2xl relative max-h-[90vh] overflow-y-auto animate-scale-in bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-emerald-500/20 text-[#0B1F16] dark:text-white"
+            className="w-full max-w-3xl rounded-3xl p-4 sm:p-6 border shadow-2xl relative max-h-[82vh] sm:max-h-[88vh] overflow-y-auto animate-scale-in bg-white dark:bg-[#0A0F0C] border-zinc-200 dark:border-emerald-500/20 text-[#0B1F16] dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between gap-4 pb-4 border-b border-zinc-200 dark:border-white/10 mb-5">
+            <div className="flex items-center justify-between gap-4 pb-3 sm:pb-4 border-b border-zinc-200 dark:border-white/10 mb-4 sm:mb-5">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold border border-emerald-500/30">
                   ⚡
@@ -762,8 +762,8 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
               </button>
             </div>
 
-            <div className="space-y-3.5 font-mono text-xs">
-              <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="space-y-2.5 sm:space-y-3.5 font-mono text-xs">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <span className="text-[11px] uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-bold block">
                     Transaction Hash
@@ -782,8 +782,8 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
               </div>
 
               {activeModalTx.stakingDetails && (
-                <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-500/25">
-                  <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="p-3 sm:p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-500/25">
+                  <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                     <span className="text-xs uppercase tracking-wider font-extrabold text-emerald-800 dark:text-emerald-400">
                       Pari-Mutuel Staking Telemetry
                     </span>
@@ -791,7 +791,7 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
                       Position: {activeModalTx.stakingDetails.side}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                     <div className="p-2 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-500/20">
                       <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Staked Value</span>
                       <span className="font-extrabold text-zinc-900 dark:text-white text-xs mt-0.5 block">{activeModalTx.valueEth}</span>
@@ -813,8 +813,8 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
               )}
 
               {activeModalTx.eip712Details && (
-                <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-500/25">
-                  <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="p-3 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-500/25">
+                  <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                     <span className="text-xs uppercase tracking-wider font-extrabold text-amber-800 dark:text-amber-400">
                       EIP-712 Cryptographic Signature Verification
                     </span>
@@ -846,8 +846,8 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
               )}
 
               {activeModalTx.creationDetails && (
-                <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-500/25">
-                  <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="p-3 sm:p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-500/25">
+                  <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                     <span className="text-xs uppercase tracking-wider font-extrabold text-blue-800 dark:text-blue-400">
                       Market Deployment & Factory Specifications
                     </span>
@@ -873,8 +873,8 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
               )}
 
               {activeModalTx.payoutDetails && (
-                <div className="p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-500/25">
-                  <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="p-3 sm:p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-500/25">
+                  <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                     <span className="text-xs uppercase tracking-wider font-extrabold text-purple-800 dark:text-purple-400">
                       Dual Payout Settlement Receipt
                     </span>
@@ -882,44 +882,44 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
                       Outcome: {activeModalTx.payoutDetails.winningOutcome}
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-center">
-                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
                       <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Gross Payout Transferred</span>
-                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm mt-0.5 block">{activeModalTx.payoutDetails.grossPayoutEth}</span>
+                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm mt-0.5 block">{activeModalTx.payoutDetails.grossPayoutEth}</span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
                       <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Initial Staked Capital</span>
-                      <span className="font-bold text-zinc-900 dark:text-white text-sm mt-0.5 block">{activeModalTx.payoutDetails.initialStakeEth}</span>
+                      <span className="font-bold text-zinc-900 dark:text-white text-xs sm:text-sm mt-0.5 block">{activeModalTx.payoutDetails.initialStakeEth}</span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
+                    <div className="p-2 sm:p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
                       <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Calculated Yield</span>
-                      <span className="font-extrabold text-purple-600 dark:text-purple-400 text-sm mt-0.5 block">{activeModalTx.payoutDetails.roiPercentage}</span>
+                      <span className="font-extrabold text-purple-600 dark:text-purple-400 text-xs sm:text-sm mt-0.5 block">{activeModalTx.payoutDetails.roiPercentage}</span>
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Block Number</span>
                   <span className="font-bold text-zinc-900 dark:text-zinc-100">#{activeModalTx.blockNumber} (18 Confs)</span>
                 </div>
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Execution Fee</span>
                   <span className="font-bold text-zinc-900 dark:text-zinc-100">{activeModalTx.txFeeEth}</span>
                 </div>
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Gas Price / Used</span>
                   <span className="font-bold text-zinc-900 dark:text-zinc-100">{activeModalTx.gasPriceGwei} • {activeModalTx.gasUsed}</span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">From (Trader / Origin)</span>
                   <span className="break-all font-mono text-zinc-800 dark:text-zinc-200">{activeModalTx.fromAddress}</span>
                 </div>
-                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
+                <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Interacted With (Contract)</span>
                   <div className="flex flex-col">
                     <span className="font-bold text-emerald-600 dark:text-emerald-400">{activeModalTx.toContractName}</span>
@@ -929,14 +929,14 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
               </div>
 
               {activeModalTx.decodedLog && (
-                <div className="p-4 rounded-2xl bg-zinc-100/90 dark:bg-black/60 border border-zinc-300 dark:border-emerald-500/25">
+                <div className="p-3 sm:p-4 rounded-2xl bg-zinc-100/90 dark:bg-black/60 border border-zinc-300 dark:border-emerald-500/25">
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="text-[11px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold">
                       Decoded EVM Calldata & Event Logs
                     </span>
                     <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">ABI Decoded</span>
                   </div>
-                  <div className="p-2.5 rounded-xl bg-white dark:bg-black/80 font-mono text-[11px] mb-2.5 text-zinc-900 dark:text-emerald-300 border border-zinc-200 dark:border-white/10 overflow-x-auto">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-black/80 font-mono text-[11px] mb-2 text-zinc-900 dark:text-emerald-300 border border-zinc-200 dark:border-white/10 overflow-x-auto">
                     {activeModalTx.decodedLog.functionName}
                   </div>
                   <div className="space-y-1.5">
@@ -951,11 +951,11 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
               )}
             </div>
 
-            <div className="mt-5 pt-3.5 border-t border-zinc-200 dark:border-white/10 flex justify-end">
+            <div className="mt-4 sm:mt-5 pt-3 border-t border-zinc-200 dark:border-white/10 flex justify-end">
               <button
                 type="button"
                 onClick={() => setActiveModalTx(null)}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs shadow-sm transition-all cursor-pointer"
+                className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs shadow-sm transition-all cursor-pointer"
               >
                 Close Receipt
               </button>

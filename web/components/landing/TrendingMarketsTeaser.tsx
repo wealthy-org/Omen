@@ -294,7 +294,7 @@ export default function TrendingMarketsTeaser({}: TrendingMarketsTeaserProps) {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredMarkets.slice(0, 6).map((market, idx) => (
-              <div key={market.id} className={idx >= 3 ? "hidden sm:block" : ""}>
+              <div key={market.id} className={`h-full ${idx >= 3 ? "hidden sm:block" : ""}`}>
                 <BeliefMarketCard market={market} />
               </div>
             ))}

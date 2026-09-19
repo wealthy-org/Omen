@@ -37,12 +37,12 @@ export default function StatsOverview({}: StatsOverviewProps) {
   return (
     <section className="w-full my-6 sm:my-8">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+        <div className="rounded-2xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <span className="w-2 h-2 rounded-full bg-[#22C55E] dark:bg-[#34D399] animate-pulse shrink-0" />
-                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] leading-tight">
                   Protocol Volume
                 </span>
               </div>
@@ -52,24 +52,24 @@ export default function StatsOverview({}: StatsOverviewProps) {
             </div>
 
             <div className="my-1.5 sm:my-2">
-              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] truncate">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] break-words">
                 {stats.totalVolume}
               </div>
             </div>
           </div>
 
-          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
-            <span className="font-semibold text-emerald-500 truncate">Sepolia & Robinhood</span>
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+            <span className="font-semibold text-emerald-500">Sepolia & Robinhood</span>
             <span className="hidden sm:inline">Escrow Verified</span>
           </div>
         </div>
 
-        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+        <div className="rounded-2xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <span className="text-emerald-500 font-bold text-xs shrink-0">●</span>
-                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] leading-tight">
                   Active Markets
                 </span>
               </div>
@@ -79,13 +79,13 @@ export default function StatsOverview({}: StatsOverviewProps) {
             </div>
 
             <div className="my-1.5 sm:my-2">
-              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] truncate">
-                {stats.activeMarkets} <span className="text-xs sm:text-lg font-bold font-sans text-zinc-500">Markets</span>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] break-words">
+                {stats.activeMarkets} <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Markets</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
             <div className="flex items-center gap-1 sm:gap-1.5 font-bold">
               <span className="text-emerald-500">AGREE</span>
               <span className="text-zinc-500">/</span>
@@ -95,12 +95,12 @@ export default function StatsOverview({}: StatsOverviewProps) {
           </div>
         </div>
 
-        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+        <div className="rounded-2xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <span className="text-blue-500 font-bold text-xs shrink-0">◆</span>
-                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] leading-tight">
                   Total Beliefs
                 </span>
               </div>
@@ -110,24 +110,24 @@ export default function StatsOverview({}: StatsOverviewProps) {
             </div>
 
             <div className="my-1.5 sm:my-2">
-              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
-                {stats.totalBeliefs} <span className="text-xs sm:text-lg font-bold font-sans text-zinc-500">Beliefs</span>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 break-words">
+                {stats.totalBeliefs} <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Beliefs</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
-            <span className="text-blue-400 font-semibold truncate">Social Signals</span>
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+            <span className="text-blue-400 font-semibold">Social Signals</span>
             <span className="hidden sm:inline">Twitter & Farcaster</span>
           </div>
         </div>
 
-        <div className="rounded-2xl p-4 sm:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
+        <div className="rounded-2xl p-3.5 sm:p-5 lg:p-6 flex flex-col justify-between border transition-all duration-300 hover-lift group bg-white/95 dark:bg-[#070D09]/95 border-emerald-500/15 dark:border-white/10 hover:border-emerald-500/35 dark:hover:border-emerald-500/40 shadow-xs dark:shadow-lg">
           <div>
-            <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 mb-2 sm:mb-3">
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <span className="text-emerald-500 font-bold text-xs shrink-0">✓</span>
-                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] truncate">
+                <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#4B5D55] dark:text-[#A9B3AD] leading-tight">
                   Verified Creators
                 </span>
               </div>
@@ -137,14 +137,14 @@ export default function StatsOverview({}: StatsOverviewProps) {
             </div>
 
             <div className="my-1.5 sm:my-2">
-              <div className="text-xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] truncate">
-                {stats.verifiedCreators} <span className="text-xs sm:text-lg font-bold font-sans text-zinc-500">Creators</span>
+              <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] break-words">
+                {stats.verifiedCreators} <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Creators</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex items-center justify-between text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
-            <span className="truncate">Signed Conviction</span>
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-xs font-mono border-emerald-500/10 dark:border-white/10 text-[#4B5D55] dark:text-[#A9B3AD]">
+            <span>Signed Conviction</span>
             <span className="font-bold text-emerald-500 shrink-0">1.5% Fee</span>
           </div>
         </div>
