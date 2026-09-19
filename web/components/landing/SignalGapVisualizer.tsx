@@ -207,7 +207,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
               isDark ? "text-[#34D399]" : "text-[#0E7A4E]"
             }`}
           >
-            Dual-Track Consensus Engine
+            Dual-Track Consensus Engine & Reputation Ledger
           </span>
         </div>
         <h2
@@ -215,20 +215,20 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
             isDark ? "text-white" : "text-[#0B1F16]"
           }`}
         >
-          The Signal Gap: Words vs. Capital
+          The Signal Gap: Words vs. Capital & Top Thinkers Record
         </h2>
         <p
           className={`text-sm sm:text-base mt-1.5 max-w-3xl ${
             isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"
           }`}
         >
-          Social sentiment reveals what the crowd says. Staked capital reveals what people truly believe. The divergence between them is where market alpha lives.
+          Social sentiment reveals what the crowd says. Staked capital reveals what people truly believe. Compare the divergence in the Signal Gap and track the top thinkers whose convictions turn into immutable on-chain records.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mb-8">
-        <div className="lg:col-span-7 flex flex-col justify-between h-full">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="lg:col-span-7 flex flex-col h-full">
+          <div className="h-10 flex items-center gap-2 overflow-x-auto pb-1 mb-4 scrollbar-none shrink-0">
             {SIGNAL_CASES.map((item) => {
               const isActive = item.id === selectedCaseId;
               return (
@@ -236,14 +236,14 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedCaseId(item.id)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer border ${
                     isActive
                       ? isDark
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm"
-                        : "bg-emerald-600 text-white shadow-sm"
+                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm"
+                        : "bg-emerald-600 text-white border-emerald-600 shadow-sm"
                       : isDark
-                        ? "bg-[#070D09]/80 border border-white/10 text-[#A9B3AD] hover:text-white hover:bg-white/5"
-                        : "bg-white border border-zinc-200 text-[#4B5D55] hover:text-[#0B1F16] hover:bg-zinc-50"
+                        ? "bg-[#070D09]/80 border-white/10 text-[#A9B3AD] hover:text-white hover:bg-white/5"
+                        : "bg-white border-zinc-200 text-[#4B5D55] hover:text-[#0B1F16] hover:bg-zinc-50 shadow-xs"
                   }`}
                 >
                   <span>{item.category}</span>
@@ -272,108 +272,110 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                 : "bg-white/95 border-emerald-500/15 shadow-[0_12px_32px_rgba(14,122,78,0.06)] text-[#0B1F16]"
             }`}
           >
-            <div key={currentCase.id} className="animate-scale-in">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-emerald-500/10">
-                <div className="flex items-start gap-3">
-                  <div className="relative w-10 h-10 shrink-0">
-                    <img
-                      src={`https://unavatar.io/twitter/${currentCase.authorHandle.replace('@', '')}`}
-                      alt={currentCase.author}
-                      className="w-10 h-10 rounded-full object-cover border border-white/20 shadow-xs relative z-10"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLElement).style.display = "none";
-                      }}
-                    />
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 text-white font-bold text-xs flex items-center justify-center border border-white/20 shadow-xs absolute inset-0 z-0">
-                      {currentCase.authorAvatar}
+            <div key={currentCase.id} className="animate-scale-in flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-emerald-500/10">
+                  <div className="flex items-start gap-3">
+                    <div className="relative w-10 h-10 shrink-0">
+                      <img
+                        src={`https://unavatar.io/twitter/${currentCase.authorHandle.replace('@', '')}`}
+                        alt={currentCase.author}
+                        className="w-10 h-10 rounded-full object-cover border border-white/20 shadow-xs relative z-10"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = "none";
+                        }}
+                      />
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-600 to-teal-500 text-white font-bold text-xs flex items-center justify-center border border-white/20 shadow-xs absolute inset-0 z-0">
+                        {currentCase.authorAvatar}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-bold">{currentCase.author}</span>
+                        <span className="text-xs font-mono text-zinc-400">{currentCase.authorHandle}</span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                          ✓ Verified
+                        </span>
+                      </div>
+                      <h3 className="text-sm sm:text-base font-extrabold mt-1 tracking-tight">
+                        &ldquo;{currentCase.statement}&rdquo;
+                      </h3>
                     </div>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-bold">{currentCase.author}</span>
-                      <span className="text-xs font-mono text-zinc-400">{currentCase.authorHandle}</span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
-                        ✓ Verified
-                      </span>
-                    </div>
-                    <h3 className="text-sm sm:text-base font-extrabold mt-1 tracking-tight">
-                      &ldquo;{currentCase.statement}&rdquo;
-                    </h3>
+
+                  <div className="shrink-0 self-start sm:self-auto">
+                    <span
+                      className={`text-xs font-mono font-bold px-2.5 py-1 rounded-xl border inline-flex items-center gap-1.5 shadow-xs ${
+                        currentCase.gapType === "overhyped"
+                          ? "bg-rose-500/10 text-rose-500 border-rose-500/30"
+                          : currentCase.gapType === "smart-money"
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
+                      {currentCase.gapBadge}
+                    </span>
                   </div>
                 </div>
 
-                <div className="shrink-0">
-                  <span
-                    className={`text-xs font-mono font-bold px-2.5 py-1 rounded-xl border inline-flex items-center gap-1.5 shadow-xs ${
-                      currentCase.gapType === "overhyped"
-                        ? "bg-rose-500/10 text-rose-500 border-rose-500/30"
-                        : currentCase.gapType === "smart-money"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                          : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+                <div className="space-y-3.5 mb-5">
+                  <div
+                    className={`p-4 rounded-2xl border ${
+                      isDark ? "bg-[#030906]/80 border-white/10" : "bg-zinc-50 border-zinc-200/80"
                     }`}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-ping" />
-                    {currentCase.gapBadge}
-                  </span>
-                </div>
-              </div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500">
+                        Track 1: Social Sentiments ({currentCase.peopleTotal.toLocaleString()} votes)
+                      </span>
+                      <span className="text-xs font-mono font-bold text-emerald-500">
+                        {currentCase.peopleAgreePct}% Agree
+                      </span>
+                    </div>
 
-              <div className="space-y-4 mb-5">
-                <div
-                  className={`p-4 rounded-2xl border ${
-                    isDark ? "bg-[#030906]/80 border-white/10" : "bg-zinc-50 border-zinc-200/80"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500">
-                      Track 1: Social Sentiments ({currentCase.peopleTotal.toLocaleString()} votes)
-                    </span>
-                    <span className="text-xs font-mono font-bold text-emerald-500">
-                      {currentCase.peopleAgreePct}% Agree
-                    </span>
+                    <div className="h-3 w-full rounded-full bg-zinc-800 overflow-hidden flex p-0.5 border border-white/10">
+                      <div
+                        style={{ width: `${currentCase.peopleAgreePct}%` }}
+                        className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-l-full transition-all duration-500"
+                      />
+                      <div
+                        style={{ width: `${currentCase.peopleDisagreePct}%` }}
+                        className="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-r-full transition-all duration-500"
+                      />
+                    </div>
                   </div>
 
-                  <div className="h-3 w-full rounded-full bg-zinc-800 overflow-hidden flex p-0.5 border border-white/10">
-                    <div
-                      style={{ width: `${currentCase.peopleAgreePct}%` }}
-                      className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-l-full transition-all duration-500"
-                    />
-                    <div
-                      style={{ width: `${currentCase.peopleDisagreePct}%` }}
-                      className="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-r-full transition-all duration-500"
-                    />
-                  </div>
-                </div>
+                  <div
+                    className={`p-4 rounded-2xl border ${
+                      isDark ? "bg-[#030906]/80 border-white/10" : "bg-zinc-50 border-zinc-200/80"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
+                        Track 2: Staked Capital Pool ({currentCase.moneyTotalEth} ETH Staked)
+                      </span>
+                      <span className="text-xs font-mono font-bold text-emerald-400">
+                        {currentCase.moneyAgreePct}% Agree
+                      </span>
+                    </div>
 
-                <div
-                  className={`p-4 rounded-2xl border ${
-                    isDark ? "bg-[#030906]/80 border-white/10" : "bg-zinc-50 border-zinc-200/80"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400">
-                      Track 2: Staked Capital Pool ({currentCase.moneyTotalEth} ETH Staked)
-                    </span>
-                    <span className="text-xs font-mono font-bold text-emerald-400">
-                      {currentCase.moneyAgreePct}% Agree
-                    </span>
-                  </div>
-
-                  <div className="h-3 w-full rounded-full bg-zinc-800 overflow-hidden flex p-0.5 border border-white/10">
-                    <div
-                      style={{ width: `${currentCase.moneyAgreePct}%` }}
-                      className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-l-full transition-all duration-500"
-                    />
-                    <div
-                      style={{ width: `${currentCase.moneyDisagreePct}%` }}
-                      className="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-r-full transition-all duration-500"
-                    />
+                    <div className="h-3 w-full rounded-full bg-zinc-800 overflow-hidden flex p-0.5 border border-white/10">
+                      <div
+                        style={{ width: `${currentCase.moneyAgreePct}%` }}
+                        className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-l-full transition-all duration-500"
+                      />
+                      <div
+                        style={{ width: `${currentCase.moneyDisagreePct}%` }}
+                        className="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-r-full transition-all duration-500"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div
-                className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                className={`p-3.5 sm:p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
                   isDark
                     ? "bg-emerald-950/20 border-emerald-500/25 text-[#DCE5DF]"
                     : "bg-emerald-50/80 border-emerald-500/20 text-[#0B1F16]"
@@ -392,7 +394,7 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                 </div>
 
                 <Link
-                  href="/markets"
+                  href="#markets"
                   className="shrink-0 text-xs font-bold font-mono px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all whitespace-nowrap active:scale-[0.98]"
                 >
                   Trade Gap ↗
@@ -402,12 +404,12 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
           </div>
         </div>
 
-        <div className="lg:col-span-5 flex flex-col justify-between h-full">
-          <div className="flex items-center justify-between gap-2 mb-4 pb-1">
+        <div className="lg:col-span-5 flex flex-col h-full">
+          <div className="h-10 flex items-center justify-between gap-2 mb-4 shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <h3
-                className={`text-sm sm:text-base font-extrabold tracking-tight ${
+                className={`text-xs sm:text-sm font-extrabold tracking-tight ${
                   isDark ? "text-white" : "text-[#0B1F16]"
                 }`}
               >
@@ -465,139 +467,141 @@ export default function SignalGapVisualizer({ theme: propTheme }: SignalGapVisua
                 : "bg-white/95 border-emerald-500/15 shadow-[0_12px_32px_rgba(14,122,78,0.06)] text-[#0B1F16]"
             }`}
           >
-            <div>
-              <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-emerald-500/10">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                  Top Thinkers ({creatorIndex + 1}/{CREATOR_SPOTLIGHTS.length})
-                </span>
-                {isPaused && (
-                  <span className="text-[11px] font-mono text-[#A9B3AD] animate-pulse">
-                    [Paused]
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-emerald-500/10">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                    Top Thinkers ({creatorIndex + 1}/{CREATOR_SPOTLIGHTS.length})
                   </span>
-                )}
-              </div>
-
-              <div key={currentCreator.id} className="animate-scale-in">
-                <div className="flex items-center justify-between gap-3 mb-5">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-12 h-12 shrink-0">
-                      <img
-                        src={`https://unavatar.io/twitter/${currentCreator.handle.replace('@', '')}`}
-                        alt={currentCreator.name}
-                        className="w-12 h-12 rounded-full object-cover border-2 border-white/20 shadow-md relative z-10"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLElement).style.display = "none";
-                        }}
-                      />
-                      <div
-                        className={`w-12 h-12 rounded-full bg-gradient-to-br ${currentCreator.gradient} text-white font-black text-sm flex items-center justify-center border-2 border-white/20 shadow-md absolute inset-0 z-0`}
-                      >
-                        {currentCreator.avatarInitials}
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <h4 className="text-base font-extrabold tracking-tight">{currentCreator.name}</h4>
-                        <span className="text-xs font-mono font-bold text-zinc-400">{currentCreator.handle}</span>
-                        <a
-                          href={`https://x.com/${currentCreator.handle.replace('@', '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-black/40 hover:bg-black/60 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-white/15 transition-all shadow-xs"
-                          title={`View ${currentCreator.handle} on X`}
-                        >
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                          </svg>
-                          <span className="text-[10px] font-mono">X ↗</span>
-                        </a>
-                      </div>
-                      <p className={`text-[11px] font-mono mt-0.5 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
-                        Conviction tracked since {currentCreator.since}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-mono font-black px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 inline-block shadow-xs">
-                      {currentCreator.accuracyRate}% Win
+                  {isPaused && (
+                    <span className="text-[11px] font-mono text-[#A9B3AD] animate-pulse">
+                      [Paused]
                     </span>
-                  </div>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-4 gap-2 p-3 rounded-xl border border-emerald-500/15 mb-4 text-center font-mono bg-black/20 text-xs">
-                  <div>
-                    <div className="text-base font-black text-emerald-500">{currentCreator.confirmed}</div>
-                    <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Confirmed</div>
-                  </div>
-                  <div>
-                    <div className="text-base font-black">{currentCreator.resolved}</div>
-                    <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Resolved</div>
-                  </div>
-                  <div>
-                    <div className="text-base font-black">{currentCreator.correct}</div>
-                    <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Correct</div>
-                  </div>
-                  <div>
-                    <div className="text-base font-black text-emerald-400">{currentCreator.volumeEth}</div>
-                    <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>ETH Vol</div>
-                  </div>
-                </div>
+                <div key={currentCreator.id} className="animate-scale-in">
+                  <div className="flex items-center justify-between gap-3 mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-12 h-12 shrink-0">
+                        <img
+                          src={`https://unavatar.io/twitter/${currentCreator.handle.replace('@', '')}`}
+                          alt={currentCreator.name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-white/20 shadow-md relative z-10"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLElement).style.display = "none";
+                          }}
+                        />
+                        <div
+                          className={`w-12 h-12 rounded-full bg-gradient-to-br ${currentCreator.gradient} text-white font-black text-sm flex items-center justify-center border-2 border-white/20 shadow-md absolute inset-0 z-0`}
+                        >
+                          {currentCreator.avatarInitials}
+                        </div>
+                      </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
-                  <div
-                    className={`p-3 rounded-xl border ${
-                      isDark ? "bg-[#030906] border-emerald-500/20" : "bg-emerald-50/60 border-emerald-500/15"
-                    }`}
-                  >
-                    <div className={`text-[11px] font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
-                      Top Alpha
+                      <div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="text-base font-extrabold tracking-tight">{currentCreator.name}</h4>
+                          <span className="text-xs font-mono font-bold text-zinc-400">{currentCreator.handle}</span>
+                          <a
+                            href={`https://x.com/${currentCreator.handle.replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-black/40 hover:bg-black/60 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-white/15 transition-all shadow-xs"
+                            title={`View ${currentCreator.handle} on X`}
+                          >
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                            </svg>
+                            <span className="text-[10px] font-mono">X ↗</span>
+                          </a>
+                        </div>
+                        <p className={`text-[11px] font-mono mt-0.5 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                          Conviction tracked since {currentCreator.since}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-xs font-bold text-emerald-500 mt-0.5 truncate">
-                      {currentCreator.topCategory.name} ({currentCreator.topCategory.winRate}%)
+
+                    <div className="text-right shrink-0">
+                      <span className="text-xs font-mono font-black px-2.5 py-1 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 inline-block shadow-xs">
+                        {currentCreator.accuracyRate}% Win
+                      </span>
                     </div>
                   </div>
-                  <div
-                    className={`p-3 rounded-xl border ${
-                      isDark ? "bg-[#030906] border-rose-500/20" : "bg-rose-50/60 border-rose-500/15"
-                    }`}
-                  >
-                    <div className={`text-[11px] font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
-                      Weakest
+
+                  <div className="grid grid-cols-4 gap-2 p-3 rounded-xl border border-emerald-500/15 mb-4 text-center font-mono bg-black/20 text-xs">
+                    <div>
+                      <div className="text-base font-black text-emerald-500">{currentCreator.confirmed}</div>
+                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Confirmed</div>
                     </div>
-                    <div className="text-xs font-bold text-rose-500 mt-0.5 truncate">
-                      {currentCreator.weakestCategory.name} ({currentCreator.weakestCategory.winRate}%)
+                    <div>
+                      <div className="text-base font-black">{currentCreator.resolved}</div>
+                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Resolved</div>
+                    </div>
+                    <div>
+                      <div className="text-base font-black">{currentCreator.correct}</div>
+                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>Correct</div>
+                    </div>
+                    <div>
+                      <div className="text-base font-black text-emerald-400">{currentCreator.volumeEth}</div>
+                      <div className={`text-[10px] ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>ETH Vol</div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                    <div
+                      className={`p-3 rounded-xl border ${
+                        isDark ? "bg-[#030906] border-emerald-500/20" : "bg-emerald-50/60 border-emerald-500/15"
+                      }`}
+                    >
+                      <div className={`text-[11px] font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                        Top Alpha
+                      </div>
+                      <div className="text-xs font-bold text-emerald-500 mt-0.5 truncate">
+                        {currentCreator.topCategory.name} ({currentCreator.topCategory.winRate}%)
+                      </div>
+                    </div>
+                    <div
+                      className={`p-3 rounded-xl border ${
+                        isDark ? "bg-[#030906] border-rose-500/20" : "bg-rose-50/60 border-rose-500/15"
+                      }`}
+                    >
+                      <div className={`text-[11px] font-mono ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
+                        Weakest
+                      </div>
+                      <div className="text-xs font-bold text-rose-500 mt-0.5 truncate">
+                        {currentCreator.weakestCategory.name} ({currentCreator.weakestCategory.winRate}%)
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between gap-3 pt-3 border-t border-emerald-500/10">
-              <div className="flex items-center gap-1.5">
-                {CREATOR_SPOTLIGHTS.map((creator, idx) => (
-                  <button
-                    key={creator.id}
-                    type="button"
-                    onClick={() => setCreatorIndex(idx)}
-                    className={`h-2 rounded-full transition-all cursor-pointer ${
-                      creatorIndex === idx
-                        ? "w-6 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
-                        : "w-2 bg-zinc-600/40 hover:bg-zinc-500/60"
-                    }`}
-                    aria-label={`Go to creator ${creator.name}`}
-                  />
-                ))}
+              <div className="flex items-center justify-between gap-3 pt-3 border-t border-emerald-500/10 mt-auto">
+                <div className="flex items-center gap-1.5">
+                  {CREATOR_SPOTLIGHTS.map((creator, idx) => (
+                    <button
+                      key={creator.id}
+                      type="button"
+                      onClick={() => setCreatorIndex(idx)}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${
+                        creatorIndex === idx
+                          ? "w-6 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"
+                          : "w-2 bg-zinc-600/40 hover:bg-zinc-500/60"
+                      }`}
+                      aria-label={`Go to creator ${creator.name}`}
+                    />
+                  ))}
+                </div>
+
+                <Link
+                  href={`/creator/${currentCreator.address}`}
+                  className="text-xs font-bold font-mono px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-white/10 transition-all flex items-center gap-1.5"
+                >
+                  <span>View Profile</span>
+                  <span>↗</span>
+                </Link>
               </div>
-
-              <Link
-                href={`/creator/${currentCreator.address}`}
-                className="text-xs font-bold font-mono px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-white/10 transition-all flex items-center gap-1.5"
-              >
-                <span>View Profile</span>
-                <span>↗</span>
-              </Link>
             </div>
           </div>
         </div>
