@@ -35,7 +35,7 @@ const CREATOR_SPOTLIGHTS: CreatorSpotlight[] = [
     id: "traderx",
     name: "TraderX",
     handle: "@TraderX",
-    address: "0x89f4...3a1c",
+    address: "0x1111111111111111111111111111111111111111",
     avatarInitials: "TX",
     gradient: "from-emerald-600 to-teal-500",
     since: "March 2026",
@@ -51,7 +51,7 @@ const CREATOR_SPOTLIGHTS: CreatorSpotlight[] = [
     id: "alphamacro",
     name: "Alpha Macro",
     handle: "@AlphaMacro",
-    address: "0x3bc1...90fe",
+    address: "0x8888888888888888888888888888888888888888",
     avatarInitials: "AM",
     gradient: "from-blue-600 to-indigo-500",
     since: "January 2026",
@@ -67,7 +67,7 @@ const CREATOR_SPOTLIGHTS: CreatorSpotlight[] = [
     id: "onchainwitch",
     name: "Onchain Witch",
     handle: "@onchainwitch",
-    address: "0x12dc...44b2",
+    address: "0x3333333333333333333333333333333333333333",
     avatarInitials: "OW",
     gradient: "from-purple-600 to-pink-500",
     since: "November 2025",
@@ -83,7 +83,7 @@ const CREATOR_SPOTLIGHTS: CreatorSpotlight[] = [
     id: "defiwizard",
     name: "DeFi Wizard",
     handle: "@DeFiWizard",
-    address: "0x67ab...19dd",
+    address: "0x5555555555555555555555555555555555555555",
     avatarInitials: "DW",
     gradient: "from-amber-600 to-orange-500",
     since: "February 2026",
@@ -98,10 +98,10 @@ const CREATOR_SPOTLIGHTS: CreatorSpotlight[] = [
 ];
 
 const INITIAL_ACTIVITIES: ActivityItem[] = [
-  { id: "1", address: "0x89f4...3a1c", action: "agreed", claim: "SOL > ETH this month", amount: "1.5 ETH", timeAgo: "1m ago" },
-  { id: "2", address: "0x3bc1...90fe", action: "disagreed", claim: "Fed cuts rates in Q3", amount: "0.8 ETH", timeAgo: "3m ago" },
-  { id: "3", address: "0x12dc...44b2", action: "agreed", claim: "BTC prints new ATH", amount: "2.4 ETH", timeAgo: "5m ago" },
-  { id: "4", address: "0x67ab...19dd", action: "agreed", claim: "Arbitrum TVL doubles", amount: "0.5 ETH", timeAgo: "8m ago" },
+  { id: "1", address: "0x1111...1111", action: "agreed", claim: "SOL > ETH this month", amount: "1.5 ETH", timeAgo: "1m ago" },
+  { id: "2", address: "0x8888...8888", action: "disagreed", claim: "Fed cuts rates in Q3", amount: "0.8 ETH", timeAgo: "3m ago" },
+  { id: "3", address: "0x3333...3333", action: "agreed", claim: "BTC prints new ATH", amount: "2.4 ETH", timeAgo: "5m ago" },
+  { id: "4", address: "0x5555...5555", action: "agreed", claim: "Arbitrum TVL doubles", amount: "0.5 ETH", timeAgo: "8m ago" },
   { id: "5", address: "0x9812...77cc", action: "disagreed", claim: "Memecoin cull in 90d", amount: "1.2 ETH", timeAgo: "12m ago" },
 ];
 
@@ -263,25 +263,47 @@ export default function LandingActivityStream({ theme: propTheme }: LandingActiv
             <div key={currentCreator.id} className="animate-scale-in">
               <div className="flex items-center justify-between gap-3 mb-6">
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`w-13 h-13 rounded-full bg-gradient-to-br ${currentCreator.gradient} text-white font-black text-base flex items-center justify-center border-2 border-white/20 shadow-md`}
-                  >
-                    {currentCreator.avatarInitials}
+                  <div className="relative w-13 h-13 shrink-0">
+                    <img
+                      src={`https://unavatar.io/twitter/${currentCreator.handle.replace('@', '')}`}
+                      alt={currentCreator.name}
+                      className="w-13 h-13 rounded-full object-cover border-2 border-white/20 shadow-md relative z-10"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLElement).style.display = "none";
+                      }}
+                    />
+                    <div
+                      className={`w-13 h-13 rounded-full bg-gradient-to-br ${currentCreator.gradient} text-white font-black text-base flex items-center justify-center border-2 border-white/20 shadow-md absolute inset-0 z-0`}
+                    >
+                      {currentCreator.avatarInitials}
+                    </div>
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-lg font-extrabold tracking-tight">{currentCreator.name}</h3>
                       <span className="text-xs font-mono font-bold text-zinc-400">{currentCreator.handle}</span>
                       <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
                         ✓ Verified
                       </span>
+                      <a
+                        href={`https://x.com/${currentCreator.handle.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-black/40 hover:bg-black/60 dark:bg-white/10 dark:hover:bg-white/20 text-white border border-white/15 transition-all shadow-xs"
+                        title={`View ${currentCreator.handle} on X`}
+                      >
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                        <span className="text-[11px] font-mono">X ↗</span>
+                      </a>
                     </div>
                     <p className={`text-xs font-mono mt-0.5 ${isDark ? "text-[#A9B3AD]" : "text-[#4B5D55]"}`}>
                       Tracking convictions since {currentCreator.since}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <span className="text-xs font-mono font-black px-3 py-1.5 rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 inline-block shadow-xs">
                     {currentCreator.accuracyRate}% Accuracy
                   </span>

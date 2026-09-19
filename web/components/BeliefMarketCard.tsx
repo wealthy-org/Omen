@@ -68,8 +68,16 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-6 h-6 rounded-full bg-zinc-800 text-white font-mono font-bold text-[10px] flex items-center justify-center border border-white/10 shrink-0">
-              {initials}
+            <div className="relative w-6 h-6 rounded-full overflow-hidden bg-zinc-800 text-white font-mono font-bold text-[10px] flex items-center justify-center border border-white/10 shrink-0">
+              <span>{initials}</span>
+              <img
+                src={`https://unavatar.io/twitter/${(market.authorHandle || market.author).replace('@', '')}`}
+                alt={market.author}
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = "none";
+                }}
+              />
             </div>
             <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
               {market.author}

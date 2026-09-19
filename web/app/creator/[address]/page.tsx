@@ -20,6 +20,9 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
     let isMounted = true;
     async function resolveParamsAndLoad() {
       try {
@@ -71,6 +74,26 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
               setBeliefs(mapped);
             }
           }
+        } else if (isMounted) {
+          const decodedAddr = decodeURIComponent(addr).trim();
+          const cleanName = decodedAddr.replace(/^@/, "");
+          const isEthAddress = cleanName.startsWith("0x") && cleanName.length === 42;
+          const displayName = isEthAddress ? `${cleanName.slice(0, 6)}...${cleanName.slice(-4)}` : cleanName;
+          const handle = isEthAddress ? undefined : `@${cleanName}`;
+
+          setCreator({
+            address: cleanName,
+            name: displayName,
+            handle: handle,
+            bio: "Social Belief Creator on Omen Protocol",
+            accuracyRate: 100,
+            confirmationRate: 100,
+            totalBeliefs: 0,
+            confirmedBeliefs: 0,
+            volumeGeneratedEth: 0,
+            isVerified: false,
+          });
+          setBeliefs([]);
         }
       } catch {
       } finally {

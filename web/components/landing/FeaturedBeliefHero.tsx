@@ -37,8 +37,16 @@ export default function FeaturedBeliefHero({ theme: propTheme }: FeaturedBeliefH
       <div>
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 text-white font-bold text-xs flex items-center justify-center border border-white/20">
-              TX
+            <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-zinc-700 to-zinc-900 text-white font-bold text-xs flex items-center justify-center border border-white/20 shrink-0">
+              <span>TX</span>
+              <img
+                src="https://unavatar.io/twitter/TraderX"
+                alt="TraderX"
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = "none";
+                }}
+              />
             </div>
             <div className="flex items-center gap-1.5">
               <span className={`text-sm font-bold ${isDark ? "text-white" : "text-[#0B1F16]"}`}>

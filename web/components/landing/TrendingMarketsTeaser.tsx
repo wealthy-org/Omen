@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useTheme } from "../ThemeProvider";
 import BeliefMarketCard, { BeliefMarket } from "../BeliefMarketCard";
 
@@ -15,15 +14,14 @@ export type TabCategory = "all" | "eth" | "btc" | "arb" | "macro";
 export interface CategoryTabItem {
   id: TabCategory;
   label: string;
-  icon: string;
 }
 
 export const CATEGORY_TABS: CategoryTabItem[] = [
-  { id: "all", label: "All", icon: "/icons/hot.webp" },
-  { id: "eth", label: "ETH", icon: "/icons/eth.webp" },
-  { id: "btc", label: "BTC", icon: "/icons/btc.webp" },
-  { id: "arb", label: "ARB", icon: "/icons/arb.webp" },
-  { id: "macro", label: "Macro", icon: "/icons/macro.webp" },
+  { id: "all", label: "All" },
+  { id: "eth", label: "ETH" },
+  { id: "btc", label: "BTC" },
+  { id: "arb", label: "ARB" },
+  { id: "macro", label: "Macro" },
 ];
 
 export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMarketsTeaserProps) {
@@ -173,7 +171,7 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
             key={tab.id}
             type="button"
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
+            className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold font-mono uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
               activeTab === tab.id
                 ? isDark
                   ? "bg-emerald-500 text-black border-emerald-400 shadow-md"
@@ -183,13 +181,6 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
                   : "bg-white border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 shadow-xs"
             }`}
           >
-            <Image
-              src={tab.icon}
-              alt={`${tab.label} icon`}
-              width={18}
-              height={18}
-              className="w-4 h-4 sm:w-4.5 sm:h-4.5 object-contain shrink-0"
-            />
             <span>{tab.label}</span>
           </button>
         ))}

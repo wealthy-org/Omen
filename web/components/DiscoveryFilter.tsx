@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { useTheme } from "./ThemeProvider";
 
 export type DiscoveryTab = "trending" | "newest" | "ending_soon" | "volume" | "confirmed";
@@ -25,12 +24,12 @@ export const SORT_TABS: { id: DiscoveryTab; label: string }[] = [
   { id: "confirmed", label: "Confirmed" },
 ];
 
-export const CATEGORY_FILTERS: { id: MarketCategoryFilter; label: string; icon: string }[] = [
-  { id: "all", label: "All", icon: "/icons/hot.webp" },
-  { id: "eth", label: "ETH", icon: "/icons/eth.webp" },
-  { id: "btc", label: "BTC", icon: "/icons/btc.webp" },
-  { id: "arb", label: "ARB", icon: "/icons/arb.webp" },
-  { id: "macro", label: "Macro", icon: "/icons/macro.webp" },
+export const CATEGORY_FILTERS: { id: MarketCategoryFilter; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "eth", label: "ETH" },
+  { id: "btc", label: "BTC" },
+  { id: "arb", label: "ARB" },
+  { id: "macro", label: "Macro" },
 ];
 
 export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
@@ -101,7 +100,7 @@ export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
             key={cat.id}
             type="button"
             onClick={() => onCategoryChange(cat.id)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
               activeCategory === cat.id
                 ? isDark
                   ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
@@ -111,13 +110,6 @@ export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
                   : "bg-zinc-100/80 border-transparent text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200"
             }`}
           >
-            <Image
-              src={cat.icon}
-              alt={`${cat.label} icon`}
-              width={16}
-              height={16}
-              className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain shrink-0"
-            />
             <span>{cat.label}</span>
           </button>
         ))}

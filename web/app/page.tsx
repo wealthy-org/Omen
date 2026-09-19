@@ -2,9 +2,9 @@ import HeroSection from "@/components/landing/HeroSection";
 import InfraMarquee from "@/components/landing/InfraMarquee";
 import StatsOverview from "@/components/landing/StatsOverview";
 import TrendingMarketsTeaser from "@/components/landing/TrendingMarketsTeaser";
-import SignalGapVisualizer from "@/components/landing/SignalGapVisualizer";
 import ProtocolFlow from "@/components/landing/ProtocolFlow";
-import LandingActivityStream from "@/components/landing/LandingActivityStream";
+import LiveActivityExplorer from "@/components/landing/LiveActivityExplorer";
+import SignalGapVisualizer from "@/components/landing/SignalGapVisualizer";
 import LandingFAQ from "@/components/landing/LandingFAQ";
 
 export default function HomePage() {
@@ -14,9 +14,9 @@ export default function HomePage() {
       <InfraMarquee />
       <StatsOverview />
       <TrendingMarketsTeaser />
-      <SignalGapVisualizer />
       <ProtocolFlow />
-      <LandingActivityStream />
+      <LiveActivityExplorer />
+      <SignalGapVisualizer />
       <LandingFAQ />
     </div>
   );

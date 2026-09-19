@@ -31,37 +31,59 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator, rank }) => {
     >
       <div>
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-black text-sm shadow-sm">
-                {creator.name.slice(0, 2).toUpperCase()}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative shrink-0">
+              <div className="w-12 h-12 rounded-full overflow-hidden relative shadow-sm">
+                <img
+                  src={creator.avatarUrl || `https://unavatar.io/twitter/${(creator.handle || creator.name).replace('@', '')}`}
+                  alt={creator.name}
+                  className="w-12 h-12 rounded-full object-cover relative z-10"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = "none";
+                  }}
+                />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-black text-sm absolute inset-0 z-0">
+                  {creator.name.slice(0, 2).toUpperCase()}
+                </div>
               </div>
               {rank !== undefined && rank <= 3 && (
-                <span className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-amber-400 text-zinc-900 font-black text-[10px] flex items-center justify-center shadow-xs border border-white dark:border-zinc-900">
+                <span className="absolute -top-1.5 -left-1.5 w-5 h-5 rounded-full bg-amber-400 text-zinc-900 font-black text-[10px] flex items-center justify-center shadow-xs border border-white dark:border-zinc-900 z-20">
                   {rank}
                 </span>
               )}
             </div>
 
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors truncate">
                   {creator.name}
                 </h3>
                 {creator.isVerified && (
-                  <span className="inline-flex items-center text-emerald-500 text-xs font-bold" title="EIP-712 Verified Creator">
+                  <span className="inline-flex items-center text-emerald-500 text-xs font-bold shrink-0" title="EIP-712 Verified Creator">
                     ✓
                   </span>
                 )}
+                <a
+                  href={`https://x.com/${(creator.handle || creator.name).replace('@', '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors shrink-0"
+                  title={`View @${(creator.handle || creator.name).replace('@', '')} on X`}
+                  aria-label={`View @${(creator.handle || creator.name).replace('@', '')} on X`}
+                >
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                </a>
               </div>
-              <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-0.5">
+              <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-0.5 truncate">
                 {creator.handle && <span>{creator.handle}</span>}
                 <span className="text-[11px] opacity-75">{shortAddress}</span>
               </div>
             </div>
           </div>
 
-          <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
             {creator.accuracyRate}%
           </span>
         </div>

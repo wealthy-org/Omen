@@ -70,8 +70,16 @@ export const BeliefCard: React.FC<BeliefCardProps> = ({
         </div>
 
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-            {belief.author.slice(0, 2).toUpperCase()}
+          <div className="relative w-8 h-8 rounded-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700 shrink-0">
+            <span>{belief.author.slice(0, 2).toUpperCase()}</span>
+            <img
+              src={`https://unavatar.io/twitter/${(belief.authorHandle || belief.author).replace('@', '')}`}
+              alt={belief.author}
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = "none";
+              }}
+            />
           </div>
           <div>
             <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 leading-none">

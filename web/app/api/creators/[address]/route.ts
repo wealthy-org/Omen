@@ -15,13 +15,15 @@ export async function GET(
       );
     }
 
-    const trimmedAddress = address.trim();
+    const rawAddress = decodeURIComponent(address).trim();
+    const cleanHandle = rawAddress.startsWith("@") ? rawAddress : `@${rawAddress}`;
+    const cleanName = rawAddress.replace(/^@/, "");
     const supabase = getSupabaseClient();
 
     const { data: profile, error: profileError } = await supabase
       .from("creator_profiles")
       .select("*")
-      .or(`wallet_address.ilike.${trimmedAddress},handle.ilike.${trimmedAddress}`)
+      .or(`wallet_address.ilike.${rawAddress},handle.ilike.${cleanHandle},handle.ilike.${cleanName}`)
       .maybeSingle();
 
     if (profileError) {
@@ -38,7 +40,7 @@ export async function GET(
       const handleFilter = creatorProfile.handle ? `author.ilike.${creatorProfile.handle},` : "";
       const selectBuilder = supabase.from("beliefs").select("*");
       const filteredBuilder = typeof (selectBuilder as any).or === "function"
-        ? (selectBuilder as any).or(`${handleFilter}author.ilike.${creatorProfile.wallet_address}`)
+        ? (selectBuilder as any).or(`${handleFilter}author.ilike.${creatorProfile.wallet_address},author.ilike.${cleanName}`)
         : selectBuilder;
 
       const { data: beliefs } = await filteredBuilder.order("created_at", { ascending: false });
@@ -47,42 +49,42 @@ export async function GET(
     } else {
       const selectBuilder = supabase.from("beliefs").select("*");
       const filteredBuilder = typeof (selectBuilder as any).or === "function"
-        ? (selectBuilder as any).or(`author.ilike.${trimmedAddress}`)
-        : (typeof (selectBuilder as any).ilike === "function" ? (selectBuilder as any).ilike("author", trimmedAddress) : selectBuilder);
+        ? (selectBuilder as any).or(`author.ilike.${rawAddress},author.ilike.${cleanHandle},author.ilike.${cleanName}`)
+        : (typeof (selectBuilder as any).ilike === "function" ? (selectBuilder as any).ilike("author", cleanName) : selectBuilder);
 
       const { data: beliefs } = await filteredBuilder.order("created_at", { ascending: false });
 
-      if (!beliefs || beliefs.length === 0) {
+      if (beliefs && beliefs.length > 0) {
+        creatorBeliefs = beliefs;
+        const firstBelief = beliefs[0];
+        const confirmedCount = beliefs.filter((b: any) => b.status === "CONFIRMED").length;
+        const authorText = typeof firstBelief.author === "string" ? firstBelief.author : cleanName;
+        const handleText = authorText.startsWith("@") ? authorText : `@${authorText}`;
+
+        creatorProfile = {
+          id: `creator-${cleanName}`,
+          wallet_address: rawAddress.startsWith("0x") && rawAddress.length === 42 ? rawAddress : `0x${Array.from({ length: 40 }, () => "0").join("")}`,
+          handle: handleText,
+          display_name: authorText.replace("@", ""),
+          bio: "Social Belief Creator on Omen Protocol",
+          avatar_url: null,
+          total_beliefs_count: beliefs.length,
+          confirmed_beliefs_count: confirmedCount,
+          resolved_count: 0,
+          correct_count: 0,
+          created_at: firstBelief.created_at ?? new Date().toISOString(),
+        };
+      } else {
         return NextResponse.json(
-          { success: false, error: `Creator profile for "${trimmedAddress}" not found` },
+          { success: false, error: "Creator profile not found" },
           { status: 404 }
         );
       }
-
-      creatorBeliefs = beliefs;
-      const firstBelief = beliefs[0];
-      const confirmedCount = beliefs.filter((b: any) => b.status === "CONFIRMED").length;
-      const authorText = typeof firstBelief.author === "string" ? firstBelief.author : "creator";
-      const handleText = authorText.startsWith("@") ? authorText : `@${authorText}`;
-
-      creatorProfile = {
-        id: `creator-${trimmedAddress}`,
-        wallet_address: trimmedAddress.startsWith("0x") ? trimmedAddress : `0x${Array.from({ length: 40 }, () => "0").join("")}`,
-        handle: handleText,
-        display_name: authorText.replace("@", ""),
-        bio: "Social Belief Creator on Omen Protocol",
-        avatar_url: null,
-        total_beliefs_count: beliefs.length,
-        confirmed_beliefs_count: confirmedCount,
-        resolved_count: 0,
-        correct_count: 0,
-        created_at: firstBelief.created_at ?? new Date().toISOString(),
-      };
     }
 
     const resolved = Number(creatorProfile.resolved_count ?? 0);
     const correct = Number(creatorProfile.correct_count ?? 0);
-    const accuracy = resolved > 0 ? Number(((correct / resolved) * 100).toFixed(2)) : 0;
+    const accuracy = resolved > 0 ? Number(((correct / resolved) * 100).toFixed(2)) : 100;
 
     const formattedData = {
       ...creatorProfile,
