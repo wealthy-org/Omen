@@ -112,20 +112,20 @@ export const MarketCard: React.FC<MarketCardProps> = ({
               <button
                 type="button"
                 onClick={() => onSelectOutcome?.(market, "YES")}
-                className="flex-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-500/20 active:scale-98 py-2 px-3 rounded-xl font-mono font-bold text-xs transition-all flex items-center justify-between cursor-pointer"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white shadow-xs hover:shadow-emerald-500/20 active:scale-[0.98] py-2 px-3 rounded-xl font-mono font-bold text-xs transition-all flex items-center justify-between cursor-pointer"
                 aria-label={`Bet Yes on ${market.title}`}
               >
                 <span>Yes</span>
-                <span>{market.yesPercentage}%</span>
+                <span className="px-1.5 py-0.5 rounded bg-black/20 text-emerald-100 text-xs">{market.yesPercentage}%</span>
               </button>
               <button
                 type="button"
                 onClick={() => onSelectOutcome?.(market, "NO")}
-                className="flex-1 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-500/20 active:scale-98 py-2 px-3 rounded-xl font-mono font-bold text-xs transition-all flex items-center justify-between cursor-pointer"
+                className="flex-1 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-xs hover:shadow-rose-500/20 active:scale-[0.98] py-2 px-3 rounded-xl font-mono font-bold text-xs transition-all flex items-center justify-between cursor-pointer"
                 aria-label={`Bet No on ${market.title}`}
               >
                 <span>No</span>
-                <span>{market.noPercentage}%</span>
+                <span className="px-1.5 py-0.5 rounded bg-black/20 text-rose-100 text-xs">{market.noPercentage}%</span>
               </button>
             </>
           )}

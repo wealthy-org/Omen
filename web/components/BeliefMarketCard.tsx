@@ -58,35 +58,34 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
     .slice(0, 2)
     .toUpperCase();
 
+  const showDistinctHandle =
+    market.authorHandle &&
+    market.authorHandle !== market.author &&
+    market.authorHandle.toLowerCase() !== market.author.toLowerCase();
+
   return (
     <div className="bg-white dark:bg-[#0A0F0C] border border-zinc-200/80 dark:border-white/10 rounded-2xl p-5 shadow-xs hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:shadow-lg transition-all hover-lift flex flex-col justify-between group">
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-zinc-800 text-white font-mono font-bold text-[10px] flex items-center justify-center border border-white/10">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-6 h-6 rounded-full bg-zinc-800 text-white font-mono font-bold text-[10px] flex items-center justify-center border border-white/10 shrink-0">
               {initials}
             </div>
-            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
               {market.author}
             </span>
-            {market.authorHandle && (
-              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400">
+            {showDistinctHandle && (
+              <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400 truncate">
                 {market.authorHandle}
               </span>
             )}
-            {market.isConfirmed ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                ✓ CONFIRMED
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-zinc-400 border border-zinc-300/40 dark:border-white/10">
-                AI DETECTED
-              </span>
-            )}
           </div>
-          <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">
-            {formatCountdown(market.closeTime)}
-          </span>
+          <div className="flex items-center gap-1.5 shrink-0 text-[11px] font-mono text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
+            <svg className="w-3 h-3 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{formatCountdown(market.closeTime)}</span>
+          </div>
         </div>
 
         <Link href={`/market/${market.id}`} className="block">
@@ -94,6 +93,25 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
             {market.statement}
           </h3>
         </Link>
+
+        <div className="flex items-center justify-between gap-2 mt-3 mb-1">
+          {market.isConfirmed ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              ✓ CONFIRMED
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-zinc-100 dark:bg-white/10 text-zinc-700 dark:text-zinc-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              AI DETECTED
+            </span>
+          )}
+          {market.category && (
+            <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 font-semibold">
+              {market.category}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/10 space-y-3">
@@ -137,35 +155,37 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 pt-1">
           <Link
             href={`/market/${market.id}`}
             onClick={() => onSelect?.(market)}
-            className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all font-mono font-bold text-xs"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-mono font-bold text-xs shadow-xs hover:shadow-emerald-500/20 active:scale-[0.98] transition-all cursor-pointer group/btn"
           >
-            <span>Agree</span>
-            <span className="text-xs">{agreePoolPercent}%</span>
+            <span className="font-sans font-bold text-xs">Agree</span>
+            <span className="px-1.5 py-0.5 rounded bg-black/20 text-emerald-100 font-mono text-xs">{agreePoolPercent}%</span>
           </Link>
 
           <Link
             href={`/market/${market.id}`}
             onClick={() => onSelect?.(market)}
-            className="flex items-center justify-between px-3 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-all font-mono font-bold text-xs"
+            className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-mono font-bold text-xs shadow-xs hover:shadow-rose-500/20 active:scale-[0.98] transition-all cursor-pointer group/btn"
           >
-            <span>Disagree</span>
-            <span className="text-xs">{disagreePoolPercent}%</span>
+            <span className="font-sans font-bold text-xs">Disagree</span>
+            <span className="px-1.5 py-0.5 rounded bg-black/20 text-rose-100 font-mono text-xs">{disagreePoolPercent}%</span>
           </Link>
         </div>
 
-        <div className="pt-2 flex items-center justify-between text-[11px] font-mono text-zinc-500 dark:text-zinc-400 border-t border-zinc-100/80 dark:border-white/5">
-          <button
-            type="button"
+        <div className="pt-2.5 flex items-center justify-between text-[11px] font-mono text-zinc-500 dark:text-zinc-400 border-t border-zinc-100/80 dark:border-white/5">
+          <Link
+            href={`/market/${market.id}`}
+            role="button"
             onClick={() => onSelect?.(market)}
-            className="text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold font-mono bg-zinc-100 hover:bg-zinc-200 dark:bg-white/10 dark:hover:bg-emerald-500 dark:hover:text-black text-zinc-800 dark:text-zinc-200 transition-all active:scale-95 cursor-pointer shadow-xs"
             aria-label={`View Market ${market.statement}`}
           >
-            View Market ↗
-          </button>
+            <span>View Market</span>
+            <span className="text-xs">↗</span>
+          </Link>
           <span>
             <strong className="text-zinc-800 dark:text-zinc-200">{totalParticipants > 0 ? totalParticipants.toLocaleString() : "0"}</strong> traders
           </span>
