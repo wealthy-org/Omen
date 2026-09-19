@@ -26,144 +26,22 @@ export const CATEGORY_TABS: CategoryTabItem[] = [
   { id: "macro", label: "Macro", icon: "/icons/macro.webp" },
 ];
 
-export const CURATED_SEED_MARKETS: BeliefMarket[] = [
-  {
-    id: "market-sol-eth",
-    statement: "SOL will outperform ETH this month",
-    author: "TraderX",
-    authorHandle: "@TraderX",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 87.5,
-    disagreePool: 34.0,
-    agreeParticipants: 2046,
-    disagreeParticipants: 796,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 12).toISOString(),
-    category: "ETH",
-    volume: 482000,
-  },
-  {
-    id: "market-eth-5000",
-    statement: "ETH closes above $5,000 before year end",
-    author: "MacroDad",
-    authorHandle: "@macrodad",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 41.2,
-    disagreePool: 59.8,
-    agreeParticipants: 840,
-    disagreeParticipants: 1200,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 85).toISOString(),
-    category: "ETH",
-    volume: 310000,
-  },
-  {
-    id: "market-btc-ath",
-    statement: "BTC prints a new all-time high in Q4",
-    author: "OnchainWitch",
-    authorHandle: "@onchainwitch",
-    isConfirmed: false,
-    status: "DETECTED",
-    agreePool: 63.0,
-    disagreePool: 37.0,
-    agreeParticipants: 610,
-    disagreeParticipants: 350,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 68).toISOString(),
-    category: "BTC",
-    volume: 195000,
-  },
-  {
-    id: "market-btc-reserve",
-    statement: "US Bitcoin Strategic Reserve legislation passes this session",
-    author: "SatoshiDisciple",
-    authorHandle: "@satoshidisciple",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 52.4,
-    disagreePool: 47.6,
-    agreeParticipants: 1120,
-    disagreeParticipants: 980,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45).toISOString(),
-    category: "BTC",
-    volume: 240000,
-  },
-  {
-    id: "market-arb-tvl",
-    statement: "Arbitrum TVL doubles following Stylus ecosystem deployment",
-    author: "RollupMaxi",
-    authorHandle: "@rollupmaxi",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 78.0,
-    disagreePool: 22.0,
-    agreeParticipants: 740,
-    disagreeParticipants: 210,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 90).toISOString(),
-    category: "ARB",
-    volume: 156000,
-  },
-  {
-    id: "market-arb-orbit",
-    statement: "Arbitrum Orbit ecosystem reaches 100 live chains by Q4",
-    author: "OffchainDev",
-    authorHandle: "@offchaindev",
-    isConfirmed: false,
-    status: "DETECTED",
-    agreePool: 45.0,
-    disagreePool: 55.0,
-    agreeParticipants: 430,
-    disagreeParticipants: 510,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 60).toISOString(),
-    category: "ARB",
-    volume: 112000,
-  },
-  {
-    id: "market-fed-rates",
-    statement: "The Federal Reserve cuts interest rates at the next FOMC meeting",
-    author: "QuantFern",
-    authorHandle: "@quantfern",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 60.5,
-    disagreePool: 40.0,
-    agreeParticipants: 1530,
-    disagreeParticipants: 1010,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 22).toISOString(),
-    category: "Macro",
-    volume: 221000,
-  },
-  {
-    id: "market-global-inflation",
-    statement: "Core US CPI year-over-year prints below 2.5% in next release",
-    author: "AlphaMacro",
-    authorHandle: "@alphamacro",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 68.0,
-    disagreePool: 32.0,
-    agreeParticipants: 920,
-    disagreeParticipants: 440,
-    closeTime: new Date(Date.now() + 1000 * 60 * 60 * 24 * 16).toISOString(),
-    category: "Macro",
-    volume: 184000,
-  },
-];
-
 export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMarketsTeaserProps) {
   const contextTheme = useTheme();
   const isDark = (propTheme || contextTheme.theme || "dark") === "dark";
   const [activeTab, setActiveTab] = useState<TabCategory>("all");
-  const [markets, setMarkets] = useState<BeliefMarket[]>(CURATED_SEED_MARKETS);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [markets, setMarkets] = useState<BeliefMarket[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     let isMounted = true;
     async function fetchTrendingMarkets() {
       try {
+        setIsLoading(true);
         const res = await fetch("/api/markets");
         if (res.ok) {
           const data = await res.json();
-          if (isMounted && data.markets && Array.isArray(data.markets) && data.markets.length > 0) {
+          if (isMounted && data.markets && Array.isArray(data.markets)) {
             const mapped: BeliefMarket[] = data.markets
               .filter((m: any) => m && (m.statement || m.title))
               .map((m: any, idx: number) => ({
@@ -179,19 +57,9 @@ export default function TrendingMarketsTeaser({ theme: propTheme }: TrendingMark
                 disagreeParticipants: Number(m.disagreeParticipants ?? m.disagree_participants ?? 0),
                 closeTime: m.closeTime ?? m.close_time ?? m.deadline ?? "",
                 category: m.category ?? "General",
+                volume: Number(m.volume ?? m.total_pool ?? 0),
               }));
-
-            if (mapped.length >= 4) {
-              setMarkets(mapped);
-            } else {
-              const combined = [...mapped];
-              for (const seed of CURATED_SEED_MARKETS) {
-                if (!combined.some((c) => c.statement.toLowerCase() === seed.statement.toLowerCase())) {
-                  combined.push(seed);
-                }
-              }
-              setMarkets(combined);
-            }
+            setMarkets(mapped);
           }
         }
       } catch {

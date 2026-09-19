@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { JetBrains_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Web3Providers } from "./providers";
 import Navbar from "@/components/Navbar";
@@ -68,15 +69,48 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const savedTheme = (cookieStore.get("omen-theme")?.value as "system" | "dark" | "light") || "system";
+  const initialClass = savedTheme === "light" ? "light" : savedTheme === "dark" ? "dark" : "";
+
   return (
-    <html lang="en" className={`${proximaNova.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${initialClass} ${proximaNova.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var cookieMatch = document.cookie.match(/(?:^|; )omen-theme=([^;]*)/);
+                  var theme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : 'system';
+                  var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  var root = document.documentElement;
+                  if (isDark) {
+                    root.classList.add('dark');
+                    root.classList.remove('light');
+                    root.style.colorScheme = 'dark';
+                  } else {
+                    root.classList.remove('dark');
+                    root.classList.add('light');
+                    root.style.colorScheme = 'light';
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-screen antialiased font-sans" suppressHydrationWarning>
-        <ThemeProvider>
+        <ThemeProvider initialTheme={savedTheme}>
           <Web3Providers>
             <div className="min-h-screen flex flex-col w-full">
               <Navbar />
