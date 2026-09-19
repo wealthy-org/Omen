@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { BarChart3, Trophy } from "lucide-react";
 
 export type BetStatus = "active" | "won" | "lost" | "cancelled";
 export type BetSide = "YES" | "NO" | "AGREE" | "DISAGREE";
@@ -46,8 +47,8 @@ export const UserBetsTable: React.FC<UserBetsTableProps> = ({
         data-testid="empty-user-bets"
         className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-12 text-center space-y-4"
       >
-        <div className="w-12 h-12 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 mx-auto flex items-center justify-center text-xl">
-          📊
+        <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 mx-auto flex items-center justify-center">
+          <BarChart3 className="w-6 h-6 text-emerald-500" />
         </div>
         <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
           No Bet Positions Yet
@@ -166,8 +167,9 @@ export const UserBetsTable: React.FC<UserBetsTableProps> = ({
                       </span>
                     )}
                     {isWon && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                        <span>Won 🏆</span>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <span>Won</span>
+                        <Trophy className="w-3.5 h-3.5 text-amber-500" />
                       </span>
                     )}
                     {isLost && (

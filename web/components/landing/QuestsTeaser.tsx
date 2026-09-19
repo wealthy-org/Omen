@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Flame } from "lucide-react";
 
 export interface QuestsTeaserProps {
   theme?: "dark" | "light";
@@ -165,8 +166,9 @@ export default function QuestsTeaser(_props: QuestsTeaserProps) {
                   Active Streak
                 </span>
               </div>
-              <div className="text-lg font-black tracking-tight text-[#0B1F16] dark:text-white">
-                🔥 {streakCount}-Day Consecutive Streak
+              <div className="text-lg font-black tracking-tight text-[#0B1F16] dark:text-white flex items-center gap-1.5">
+                <Flame className="w-5 h-5 text-amber-500 fill-amber-500/20 shrink-0" />
+                <span>{streakCount}-Day Consecutive Streak</span>
               </div>
               <p className="text-xs mt-2 text-[#4B5D55] dark:text-[#A9B3AD]">
                 You are earning with a <strong>1.5x Point Multiplier</strong>. Check in tomorrow to keep your bonus active!

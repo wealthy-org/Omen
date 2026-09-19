@@ -82,7 +82,7 @@ describe("ActivityPage (/activity)", () => {
     expect(screen.queryByText(/CryptoWhale/i)).not.toBeInTheDocument();
   });
 
-  it("links to market page and block explorer", async () => {
+  it("links to market page and block explorer via receipt modal", async () => {
     render(<ActivityPage />);
 
     await waitFor(() => {
@@ -92,7 +92,11 @@ describe("ActivityPage (/activity)", () => {
     const marketLinks = screen.getAllByRole("link", { name: /view market/i });
     expect(marketLinks[0]).toHaveAttribute("href", "/market/market-101");
 
-    const explorerLinks = screen.getAllByRole("link", { name: /view tx/i });
+    const receiptButtons = screen.getAllByRole("button", { name: /view transaction receipt/i });
+    expect(receiptButtons.length).toBeGreaterThan(0);
+    fireEvent.click(receiptButtons[0]);
+
+    const explorerLinks = screen.getAllByRole("link", { name: /view on/i });
     expect(explorerLinks[0]).toHaveAttribute("href", expect.stringContaining("0xaaaa"));
   });
 });

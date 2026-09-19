@@ -108,7 +108,7 @@ describe("MarketCard Component", () => {
 
     expect(screen.getByText("Resolved")).toBeInTheDocument();
     expect(
-      screen.getByText(/Resolved: Outcome YES Won 🏆/i)
+      screen.getByText(/Resolved: Outcome YES Won/i)
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /bet yes/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /bet no/i })).not.toBeInTheDocument();

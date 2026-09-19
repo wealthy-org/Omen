@@ -85,7 +85,7 @@ describe("UserBetsTable Component", () => {
     expect(noBadge).toBeInTheDocument();
 
     expect(screen.getByText("Active")).toBeInTheDocument();
-    expect(screen.getAllByText(/won 🏆/i).length).toBe(2);
+    expect(screen.getAllByText("Won").length).toBe(2);
     expect(screen.getByText("Lost")).toBeInTheDocument();
   });
 

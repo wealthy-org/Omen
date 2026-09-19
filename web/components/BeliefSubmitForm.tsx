@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Rocket } from "lucide-react";
 
 export interface ExtractedBeliefData {
   statement: string;
@@ -418,7 +419,10 @@ export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
                   <span>Deploying Market On-Chain...</span>
                 </>
               ) : (
-                <span>Launch On-Chain Market 🚀</span>
+                <span className="flex items-center gap-2">
+                  <span>Launch On-Chain Market</span>
+                  <Rocket className="w-4 h-4 text-white" />
+                </span>
               )}
             </button>
           </div>

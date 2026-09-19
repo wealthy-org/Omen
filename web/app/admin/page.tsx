@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Sparkles } from "lucide-react";
 import { AdminMarketCreateForm, AdminMarketFormData } from "../../components/AdminMarketCreateForm";
 import AdminMarketResolutionTable, {
   ResolvableMarketItem,
@@ -226,7 +227,7 @@ export default function AdminDashboardPage({
           }`}
         >
           <div className="flex items-center gap-2">
-            <span>✨</span>
+            <Sparkles className="w-4 h-4 text-yes-green shrink-0" />
             <span className="font-semibold">{globalNotice.message}</span>
           </div>
           <button

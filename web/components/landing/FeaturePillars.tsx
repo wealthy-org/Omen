@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Flame, Zap } from "lucide-react";
 
 export interface FeaturePillarsProps {
   theme?: "dark" | "light";
@@ -180,7 +181,10 @@ export default function FeaturePillars({}: FeaturePillarsProps) {
                     <span className="w-2 h-2 rounded-full bg-[#34D399]" />
                     <span>Day 3-5 Milestone</span>
                   </div>
-                  <span className="font-bold text-[#34D399]">1.5x Multiplier 🔥</span>
+                  <span className="font-bold text-[#34D399] flex items-center gap-1">
+                    <span>1.5x Multiplier</span>
+                    <Flame className="w-3.5 h-3.5 text-amber-500" />
+                  </span>
                 </div>
 
                 <div className="p-3.5 rounded-xl flex items-center justify-between text-xs font-mono border bg-emerald-200/80 dark:bg-emerald-500/25 border-emerald-400 dark:border-emerald-400/50 text-emerald-950 dark:text-white shadow-sm dark:shadow-[0_0_20px_rgba(52,211,153,0.2)]">
@@ -188,7 +192,10 @@ export default function FeaturePillars({}: FeaturePillarsProps) {
                     <span className="w-2 h-2 rounded-full bg-yes-green animate-ping" />
                     <span className="font-bold">Day 7 Champion Streak</span>
                   </div>
-                  <span className="font-black text-yes-green">3.0x Max Multiplier ⚡</span>
+                  <span className="font-black text-yes-green flex items-center gap-1">
+                    <span>3.0x Max Multiplier</span>
+                    <Zap className="w-3.5 h-3.5 text-yes-green" />
+                  </span>
                 </div>
               </div>
             </div>

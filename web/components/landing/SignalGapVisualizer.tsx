@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { Zap } from "lucide-react";
 
 export interface SignalCase {
   id: string;
@@ -338,8 +339,8 @@ export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
 
               <div className="p-3.5 sm:p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-500/20 dark:border-emerald-500/25 text-[#0B1F16] dark:text-[#DCE5DF]">
                 <div className="flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30 font-bold text-xs">
-                    ⚡
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-500 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                    <Zap className="w-4 h-4 text-emerald-500" />
                   </div>
                   <div>
                     <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500 block">

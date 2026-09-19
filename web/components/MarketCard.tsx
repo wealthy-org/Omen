@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Trophy } from "lucide-react";
 
 export type MarketStatus = "active" | "closing-soon" | "resolved";
 export type MarketOutcome = "YES" | "NO";
@@ -104,8 +105,15 @@ export const MarketCard: React.FC<MarketCardProps> = ({
 
         <div className="mt-3 pt-3 border-t border-zinc-100/80 dark:border-white/5 flex gap-2">
           {isResolved ? (
-            <div className="w-full py-2.5 px-3 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl text-center text-xs font-bold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/60">
-              Resolved: {market.resolvedOutcome ? `Outcome ${market.resolvedOutcome} Won 🏆` : "Market Settled"}
+            <div className="w-full py-2.5 px-3 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl text-center text-xs font-bold text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700/60 flex items-center justify-center gap-1.5">
+              {market.resolvedOutcome ? (
+                <>
+                  <span>Resolved: Outcome {market.resolvedOutcome} Won</span>
+                  <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                </>
+              ) : (
+                <span>Resolved: Market Settled</span>
+              )}
             </div>
           ) : (
             <>

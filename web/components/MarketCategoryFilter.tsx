@@ -1,20 +1,21 @@
 "use client";
 
 import React from "react";
+import { Globe, Flame, Zap, Sparkles, Clock, CheckCircle2 } from "lucide-react";
 
 export interface CategoryItem {
   id: string;
   label: string;
-  icon?: string;
+  icon?: React.ReactNode;
 }
 
 export const MARKET_CATEGORIES: CategoryItem[] = [
-  { id: "all", label: "All Markets", icon: "🌐" },
-  { id: "trending", label: "Trending", icon: "🔥" },
-  { id: "crypto", label: "Crypto Narratives", icon: "⚡" },
-  { id: "meme", label: "Meme Tokens", icon: "🐸" },
-  { id: "closing-soon", label: "Closing Soon", icon: "⏳" },
-  { id: "resolved", label: "Resolved", icon: "🏁" },
+  { id: "all", label: "All Markets", icon: <Globe className="w-4 h-4" /> },
+  { id: "trending", label: "Trending", icon: <Flame className="w-4 h-4" /> },
+  { id: "crypto", label: "Crypto Narratives", icon: <Zap className="w-4 h-4" /> },
+  { id: "meme", label: "Meme Tokens", icon: <Sparkles className="w-4 h-4" /> },
+  { id: "closing-soon", label: "Closing Soon", icon: <Clock className="w-4 h-4" /> },
+  { id: "resolved", label: "Resolved", icon: <CheckCircle2 className="w-4 h-4" /> },
 ];
 
 export const MARKET_SORT_OPTIONS = [
@@ -152,7 +153,7 @@ export const MarketCategoryFilter: React.FC<MarketCategoryFilterProps> = ({
               }`}
               aria-pressed={isActive}
             >
-              {cat.icon && <span className="text-sm">{cat.icon}</span>}
+              {cat.icon && <span className="inline-flex items-center shrink-0">{cat.icon}</span>}
               <span>{cat.label}</span>
               {typeof count === "number" && (
                 <span

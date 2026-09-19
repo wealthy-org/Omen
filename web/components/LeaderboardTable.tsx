@@ -45,25 +45,22 @@ export default function LeaderboardTable({
   const renderRankBadge = (rank: number) => {
     if (rank === 1) {
       return (
-        <span className="inline-flex items-center justify-center gap-1 px-2 h-7 rounded-lg bg-amber-400/20 text-amber-500 font-mono font-black text-xs border border-amber-400/30">
-          <span>🥇</span>
-          <span>#1</span>
+        <span className="inline-flex items-center justify-center px-2.5 h-7 rounded-lg bg-amber-400/15 text-amber-500 dark:text-amber-400 font-mono font-black text-xs border border-amber-400/40 shadow-xs">
+          #1
         </span>
       );
     }
     if (rank === 2) {
       return (
-        <span className="inline-flex items-center justify-center gap-1 px-2 h-7 rounded-lg bg-slate-300/20 text-slate-400 font-mono font-black text-xs border border-slate-300/30">
-          <span>🥈</span>
-          <span>#2</span>
+        <span className="inline-flex items-center justify-center px-2.5 h-7 rounded-lg bg-slate-200 dark:bg-slate-700/40 text-slate-700 dark:text-slate-300 font-mono font-black text-xs border border-slate-300 dark:border-slate-600 shadow-xs">
+          #2
         </span>
       );
     }
     if (rank === 3) {
       return (
-        <span className="inline-flex items-center justify-center gap-1 px-2 h-7 rounded-lg bg-amber-700/20 text-amber-600 font-mono font-black text-xs border border-amber-700/30">
-          <span>🥉</span>
-          <span>#3</span>
+        <span className="inline-flex items-center justify-center px-2.5 h-7 rounded-lg bg-amber-700/15 text-amber-700 dark:text-amber-500 font-mono font-black text-xs border border-amber-700/40 shadow-xs">
+          #3
         </span>
       );
     }

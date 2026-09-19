@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { mockPredictionMarket } from "../lib/mockPredictionMarket";
 
 export interface DailyCheckinWidgetProps {
@@ -207,9 +208,10 @@ export default function DailyCheckinWidget({
       {claimedNotice && (
         <div
           role="status"
-          className="mb-4 p-3 rounded-xl bg-yes-green/10 border border-yes-green/30 text-yes-green text-center text-xs font-mono font-bold animate-in fade-in slide-in-from-bottom-2 duration-200"
+          className="mb-4 p-3 rounded-xl bg-yes-green/10 border border-yes-green/30 text-yes-green text-center text-xs font-mono font-bold animate-in fade-in slide-in-from-bottom-2 duration-200 flex items-center justify-center gap-2"
         >
-          🎉 {claimedNotice}
+          <CheckCircle2 className="w-4 h-4 text-yes-green shrink-0" />
+          <span>{claimedNotice}</span>
         </div>
       )}
 

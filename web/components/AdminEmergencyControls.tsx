@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { Shield, AlertTriangle } from "lucide-react";
 
 export interface EmergencyActionLog {
   id: string;
@@ -179,7 +180,7 @@ export default function AdminEmergencyControls() {
           }`}
         >
           <div className="flex items-center gap-2">
-            <span>{notification.type === "success" ? "🛡️" : "⚠️"}</span>
+            <span>{notification.type === "success" ? <Shield className="w-4 h-4 text-yes-green" /> : <AlertTriangle className="w-4 h-4 text-no-red" />}</span>
             <span className="font-semibold">{notification.message}</span>
           </div>
           <button

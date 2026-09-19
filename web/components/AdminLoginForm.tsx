@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { Zap } from "lucide-react";
 
 export interface AdminLoginFormProps {
   onLoginSuccess: (adminAddress: string) => void;
@@ -342,9 +343,10 @@ export default function AdminLoginForm({
           <button
             type="button"
             onClick={handleFillDemoAdmin}
-            className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold hover:underline cursor-pointer"
+            className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px] font-bold hover:underline cursor-pointer flex items-center gap-1"
           >
-            ⚡ Use Demo Admin
+            <Zap className="w-3.5 h-3.5" />
+            <span>Use Demo Admin</span>
           </button>
 
           <Link

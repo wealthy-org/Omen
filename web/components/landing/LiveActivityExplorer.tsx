@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { Zap, X, Check, ArrowUpRight } from "lucide-react";
 
 export type ActivityMethod =
   | "stake_agree"
@@ -738,7 +739,7 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
             <div className="flex items-center justify-between gap-4 pb-3 sm:pb-4 border-b border-zinc-200 dark:border-white/10 mb-4 sm:mb-5">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold border border-emerald-500/30">
-                  ⚡
+                  <Zap className="w-5 h-5 text-emerald-500" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-extrabold tracking-tight">
@@ -758,7 +759,7 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
                 className="w-8 h-8 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-white/10 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
                 aria-label="Close modal"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

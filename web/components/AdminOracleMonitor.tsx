@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { Zap, AlertTriangle } from "lucide-react";
 import { OracleFeedState, OracleSnapshotRecord } from "@/types/api";
 
 export type { OracleFeedState, OracleSnapshotRecord };
@@ -228,7 +229,7 @@ export default function AdminOracleMonitor() {
           }`}
         >
           <div className="flex items-center gap-2">
-            <span>{notification.type === "success" ? "⚡" : "⚠️"}</span>
+            <span>{notification.type === "success" ? <Zap className="w-4 h-4 text-yes-green" /> : <AlertTriangle className="w-4 h-4 text-no-red" />}</span>
             <span className="font-semibold">{notification.message}</span>
           </div>
           <button
