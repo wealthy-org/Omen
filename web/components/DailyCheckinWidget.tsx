@@ -4,16 +4,9 @@ import { useState, useEffect } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { mockPredictionMarket } from "../lib/mockPredictionMarket";
 
-export interface DailyCheckinWidgetProps {
-  currentStreak?: number;
-  totalDays?: number;
-  streakMultiplier?: string;
-  initialCanCheckIn?: boolean;
-  cooldownSeconds?: number;
-  pointsSchedule?: number[];
-  onCheckIn?: (day: number, points: number) => Promise<void> | void;
-  className?: string;
-}
+import { DailyCheckinWidgetProps } from "@/types";
+
+export type { DailyCheckinWidgetProps };
 
 export default function DailyCheckinWidget({
   currentStreak = 2,

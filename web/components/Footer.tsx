@@ -24,9 +24,9 @@ const COMMUNITY_LINKS = [
   { label: "Telegram", href: "https://telegram.org", external: true },
 ];
 
-export interface FooterProps {
-  theme?: "dark" | "light";
-}
+import { FooterProps } from "@/types";
+
+export type { FooterProps };
 
 export default function Footer(_props: FooterProps) {
   const currentYear = new Date().getFullYear();

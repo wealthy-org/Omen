@@ -3,27 +3,9 @@ import { useAccount, useWriteContract } from "wagmi";
 import { Address, parseUnits } from "viem";
 import { getOmenFactoryAddress, OMEN_FACTORY_ABI } from "@/lib/contracts";
 import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
+import type { CreateMarketParams, UseCreateMarketResult } from "@/types";
 
-export interface CreateMarketParams {
-  statement: string;
-  oracleFeed?: Address;
-  targetPrice: number | bigint;
-  resolutionType: number;
-  closeTime: number | bigint;
-  creator?: Address;
-  beliefId?: string;
-}
-
-export interface UseCreateMarketResult {
-  createMarket: (params: CreateMarketParams) => Promise<{ marketAddress: Address; txHash: string }>;
-  isPending: boolean;
-  isDeploying: boolean;
-  isSuccess: boolean;
-  marketAddress: Address | null;
-  txHash: string | null;
-  error: Error | null;
-  reset: () => void;
-}
+export type { CreateMarketParams, UseCreateMarketResult };
 
 export function useCreateMarket(): UseCreateMarketResult {
   const { address } = useAccount();
@@ -51,14 +33,14 @@ export function useCreateMarket(): UseCreateMarketResult {
     setError(null);
 
     try {
-      const creatorAddress = params.creator || address || ("0x1111111111111111111111111111111111111111" as Address);
-      const oracleFeedAddress = params.oracleFeed || ("0x694AA1769357215DE4FAC081bf1f309aDC325306" as Address);
+      const creatorAddress = (params.creator || address || "0x1111111111111111111111111111111111111111") as Address;
+      const oracleFeedAddress = (params.oracleFeed || "0x694AA1769357215DE4FAC081bf1f309aDC325306") as Address;
       const targetPriceBigInt = typeof params.targetPrice === "bigint"
         ? params.targetPrice
-        : parseUnits(params.targetPrice.toString(), 8);
+        : parseUnits((params.targetPrice ?? 0).toString(), 8);
       const closeTimeBigInt = typeof params.closeTime === "bigint"
         ? params.closeTime
-        : BigInt(params.closeTime);
+        : BigInt(params.closeTime ?? 0);
 
       if (USE_MOCK_CONTRACT) {
         const mockAddress = `0xMarket${Math.random().toString(16).substring(2, 10)}${"0".repeat(24)}` as Address;

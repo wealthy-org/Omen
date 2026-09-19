@@ -4,90 +4,27 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Zap, X, Check, ArrowUpRight } from "lucide-react";
 
-export type ActivityMethod =
-  | "stake_agree"
-  | "stake_disagree"
-  | "create_market"
-  | "confirm_belief"
-  | "claim_payout"
-  | "oracle_resolve";
+import {
+  ActivityMethod,
+  StakingDetails,
+  Eip712Details,
+  MarketCreationDetails,
+  DualPayoutDetails,
+  OracleDetails,
+  OnChainTx,
+  LiveActivityExplorerProps,
+} from "@/types";
 
-export interface StakingDetails {
-  side: "AGREE" | "DISAGREE";
-  multiplier: string;
-  poolShare: string;
-  preStakeOdds: string;
-  postStakeOdds: string;
-  vaultAddress: string;
-}
-
-export interface Eip712Details {
-  domain: string;
-  verifyingContract: string;
-  authorPublicKey: string;
-  sigV: number;
-  sigR: string;
-  sigS: string;
-  messageHash: string;
-}
-
-export interface MarketCreationDetails {
-  factoryAddress: string;
-  initialSeed: string;
-  creatorFeePct: string;
-  resolutionOracle: string;
-  durationDays: number;
-}
-
-export interface DualPayoutDetails {
-  winningOutcome: "AGREE" | "DISAGREE";
-  grossPayoutEth: string;
-  initialStakeEth: string;
-  roiPercentage: string;
-  resolutionTxHash: string;
-}
-
-export interface OracleDetails {
-  feedName: string;
-  feedAddress: string;
-  roundId: string;
-  observedPrice: string;
-  oracleTimestamp: string;
-}
-
-export interface OnChainTx {
-  id: string;
-  txHash: string;
-  method: ActivityMethod;
-  methodLabel: string;
-  blockNumber: number;
-  timeAgo: string;
-  timestamp: string;
-  fromAddress: string;
-  fromHandle?: string;
-  toContract: string;
-  toContractName: string;
-  statement: string;
-  marketId?: string;
-  valueEth: string;
-  valueUsd: string;
-  txFeeEth: string;
-  gasPriceGwei: string;
-  gasUsed: string;
-  gasLimit: string;
-  chainName: string;
-  chainId: number;
-  status: "Success" | "Pending";
-  stakingDetails?: StakingDetails;
-  eip712Details?: Eip712Details;
-  creationDetails?: MarketCreationDetails;
-  payoutDetails?: DualPayoutDetails;
-  oracleDetails?: OracleDetails;
-  decodedLog?: {
-    functionName: string;
-    params: { name: string; value: string; type: string }[];
-  };
-}
+export type {
+  ActivityMethod,
+  StakingDetails,
+  Eip712Details,
+  MarketCreationDetails,
+  DualPayoutDetails,
+  OracleDetails,
+  OnChainTx,
+  LiveActivityExplorerProps,
+};
 
 const INITIAL_TRANSACTIONS: OnChainTx[] = [
   {
@@ -301,10 +238,6 @@ const RANDOM_STATEMENTS = [
 ];
 
 const RANDOM_HANDLES = ["@TraderX", "@AlphaMacro", "@onchainwitch", "@DeFiWizard", "@Cryptonor", "@SatoshiWhale"];
-
-export interface LiveActivityExplorerProps {
-  theme?: "dark" | "light";
-}
 
 export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
 
@@ -553,7 +486,7 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
             <tbody className="divide-y divide-zinc-200/60 dark:divide-white/5 text-xs font-mono">
               {displayedTxs.map((tx) => {
                 const shortTx = `${tx.txHash.slice(0, 8)}...${tx.txHash.slice(-6)}`;
-                const shortFrom = `${tx.fromAddress.slice(0, 6)}...${tx.fromAddress.slice(-4)}`;
+                const shortFrom = tx.fromAddress ? `${tx.fromAddress.slice(0, 6)}...${tx.fromAddress.slice(-4)}` : "0x0000...0000";
 
                 return (
                   <tr

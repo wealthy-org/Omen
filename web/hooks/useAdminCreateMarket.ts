@@ -7,25 +7,9 @@ import {
 } from "wagmi";
 import { decodeEventLog } from "viem";
 import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import type { CreateMarketParams, CreateMarketResult } from "@/types";
 
-export interface CreateMarketParams {
-  title: string;
-  category: string;
-  endTime: string;
-  resolutionSourceUrl?: string;
-  resolutionCriteria: string;
-  initialLiquidity?: string;
-}
-
-export interface CreateMarketResult {
-  createMarket: (params: CreateMarketParams) => Promise<{ hash: string; contractMarketId: string }>;
-  txHash: `0x${string}` | undefined;
-  isPending: boolean;
-  isConfirming: boolean;
-  isConfirmed: boolean;
-  isSyncing: boolean;
-  error: Error | null;
-}
+export type { CreateMarketParams, CreateMarketResult };
 
 export function useAdminCreateMarket(): CreateMarketResult {
   const { address } = useAccount();
@@ -45,11 +29,11 @@ export function useAdminCreateMarket(): CreateMarketResult {
   });
 
   const createMarket = async ({
-    title,
-    category,
-    endTime,
+    title = "",
+    category = "CRYPTO",
+    endTime = new Date().toISOString(),
     resolutionSourceUrl = "",
-    resolutionCriteria,
+    resolutionCriteria = "",
     initialLiquidity = "0.50",
   }: CreateMarketParams): Promise<{ hash: string; contractMarketId: string }> => {
     setSyncError(null);

@@ -3,11 +3,9 @@
 import React from "react";
 import { Globe, Flame, Zap, Sparkles, Clock, CheckCircle2 } from "lucide-react";
 
-export interface CategoryItem {
-  id: string;
-  label: string;
-  icon?: React.ReactNode;
-}
+import { CategoryItem, MarketCategoryFilterProps } from "@/types";
+
+export type { CategoryItem, MarketCategoryFilterProps };
 
 export const MARKET_CATEGORIES: CategoryItem[] = [
   { id: "all", label: "All Markets", icon: <Globe className="w-4 h-4" /> },
@@ -24,24 +22,14 @@ export const MARKET_SORT_OPTIONS = [
   { id: "newest", label: "Newest" },
 ];
 
-export interface MarketCategoryFilterProps {
-  selectedCategory: string;
-  onSelectCategory: (categoryId: string) => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  sortBy: string;
-  onSortChange: (sortId: string) => void;
-  marketCounts?: Record<string, number>;
-}
-
 export const MarketCategoryFilter: React.FC<MarketCategoryFilterProps> = ({
-  selectedCategory,
-  onSelectCategory,
-  searchQuery,
-  onSearchChange,
-  sortBy,
-  onSortChange,
-  marketCounts,
+  selectedCategory = "all",
+  onSelectCategory = () => {},
+  searchQuery = "",
+  onSearchChange = () => {},
+  sortBy = "highest-pool",
+  onSortChange = () => {},
+  marketCounts = {},
 }) => {
   return (
     <div className="w-full flex flex-col gap-4">

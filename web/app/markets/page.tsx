@@ -134,7 +134,7 @@ export default function MarketsPage() {
     .sort((a, b) => {
       if (activeTab === "volume") return (b.volume || (b.agreePool + b.disagreePool)) - (a.volume || (a.agreePool + a.agreePool));
       if (activeTab === "ending_soon") {
-        return new Date(a.closeTime).getTime() - new Date(b.closeTime).getTime();
+        return new Date(a.closeTime || a.deadline || 0).getTime() - new Date(b.closeTime || b.deadline || 0).getTime();
       }
       if (activeTab === "newest") {
         return b.id.localeCompare(a.id);

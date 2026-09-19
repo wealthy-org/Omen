@@ -2,21 +2,11 @@
 
 import { useState, useEffect } from "react";
 import DailyCheckinWidget from "@/components/DailyCheckinWidget";
-import QuestCard, { QuestCategory, QuestStatus } from "@/components/QuestCard";
+import QuestCard from "@/components/QuestCard";
 import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
+import type { QuestCategory, QuestStatus, QuestItem, FilterCategory } from "@/types";
 
-export interface QuestItem {
-  id: string;
-  title: string;
-  description: string;
-  category: QuestCategory;
-  points: number;
-  status: QuestStatus;
-  actionLabel: string;
-  actionUrl?: string;
-}
-
-export type FilterCategory = "ALL" | QuestCategory;
+export type { QuestItem, FilterCategory };
 
 export default function QuestsPage() {
   const [quests, setQuests] = useState<QuestItem[]>([]);
@@ -73,7 +63,7 @@ export default function QuestsPage() {
     const targetQuest = quests.find((q) => q.id === questId);
 
     if (targetQuest && targetQuest.status !== "COMPLETED") {
-      setTotalPoints((current) => current + targetQuest.points);
+      setTotalPoints((current) => current + (targetQuest.points ?? targetQuest.xp_reward ?? 0));
       setQuests((prev) =>
         prev.map((q) => (q.id === questId ? { ...q, status: "COMPLETED" as QuestStatus } : q))
       );

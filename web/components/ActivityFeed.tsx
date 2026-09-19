@@ -16,26 +16,9 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export type ActivityType = "AGREE" | "DISAGREE" | "CONFIRM_EIP712" | "CLAIM" | "RESOLVE" | "MARKET_CREATED";
+import { ActivityType, ActivityItem, ActivityFeedProps } from "@/types";
 
-export interface ActivityItem {
-  id: string;
-  type: ActivityType;
-  actorAddress: string;
-  actorName?: string;
-  marketId: string;
-  marketStatement: string;
-  amountEth?: number;
-  outcomeWon?: string;
-  txHash: string;
-  chainId?: number;
-  timestamp: string;
-}
-
-export interface ActivityFeedProps {
-  activities: ActivityItem[];
-  isLoading?: boolean;
-}
+export type { ActivityType, ActivityItem, ActivityFeedProps };
 
 function getExplorerUrl(txHash: string, chainId?: number): string {
   if (chainId === 46630) {

@@ -2,14 +2,9 @@ import { formatEther, Address } from "viem";
 import { useReadContract } from "wagmi";
 import { OMEN_MARKET_ABI } from "@/lib/contracts";
 import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
+import type { UseMarketResult } from "@/types";
 
-export interface UseMarketResult {
-  agreePool: number;
-  disagreePool: number;
-  status: string;
-  isLoading: boolean;
-  refetch: () => void;
-}
+export type { UseMarketResult };
 
 export function useMarket(marketAddress?: string): UseMarketResult {
   const { data, isLoading, refetch: contractRefetch } = useReadContract({

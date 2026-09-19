@@ -3,20 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-export interface BeliefPipelineItem {
-  id: string;
-  statement: string;
-  author: string;
-  author_handle?: string;
-  status: "DETECTED" | "OPEN" | "CONFIRMED" | "CLOSED" | "RESOLVED" | "SETTLED" | string;
-  ai_confidence?: number;
-  agree_pool?: number;
-  disagree_pool?: number;
-  total_pool?: number;
-  consensus_percentage?: number;
-  has_eip712_signature?: boolean;
-  created_at: string;
-}
+import { BeliefPipelineItem } from "@/types";
+
+export type { BeliefPipelineItem };
 
 const MOCK_PIPELINE_ITEMS: BeliefPipelineItem[] = [
   {

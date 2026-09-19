@@ -3,29 +3,9 @@
 import React from "react";
 import Link from "next/link";
 
-export type BeliefCardStatus = "DETECTED" | "CONFIRMED" | "MARKET_OPEN" | "RESOLVED";
+import { BeliefCardStatus, BeliefItem, BeliefCardProps } from "@/types";
 
-export interface BeliefItem {
-  id: string;
-  statement: string;
-  author: string;
-  authorHandle?: string;
-  authorAvatar?: string;
-  isConfirmed: boolean;
-  status: BeliefCardStatus;
-  confidenceScore?: number;
-  sourceUrl?: string;
-  subject?: string;
-  comparisonAsset?: string;
-  direction?: string;
-  targetTime?: string;
-  marketId?: string;
-}
-
-export interface BeliefCardProps {
-  belief: BeliefItem;
-  onCreateMarket?: (belief: BeliefItem) => void;
-}
+export type { BeliefCardStatus, BeliefItem, BeliefCardProps };
 
 export const BeliefCard: React.FC<BeliefCardProps> = ({
   belief,

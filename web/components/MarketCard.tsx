@@ -3,26 +3,9 @@
 import React from "react";
 import { Trophy } from "lucide-react";
 
-export type MarketStatus = "active" | "closing-soon" | "resolved";
-export type MarketOutcome = "YES" | "NO";
+import { MarketStatus, MarketOutcome, MarketData, MarketCardProps } from "@/types";
 
-export interface MarketData {
-  id: string | number;
-  title: string;
-  category: string;
-  status: MarketStatus;
-  endTime: string;
-  totalPool: string;
-  yesPercentage: number;
-  noPercentage: number;
-  volume?: string;
-  resolvedOutcome?: MarketOutcome;
-}
-
-export interface MarketCardProps {
-  market: MarketData;
-  onSelectOutcome?: (market: MarketData, outcome: MarketOutcome) => void;
-}
+export type { MarketStatus, MarketOutcome, MarketData, MarketCardProps };
 
 export const MarketCard: React.FC<MarketCardProps> = ({
   market,

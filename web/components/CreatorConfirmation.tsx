@@ -5,15 +5,9 @@ import { useAccount } from "wagmi";
 import { Address } from "viem";
 import { useCreatorConfirm } from "@/hooks/useCreatorConfirm";
 
-export interface CreatorConfirmationProps {
-  beliefId: string;
-  statement: string;
-  authorHandle: string;
-  creatorAddress?: string;
-  isConfirmed?: boolean;
-  marketAddress?: string;
-  onConfirmed?: (signature: string) => void;
-}
+import { CreatorConfirmationProps } from "@/types";
+
+export type { CreatorConfirmationProps };
 
 export function CreatorConfirmation({
   beliefId,

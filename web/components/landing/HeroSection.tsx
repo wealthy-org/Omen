@@ -4,9 +4,9 @@ import React from "react";
 import Link from "next/link";
 import FeaturedBeliefHero from "./FeaturedBeliefHero";
 
-export interface HeroSectionProps {
-  theme?: "dark" | "light";
-}
+import { HeroSectionProps } from "@/types";
+
+export type { HeroSectionProps };
 
 export default function HeroSection({}: HeroSectionProps) {
   return (

@@ -2,22 +2,11 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { MarketCard, MarketData } from "./MarketCard";
+import { MarketCard } from "./MarketCard";
 import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
+import { AdminMarketFormData, AdminMarketCreateFormProps, MarketData } from "@/types";
 
-export interface AdminMarketFormData {
-  title: string;
-  category: string;
-  endTime: string;
-  resolutionSourceUrl: string;
-  resolutionCriteria: string;
-  initialLiquidity: string;
-}
-
-export interface AdminMarketCreateFormProps {
-  onSubmitMarket?: (data: AdminMarketFormData) => Promise<void> | void;
-  isLoading?: boolean;
-}
+export type { AdminMarketFormData, AdminMarketCreateFormProps };
 
 export const MARKET_CATEGORIES_OPTIONS = [
   "CRYPTO",

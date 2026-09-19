@@ -4,28 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { BarChart3, Trophy } from "lucide-react";
 
-export type BetStatus = "active" | "won" | "lost" | "cancelled";
-export type BetSide = "YES" | "NO" | "AGREE" | "DISAGREE";
+import { BetStatus, BetSide, UserBet, UserBetsTableProps } from "@/types";
 
-export interface UserBet {
-  id: string | number;
-  marketId: string | number;
-  marketTitle: string;
-  category: string;
-  side: BetSide;
-  amount: string;
-  payout: string;
-  roiPercent?: number;
-  status: BetStatus;
-  isClaimed?: boolean;
-  createdAt?: string;
-}
-
-export interface UserBetsTableProps {
-  bets: UserBet[];
-  onClaimPayout?: (bet: UserBet) => void;
-  isLoading?: boolean;
-}
+export type { BetStatus, BetSide, UserBet, UserBetsTableProps };
 
 export const UserBetsTable: React.FC<UserBetsTableProps> = ({
   bets,

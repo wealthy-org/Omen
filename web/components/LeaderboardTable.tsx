@@ -2,28 +2,9 @@
 
 import { useState } from "react";
 
-export interface LeaderboardEntry {
-  rank: number;
-  address: string;
-  handle?: string;
-  ensName?: string;
-  streakDays?: number;
-  totalPoints?: number;
-  multiplier?: string;
-  winRate?: string;
-  accuracyPercentage?: number;
-  correctPredictions?: number;
-  resolvedPredictions?: number;
-  totalVolume?: string;
-  tier?: string;
-}
+import { LeaderboardEntry, LeaderboardTableProps } from "@/types";
 
-export interface LeaderboardTableProps {
-  entries?: LeaderboardEntry[];
-  currentUserAddress?: string;
-  pageSize?: number;
-  className?: string;
-}
+export type { LeaderboardEntry, LeaderboardTableProps };
 
 export default function LeaderboardTable({
   entries = [],

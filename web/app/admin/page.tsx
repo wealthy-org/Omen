@@ -2,28 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { Sparkles } from "lucide-react";
-import { AdminMarketCreateForm, AdminMarketFormData } from "../../components/AdminMarketCreateForm";
-import AdminMarketResolutionTable, {
-  ResolvableMarketItem,
-  ResolutionOutcome,
-  CancellationReasonCategory,
-} from "../../components/AdminMarketResolutionTable";
+import { AdminMarketCreateForm } from "../../components/AdminMarketCreateForm";
+import AdminMarketResolutionTable from "../../components/AdminMarketResolutionTable";
 import AdminOracleMonitor from "../../components/AdminOracleMonitor";
 import AdminBeliefPipelineTable from "../../components/AdminBeliefPipelineTable";
 import AdminEmergencyControls from "../../components/AdminEmergencyControls";
 import AdminLoginForm from "../../components/AdminLoginForm";
+import type {
+  AdminTab,
+  AdminDashboardProps,
+  AdminMarketFormData,
+  ResolvableMarketItem,
+  ResolutionOutcome,
+  CancellationReasonCategory,
+} from "@/types";
 
-export type AdminTab =
-  | "create-market"
-  | "beliefs-monitor"
-  | "oracle-monitor"
-  | "resolve-markets"
-  | "emergency-controls";
-
-export interface AdminDashboardProps {
-  initialConnectedAddress?: string;
-  initialTab?: AdminTab;
-}
+export type { AdminTab, AdminDashboardProps };
 
 const AUTHORIZED_ADMIN_ADDRESSES = [
   "0x1234567890abcdef1234567890abcdef12345678".toLowerCase(),
@@ -149,7 +143,7 @@ export default function AdminDashboardPage({
     marketId: string,
     outcome: ResolutionOutcome,
     _notes?: string,
-    _cancellationReason?: CancellationReasonCategory
+    _cancellationReason?: CancellationReasonCategory | string
   ) => {
     setPendingResolutionsCount((prev) => Math.max(0, prev - 1));
     setResolvableMarkets((prev) =>

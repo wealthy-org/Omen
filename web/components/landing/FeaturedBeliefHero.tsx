@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 
-export interface FeaturedBeliefHeroProps {
-  theme?: "dark" | "light";
-}
+import { FeaturedBeliefHeroProps } from "@/types";
+
+export type { FeaturedBeliefHeroProps };
 
 export default function FeaturedBeliefHero({}: FeaturedBeliefHeroProps) {
   const [side, setSide] = useState<"agree" | "disagree">("agree");

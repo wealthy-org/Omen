@@ -1,15 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import LeaderboardTable, { LeaderboardEntry } from "@/components/LeaderboardTable";
+import LeaderboardTable from "@/components/LeaderboardTable";
 import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
+import { LeaderboardEntry, CurrentUserProfile } from "@/types";
 
-export interface CurrentUserProfile {
-  rank: number;
-  totalPoints: number;
-  streakDays?: number;
-  ensName?: string;
-}
+export type { CurrentUserProfile };
 
 export default function LeaderboardPage() {
   const [searchQuery, setSearchQuery] = useState("");

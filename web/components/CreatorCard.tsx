@@ -3,23 +3,9 @@
 import React from "react";
 import Link from "next/link";
 
-export interface CreatorProfile {
-  address: string;
-  name: string;
-  handle?: string;
-  avatarUrl?: string;
-  accuracyRate: number;
-  confirmedBeliefs: number;
-  totalBeliefs: number;
-  volumeGeneratedEth: number;
-  earnedFeesEth?: number;
-  isVerified?: boolean;
-}
+import { CreatorProfile, CreatorCardProps } from "@/types";
 
-export interface CreatorCardProps {
-  creator: CreatorProfile;
-  rank?: number;
-}
+export type { CreatorProfile, CreatorCardProps };
 
 export const CreatorCard: React.FC<CreatorCardProps> = ({ creator, rank }) => {
   const shortAddress = `${creator.address.slice(0, 6)}...${creator.address.slice(-4)}`;

@@ -2,10 +2,9 @@
 
 import React, { useState } from "react";
 
-export interface FAQItem {
-  question: string;
-  answer: string;
-}
+import { FAQItem, LandingFAQProps } from "@/types";
+
+export type { FAQItem, LandingFAQProps };
 
 export const FAQ_ITEMS: FAQItem[] = [
   {
@@ -33,10 +32,6 @@ export const FAQ_ITEMS: FAQItem[] = [
     answer: "No. Omen is currently deployed as a demonstration and research protocol on public testnets. Positions utilize test ETH with zero real-world monetary value, ensuring safe exploration and stress-testing of on-chain reputation mechanics.",
   },
 ];
-
-export interface LandingFAQProps {
-  theme?: "dark" | "light";
-}
 
 export default function LandingFAQ({}: LandingFAQProps) {
   const [openIdx, setOpenIdx] = useState<number | null>(0);

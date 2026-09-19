@@ -4,11 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Zap } from "lucide-react";
 
-export interface AdminLoginFormProps {
-  onLoginSuccess: (adminAddress: string) => void;
-  authorizedAddresses?: string[];
-  className?: string;
-}
+import { AdminLoginFormProps } from "@/types";
+
+export type { AdminLoginFormProps };
 
 const DEFAULT_AUTHORIZED_ADMINS = [
   "0x1234567890abcdef1234567890abcdef12345678".toLowerCase(),

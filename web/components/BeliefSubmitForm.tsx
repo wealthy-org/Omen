@@ -4,21 +4,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Rocket } from "lucide-react";
 
-export interface ExtractedBeliefData {
-  statement: string;
-  subject: string;
-  direction: string;
-  targetPrice?: number;
-  targetTime?: string;
-  category: string;
-  confidenceScore: number;
-}
+import { ExtractedBeliefData, BeliefSubmitFormProps } from "@/types";
 
-export interface BeliefSubmitFormProps {
-  initialRawText?: string;
-  initialAuthorHandle?: string;
-  onSuccessRedirect?: (marketId: string) => void;
-}
+export type { ExtractedBeliefData, BeliefSubmitFormProps };
 
 export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
   initialRawText = "",

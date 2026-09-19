@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import CreatorCard, { CreatorProfile } from "@/components/CreatorCard";
+import CreatorCard from "@/components/CreatorCard";
+import { CreatorProfile, CreatorSortOption } from "@/types";
 
-export type CreatorSortOption = "accuracy" | "confirmed" | "volume" | "beliefs";
+export type { CreatorSortOption };
 
 export default function CreatorsPage() {
   const [creators, setCreators] = useState<CreatorProfile[]>([]);

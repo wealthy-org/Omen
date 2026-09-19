@@ -53,17 +53,9 @@ export const CHAINLINK_PRICE_FEEDS: Record<number, Record<string, Address>> = {
   },
 };
 
-export type ResolutionType = "PRICE_ABOVE" | "PRICE_BELOW" | "RELATIVE_PERFORMANCE";
-export type ResolutionOutcome = "AGREE_WON" | "DISAGREE_WON" | "INVALID";
+import type { ResolutionType, OracleResolutionOutcome as ResolutionOutcome, ResolutionParams } from "@/types";
 
-export interface ResolutionParams {
-  type: ResolutionType;
-  targetPrice?: number;
-  startPriceA?: number;
-  endPriceA?: number;
-  startPriceB?: number;
-  endPriceB?: number;
-}
+export type { ResolutionType, ResolutionOutcome, ResolutionParams };
 
 export function normalizeChainlinkPrice(rawPrice: bigint | number, decimals = 8): number {
   if (!rawPrice || rawPrice === BigInt(0) || rawPrice === 0) return 0;

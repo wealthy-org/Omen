@@ -3,16 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { useClaimPayout } from "@/hooks/useClaimPayout";
 
-export interface ClaimPayoutButtonProps {
-  amount: string | number;
-  marketId?: string | number;
-  isClaimed?: boolean;
-  isLoading?: boolean;
-  disabled?: boolean;
-  onClaim?: () => Promise<void> | void;
-  onSuccess?: () => void;
-  className?: string;
-}
+import { ClaimPayoutButtonProps } from "@/types";
+
+export type { ClaimPayoutButtonProps };
 
 export const ClaimPayoutButton: React.FC<ClaimPayoutButtonProps> = ({
   amount,

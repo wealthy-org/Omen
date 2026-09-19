@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 
-export interface AirdropBannerProps {
-  theme?: "dark" | "light";
-}
+import { AirdropBannerProps } from "@/types";
+
+export type { AirdropBannerProps };
 
 export default function AirdropBanner({}: AirdropBannerProps) {
   return (

@@ -4,7 +4,7 @@ export type PointsSource =
   | "prediction_market"
   | "referral";
 
-export type MarketStatus =
+export type DbMarketStatus =
   | "active"
   | "resolved_yes"
   | "resolved_no"
@@ -14,9 +14,9 @@ export type MarketStatus =
   | "RESOLVED"
   | "SETTLED";
 
-export type BetSide = "yes" | "no";
+export type DbBetSide = "yes" | "no";
 
-export type BeliefStatus =
+export type DbBeliefStatus =
   | "DETECTED"
   | "OPEN"
   | "CONFIRMED"
@@ -31,7 +31,12 @@ export type MarketResolutionType =
 
 export type MarketWinner = "AGREE" | "DISAGREE" | "VOID";
 
-export type PositionSide = "AGREE" | "DISAGREE";
+export type DbPositionSide = "AGREE" | "DISAGREE";
+
+export type MarketStatus = DbMarketStatus;
+export type BetSide = DbBetSide;
+export type BeliefStatus = DbBeliefStatus;
+export type PositionSide = DbPositionSide;
 
 export type MarketEventType =
   | "MarketCreated"
@@ -90,7 +95,7 @@ export type Belief = {
   source_platform: string | null;
   source_timestamp: string | null;
   ai_confidence: number | null;
-  status: BeliefStatus;
+  status: DbBeliefStatus;
   created_at: string;
 };
 
@@ -112,7 +117,7 @@ export type Market = {
   category?: string;
   description?: string | null;
   deadline?: string;
-  status: MarketStatus;
+  status: DbMarketStatus;
   resolution_source?: string | null;
   yes_pool?: number;
   no_pool?: number;
@@ -148,7 +153,7 @@ export type MarketPosition = {
   id: string;
   market_id: string;
   wallet_address: string;
-  side: PositionSide;
+  side: DbPositionSide;
   amount: number;
   claimed: boolean;
   tx_hash: string;
@@ -186,7 +191,7 @@ export type MarketSettlement = {
   settled_at: string;
 };
 
-export type CreatorProfile = {
+export type DbCreatorProfile = {
   id: string;
   wallet_address: string;
   handle: string | null;
@@ -195,6 +200,8 @@ export type CreatorProfile = {
   correct_count: number;
   created_at: string;
 };
+
+export type CreatorProfile = DbCreatorProfile;
 
 export type CreatorConfirmation = {
   id: string;
@@ -219,7 +226,7 @@ export type Bet = {
   id: string;
   market_id: string;
   wallet_address: string;
-  side: BetSide;
+  side: DbBetSide;
   amount: number;
   claimed: boolean;
   tx_hash: string;
@@ -273,7 +280,7 @@ export type Database = {
         Insert: Partial<Bet> & {
           market_id: string;
           wallet_address: string;
-          side: BetSide;
+          side: DbBetSide;
           amount: number;
           tx_hash: string;
         };
@@ -311,7 +318,7 @@ export type Database = {
         Insert: Partial<MarketPosition> & {
           market_id: string;
           wallet_address: string;
-          side: PositionSide;
+          side: DbPositionSide;
           amount: number;
           tx_hash: string;
         };
@@ -373,11 +380,11 @@ export type Database = {
         ];
       };
       creator_profiles: {
-        Row: CreatorProfile;
-        Insert: Partial<CreatorProfile> & {
+        Row: DbCreatorProfile;
+        Insert: Partial<DbCreatorProfile> & {
           wallet_address: string;
         };
-        Update: Partial<CreatorProfile>;
+        Update: Partial<DbCreatorProfile>;
         Relationships: [];
       };
       creator_confirmations: {

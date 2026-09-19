@@ -1,11 +1,8 @@
 "use client";
 
-export interface ProtocolStep {
-  number: string;
-  title: string;
-  description: string;
-  tag: string;
-}
+import { ProtocolStep, ProtocolFlowProps } from "@/types";
+
+export type { ProtocolStep, ProtocolFlowProps };
 
 export const PROTOCOL_STEPS: ProtocolStep[] = [
   {
@@ -39,10 +36,6 @@ export const PROTOCOL_STEPS: ProtocolStep[] = [
     tag: "On-Chain Record",
   },
 ];
-
-export interface ProtocolFlowProps {
-  theme?: "dark" | "light";
-}
 
 export default function ProtocolFlow({}: ProtocolFlowProps) {
   return (

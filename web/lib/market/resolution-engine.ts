@@ -5,21 +5,9 @@ import { getSupabaseAdminClient } from "../supabase";
 import { fetchChainlinkPrice } from "../oracle/chainlink";
 import { evaluateOracleCondition, calculateSettlementPool } from "./resolution-helper";
 import { OMEN_MARKET_ABI } from "../contracts";
-import { ResolvedOutcome } from "@/types/database";
+import type { ResolvedOutcome, ResolutionExecutionResult, ResolutionEngineSummary } from "@/types";
 
-export interface ResolutionExecutionResult {
-  success: boolean;
-  marketId: string;
-  outcome: ResolvedOutcome;
-  txHash?: string;
-  error?: string;
-}
-
-export interface ResolutionEngineSummary {
-  success: boolean;
-  processedCount: number;
-  results: ResolutionExecutionResult[];
-}
+export type { ResolutionExecutionResult, ResolutionEngineSummary };
 
 export async function resolveSingleMarket(marketId: string): Promise<ResolutionExecutionResult> {
   const supabase = getSupabaseAdminClient();

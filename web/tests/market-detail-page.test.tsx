@@ -76,8 +76,7 @@ describe("Market Detail Page (/market/[id])", () => {
     });
 
     expect(screen.getAllByText(/aeyakovenko/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Oracle & Resolution Rules/i)).toBeInTheDocument();
-    expect(screen.getByText(/On-Chain Transparency/i)).toBeInTheDocument();
+    expect(screen.getByText(/Contract & Verification Details/i)).toBeInTheDocument();
     expect(screen.getByText(/Consensus & Pool Metrics/i)).toBeInTheDocument();
   });
 

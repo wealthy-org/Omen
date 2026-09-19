@@ -3,14 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import CreatorProfileHeader from "@/components/CreatorProfileHeader";
-import BeliefCard, { BeliefItem } from "@/components/BeliefCard";
-import { CreatorProfile } from "@/components/CreatorCard";
+import BeliefCard from "@/components/BeliefCard";
+import type { CreatorProfile, BeliefItem, ProfileTab, CreatorPageProps } from "@/types";
 
-export type ProfileTab = "active" | "resolved" | "all";
-
-export interface CreatorPageProps {
-  params: { address: string } | Promise<{ address: string }>;
-}
+export type { ProfileTab, CreatorPageProps };
 
 export default function CreatorProfilePage({ params }: CreatorPageProps) {
   const [targetAddress, setTargetAddress] = useState<string>("");

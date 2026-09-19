@@ -4,14 +4,9 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Shield, AlertTriangle } from "lucide-react";
 
-export interface EmergencyActionLog {
-  id: string;
-  actionType: "PAUSE_PROTOCOL" | "RESUME_PROTOCOL" | "EMERGENCY_VOID" | "CANCEL_MARKET";
-  targetId?: string;
-  reason: string;
-  executor: string;
-  timestamp: string;
-}
+import { EmergencyActionLog } from "@/types";
+
+export type { EmergencyActionLog };
 
 const INITIAL_LOGS: EmergencyActionLog[] = [
   {

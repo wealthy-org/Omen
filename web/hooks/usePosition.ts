@@ -5,14 +5,9 @@ import { parseEther, Address } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 import { OMEN_MARKET_ABI } from "@/lib/contracts";
 import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
+import type { PlacePositionParams } from "@/types";
 
-export interface PlacePositionParams {
-  marketAddress: string;
-  marketId?: string;
-  side: "AGREE" | "DISAGREE";
-  amount?: string | number;
-  amountEth?: number | string;
-}
+export type { PlacePositionParams };
 
 export function usePosition() {
   const { address } = useAccount();

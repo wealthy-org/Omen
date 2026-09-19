@@ -3,7 +3,10 @@
 import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { MarketDetailPanels, MarketDetailData } from "@/components/MarketDetailPanels";
+import { MarketDetailPanels } from "@/components/MarketDetailPanels";
+import { MarketDetailData, MarketDetailPageProps } from "@/types";
+
+export type { MarketDetailPageProps };
 
 function mapToMarketDetailData(raw: Record<string, unknown>, idFallback: string): MarketDetailData {
   const agreePool = typeof raw.agreePoolEth === "number"
@@ -38,10 +41,6 @@ function mapToMarketDetailData(raw: Record<string, unknown>, idFallback: string)
     targetPrice: typeof raw.targetPrice === "number" ? raw.targetPrice : null,
     resolutionType: typeof raw.resolutionType === "string" ? raw.resolutionType : null,
   };
-}
-
-export interface MarketDetailPageProps {
-  params?: Promise<{ id: string }> | { id: string };
 }
 
 function MarketDetailContent({ params }: MarketDetailPageProps) {

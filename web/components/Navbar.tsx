@@ -13,11 +13,9 @@ const NAV_ITEMS = [
   { label: "Activity", href: "/#activity" },
 ];
 
-export interface NavbarProps {
-  theme?: "dark" | "light";
-  onToggleTheme?: () => void;
-  isWrongNetwork?: boolean;
-}
+import { NavbarProps } from "@/types";
+
+export type { NavbarProps };
 
 export default function Navbar({ onToggleTheme, isWrongNetwork = false }: NavbarProps) {
   const pathname = usePathname();

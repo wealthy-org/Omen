@@ -1,14 +1,9 @@
 "use client";
 
 import React from "react";
-import { CreatorProfile } from "./CreatorCard";
+import { CreatorProfile, CreatorProfileHeaderProps } from "@/types";
 
-export interface CreatorProfileHeaderProps {
-  creator: CreatorProfile & {
-    bio?: string;
-    confirmationRate?: number;
-  };
-}
+export type { CreatorProfileHeaderProps };
 
 export const CreatorProfileHeader: React.FC<CreatorProfileHeaderProps> = ({ creator }) => {
   const shortAddress = `${creator.address.slice(0, 6)}...${creator.address.slice(-4)}`;

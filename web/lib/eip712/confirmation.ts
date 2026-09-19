@@ -8,14 +8,9 @@ export const EIP712_BELIEF_CONFIRMATION_TYPES = {
   ],
 } as const;
 
-export interface VerifyConfirmationParams {
-  beliefId: string;
-  statement: string;
-  timestamp: number | bigint;
-  chainId: number;
-  creatorAddress: string;
-  signature: string;
-}
+import type { VerifyConfirmationParams } from "@/types";
+
+export type { VerifyConfirmationParams };
 
 export async function verifyBeliefConfirmationSignature(
   params: VerifyConfirmationParams
@@ -33,7 +28,7 @@ export async function verifyBeliefConfirmationSignature(
       message: {
         beliefId: params.beliefId,
         statement: params.statement,
-        timestamp: BigInt(params.timestamp),
+        timestamp: BigInt(params.timestamp ?? 0),
       },
       signature: params.signature as Hex,
     });

@@ -2,12 +2,9 @@ import { useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
 import { parseEther } from "viem";
 import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import type { PlaceBetParams } from "@/types";
 
-export interface PlaceBetParams {
-  marketId: string | number;
-  outcome: "YES" | "NO";
-  amount: string;
-}
+export type { PlaceBetParams };
 
 export function usePlaceBet() {
   const { address } = useAccount();
@@ -25,7 +22,7 @@ export function usePlaceBet() {
     hash: txHash,
   });
 
-  const placeBet = async ({ marketId, outcome, amount }: PlaceBetParams) => {
+  const placeBet = async ({ marketId, outcome = "YES", amount = "0" }: PlaceBetParams) => {
     setIndexerError(null);
     const side = outcome === "YES";
     const numericMarketId = BigInt(marketId);

@@ -3,43 +3,19 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useAdminResolveMarket } from "@/hooks/useAdminResolveMarket";
+import {
+  ResolutionOutcome,
+  CancellationReasonCategory,
+  ResolvableMarketItem,
+  AdminMarketResolutionTableProps,
+} from "@/types";
 
-export type ResolutionOutcome = "YES" | "NO" | "CANCEL";
-
-export type CancellationReasonCategory =
-  | "ORACLE_FAILURE"
-  | "AMBIGUOUS_CRITERIA"
-  | "EVENT_CANCELLED"
-  | "EMERGENCY_SAFEGUARD";
-
-export interface ResolvableMarketItem {
-  id: string;
-  title: string;
-  category: string;
-  totalPool: number;
-  volume: number;
-  yesPercentage: number;
-  noPercentage: number;
-  endTime: string;
-  resolutionSourceUrl: string;
-  resolutionCriteria?: string;
-  resolvedOutcome?: ResolutionOutcome;
-  resolvedAt?: string;
-  cancellationReason?: CancellationReasonCategory;
-  resolutionNotes?: string;
-  status: "PENDING_RESOLUTION" | "RESOLVED" | "CANCELLED";
-}
-
-export interface AdminMarketResolutionTableProps {
-  initialMarkets?: ResolvableMarketItem[];
-  onResolveMarket?: (
-    marketId: string,
-    outcome: ResolutionOutcome,
-    notes?: string,
-    cancellationReason?: CancellationReasonCategory
-  ) => Promise<void> | void;
-  className?: string;
-}
+export type {
+  ResolutionOutcome,
+  CancellationReasonCategory,
+  ResolvableMarketItem,
+  AdminMarketResolutionTableProps,
+};
 
 export const CANCELLATION_REASONS: {
   code: CancellationReasonCategory;
@@ -392,7 +368,7 @@ export default function AdminMarketResolutionTable({
                     </td>
 
                     <td className="py-4 px-4 whitespace-nowrap font-mono text-xs text-text-muted dark:text-[#A9B3AD]">
-                      {new Date(market.endTime).toLocaleDateString("en-US", {
+                      {new Date(market.endTime || market.deadline || 0).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -401,7 +377,7 @@ export default function AdminMarketResolutionTable({
 
                     <td className="py-4 px-4 whitespace-nowrap">
                       <div className="font-mono font-bold text-xs text-accent-navy dark:text-white">
-                        ${market.totalPool.toLocaleString()}
+                        ${(market.totalPool ?? market.volume ?? 0).toLocaleString()}
                       </div>
                       <div className="flex items-center gap-1.5 text-[10px] font-mono mt-0.5">
                         <span className="text-yes-green font-bold">YES {market.yesPercentage}%</span>
@@ -547,7 +523,7 @@ export default function AdminMarketResolutionTable({
                   </div>
                 )}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono mt-3 pt-3 border-t border-zinc-200 dark:border-white/10 gap-2">
-                  <span>Total Collateral: <strong>${activeModal.market.totalPool.toLocaleString()}</strong></span>
+                  <span>Total Collateral: <strong>${(activeModal.market.totalPool ?? activeModal.market.volume ?? 0).toLocaleString()}</strong></span>
                   <a
                     href={activeModal.market.resolutionSourceUrl}
                     target="_blank"

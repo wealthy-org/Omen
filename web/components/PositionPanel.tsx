@@ -2,23 +2,9 @@
 
 import React, { useState } from "react";
 
-export type PositionSide = "AGREE" | "DISAGREE";
+import { PositionSide, PositionPanelProps } from "@/types";
 
-export interface PositionPanelProps {
-  marketId: string | number;
-  marketAddress?: string;
-  marketStatement?: string;
-  agreePool?: number;
-  disagreePool?: number;
-  userBalance?: string;
-  isSubmitting?: boolean;
-  onPositionSuccess?: () => void;
-  onConfirmPosition?: (params: {
-    marketId: string | number;
-    side: PositionSide;
-    amount: string;
-  }) => Promise<void> | void;
-}
+export type { PositionSide, PositionPanelProps };
 
 export const PRESET_AMOUNTS = ["0.01", "0.05", "0.10"];
 

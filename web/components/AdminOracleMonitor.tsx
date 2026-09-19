@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Zap, AlertTriangle } from "lucide-react";
-import { OracleFeedState, OracleSnapshotRecord } from "@/types/api";
+import { OracleFeedState, OracleSnapshotRecord } from "@/types";
 
 export type { OracleFeedState, OracleSnapshotRecord };
 

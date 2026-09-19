@@ -4,41 +4,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Zap } from "lucide-react";
 
-export interface SignalCase {
-  id: string;
-  category: string;
-  statement: string;
-  author: string;
-  authorHandle: string;
-  authorAvatar: string;
-  peopleAgreePct: number;
-  peopleDisagreePct: number;
-  peopleTotal: number;
-  moneyAgreePct: number;
-  moneyDisagreePct: number;
-  moneyTotalEth: number;
-  gapPct: number;
-  gapType: "overhyped" | "smart-money" | "aligned";
-  gapBadge: string;
-  analysisText: string;
-}
+import { SignalCase, CreatorSpotlight, SignalGapVisualizerProps } from "@/types";
 
-export interface CreatorSpotlight {
-  id: string;
-  name: string;
-  handle: string;
-  address: string;
-  avatarInitials: string;
-  gradient: string;
-  since: string;
-  confirmed: number;
-  resolved: number;
-  correct: number;
-  accuracyRate: number;
-  volumeEth: number;
-  topCategory: { name: string; winRate: number };
-  weakestCategory: { name: string; winRate: number };
-}
+export type { SignalCase, CreatorSpotlight, SignalGapVisualizerProps };
 
 const SIGNAL_CASES: SignalCase[] = [
   {
@@ -163,10 +131,6 @@ const CREATOR_SPOTLIGHTS: CreatorSpotlight[] = [
     weakestCategory: { name: "AI Sectors", winRate: 55 },
   },
 ];
-
-export interface SignalGapVisualizerProps {
-  theme?: "dark" | "light";
-}
 
 export default function SignalGapVisualizer({}: SignalGapVisualizerProps) {
   const [selectedCaseId, setSelectedCaseId] = useState<string>("sol-eth");

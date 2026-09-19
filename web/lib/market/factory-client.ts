@@ -2,35 +2,9 @@ import { keccak256, toHex, Address, Hex, createWalletClient, createPublicClient,
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia, arbitrumSepolia } from "viem/chains";
 import { OMEN_FACTORY_ABI, getOmenFactoryAddress, ROBINHOOD_TESTNET_CHAIN_ID } from "../contracts";
+import type { BeliefHashes, CreateOnChainMarketParams, CreatedMarketResult } from "@/types";
 
-export interface BeliefHashes {
-  beliefHash: Hex;
-  sourceHash: Hex;
-  resolutionHash: Hex;
-}
-
-export interface CreateOnChainMarketParams {
-  beliefHash: Hex;
-  sourceHash: Hex;
-  resolutionHash: Hex;
-  openTime: number;
-  closeTime: number;
-  config?: {
-    resType?: number;
-    assetAFeed?: Address;
-    assetBFeed?: Address;
-    targetPrice?: bigint | number;
-    startTimestamp?: number;
-    endTimestamp?: number;
-  };
-  chainId?: number;
-}
-
-export interface CreatedMarketResult {
-  contractAddress: string;
-  contractMarketId?: number;
-  txHash: string;
-}
+export type { BeliefHashes, CreateOnChainMarketParams, CreatedMarketResult };
 
 export function computeBeliefHashes(
   statement: string,
@@ -85,8 +59,8 @@ export async function createOnChainMarket(
     assetAFeed: params.config?.assetAFeed || ("0x0000000000000000000000000000000000000000" as Address),
     assetBFeed: params.config?.assetBFeed || ("0x0000000000000000000000000000000000000000" as Address),
     targetPrice: BigInt(params.config?.targetPrice || 0),
-    startTimestamp: BigInt(params.config?.startTimestamp || params.openTime),
-    endTimestamp: BigInt(params.config?.endTimestamp || params.closeTime),
+    startTimestamp: BigInt(params.config?.startTimestamp || params.openTime || 0),
+    endTimestamp: BigInt(params.config?.endTimestamp || params.closeTime || 0),
   };
 
   const txHash = await walletClient.writeContract({
@@ -97,8 +71,8 @@ export async function createOnChainMarket(
       params.beliefHash,
       params.sourceHash,
       params.resolutionHash,
-      BigInt(params.openTime),
-      BigInt(params.closeTime),
+      BigInt(params.openTime || 0),
+      BigInt(params.closeTime || 0),
       resolutionConfig,
     ],
   });

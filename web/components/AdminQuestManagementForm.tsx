@@ -2,30 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { QuestCategory } from "./QuestCard";
+import {
+  QuestCategory,
+  QuestRecurrence,
+  AdminQuestItem,
+  AdminQuestManagementFormProps,
+} from "@/types";
 
-export type QuestRecurrence = "ONE_TIME" | "DAILY" | "WEEKLY";
-
-export interface AdminQuestItem {
-  id: string;
-  title: string;
-  description: string;
-  category: QuestCategory;
-  points: number;
-  recurrence?: QuestRecurrence;
-  actionUrl?: string;
-  isActive: boolean;
-  completionsCount?: number;
-  createdAt?: string;
-}
-
-export interface AdminQuestManagementFormProps {
-  initialQuests?: AdminQuestItem[];
-  onCreateQuest?: (quest: AdminQuestItem) => Promise<void> | void;
-  onToggleQuestStatus?: (id: string, active: boolean) => Promise<void> | void;
-  onDeleteQuest?: (id: string) => Promise<void> | void;
-  className?: string;
-}
+export type {
+  QuestCategory,
+  QuestRecurrence,
+  AdminQuestItem,
+  AdminQuestManagementFormProps,
+};
 
 export default function AdminQuestManagementForm({
   initialQuests = [],
@@ -677,7 +666,7 @@ export default function AdminQuestManagementForm({
                           aria-checked={quest.isActive}
                           aria-label={`Toggle status for ${quest.title}`}
                           disabled={toggleUpdatingId === quest.id}
-                          onClick={() => handleToggle(quest.id, quest.isActive)}
+                          onClick={() => handleToggle(quest.id, Boolean(quest.isActive))}
                           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
                             quest.isActive ? "bg-emerald-600" : "bg-slate-300 dark:bg-white/20"
                           } ${toggleUpdatingId === quest.id ? "opacity-50 cursor-wait" : ""}`}

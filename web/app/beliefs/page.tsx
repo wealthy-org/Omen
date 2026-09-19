@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import BeliefCard, { BeliefItem, BeliefCardStatus } from "@/components/BeliefCard";
-import { BeliefRecord, BeliefsApiResponse } from "@/types/api";
+import BeliefCard from "@/components/BeliefCard";
+import type { BeliefRecord, BeliefsApiResponse, BeliefItem, BeliefCardStatus, BeliefFilterStatus } from "@/types";
 
-export type BeliefFilterStatus = "all" | "detected" | "confirmed" | "market_live";
+export type { BeliefFilterStatus };
 
 export default function BeliefsPage() {
   const [beliefs, setBeliefs] = useState<BeliefItem[]>([]);

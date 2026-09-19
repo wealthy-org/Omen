@@ -2,18 +2,9 @@
 
 import React from "react";
 
-export type DiscoveryTab = "trending" | "newest" | "ending_soon" | "volume" | "confirmed";
-export type MarketCategoryFilter = "all" | "eth" | "btc" | "arb" | "macro";
+import { DiscoveryTab, MarketCategoryFilter, DiscoveryFilterProps } from "@/types";
 
-export interface DiscoveryFilterProps {
-  activeTab: DiscoveryTab;
-  onTabChange: (tab: DiscoveryTab) => void;
-  activeCategory: MarketCategoryFilter;
-  onCategoryChange: (category: MarketCategoryFilter) => void;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  theme?: "dark" | "light";
-}
+export type { DiscoveryTab, MarketCategoryFilter, DiscoveryFilterProps };
 
 export const SORT_TABS: { id: DiscoveryTab; label: string }[] = [
   { id: "trending", label: "Trending" },

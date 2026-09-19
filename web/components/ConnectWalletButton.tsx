@@ -3,14 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { mockPredictionMarket } from "../lib/mockPredictionMarket";
 
-export interface ConnectWalletButtonProps {
-  initialStatus?: "disconnected" | "connecting" | "connected";
-  initialAddress?: string;
-  initialBalance?: string;
-  className?: string;
-  onConnect?: () => void;
-  onDisconnect?: () => void;
-}
+import { ConnectWalletButtonProps } from "@/types";
+
+export type { ConnectWalletButtonProps };
 
 export default function ConnectWalletButton({
   initialStatus = "disconnected",

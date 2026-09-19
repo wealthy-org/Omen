@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 
-export interface StatsOverviewProps {
-  theme?: "dark" | "light";
-}
+import { StatsOverviewProps } from "@/types";
+
+export type { StatsOverviewProps };
 
 export default function StatsOverview({}: StatsOverviewProps) {
   const [stats, setStats] = useState({

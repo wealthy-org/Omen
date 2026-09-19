@@ -2,29 +2,16 @@
 
 import { useState } from "react";
 
-export type QuestCategory = "ONBOARDING" | "SOCIAL" | "ON-CHAIN" | "DAILY";
-export type QuestStatus = "AVAILABLE" | "VERIFYING" | "COMPLETED";
+import { QuestCategory, QuestStatus, QuestCardProps } from "@/types";
 
-export interface QuestCardProps {
-  id: string;
-  title: string;
-  description: string;
-  category: QuestCategory;
-  points: number;
-  status?: QuestStatus;
-  actionLabel?: string;
-  actionUrl?: string;
-  onAction?: (id: string) => Promise<void> | void;
-  onVerify?: (id: string) => Promise<void> | void;
-  className?: string;
-}
+export type { QuestCategory, QuestStatus, QuestCardProps };
 
 export default function QuestCard({
-  id,
-  title,
-  description,
-  category,
-  points,
+  id = "",
+  title = "",
+  description = "",
+  category = "ONBOARDING",
+  points = 0,
   status = "AVAILABLE",
   actionLabel = "Start Quest",
   actionUrl,

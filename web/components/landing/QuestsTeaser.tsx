@@ -4,16 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Flame } from "lucide-react";
 
-export interface QuestsTeaserProps {
-  theme?: "dark" | "light";
-}
+import { QuestsTeaserProps, TeaserQuest } from "@/types";
 
-interface TeaserQuest {
-  title: string;
-  category: string;
-  reward: string;
-  progress: string;
-}
+export type { QuestsTeaserProps, TeaserQuest };
 
 export default function QuestsTeaser(_props: QuestsTeaserProps) {
   const [quests, setQuests] = useState<TeaserQuest[]>([

@@ -1,26 +1,6 @@
-export interface MockMarketPool {
-  marketId: number;
-  yesPool: number;
-  noPool: number;
-  totalPool: number;
-  status: "active" | "resolved_yes" | "resolved_no" | "cancelled";
-}
+import type { MockMarketPool, MockBetRecord, MockTransactionResult } from "@/types";
 
-export interface MockBetRecord {
-  txHash: `0x${string}`;
-  marketId: number;
-  walletAddress: string;
-  side: "YES" | "NO";
-  amountEth: number;
-  claimed: boolean;
-  timestamp: string;
-}
-
-export interface MockTransactionResult {
-  txHash: `0x${string}`;
-  blockNumber: number;
-  success: boolean;
-}
+export type { MockMarketPool, MockBetRecord, MockTransactionResult };
 
 export const DEFAULT_DEMO_WALLET_ADDRESS: `0x${string}` =
   "0x71C6793F1e44f80879624Fe2d431c3c97A484B29";

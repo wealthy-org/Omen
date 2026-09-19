@@ -129,10 +129,10 @@ export default function PredictionsPage() {
   const sortedMarkets = useMemo(() => {
     const list = [...filteredMarkets];
     if (sortBy === "highest-pool") {
-      return list.sort((a, b) => parseFloat(b.totalPool) - parseFloat(a.totalPool));
+      return list.sort((a, b) => parseFloat(String(b.totalPool ?? b.totalPoolEth ?? 0)) - parseFloat(String(a.totalPool ?? a.totalPoolEth ?? 0)));
     }
     if (sortBy === "lowest-pool") {
-      return list.sort((a, b) => parseFloat(a.totalPool) - parseFloat(b.totalPool));
+      return list.sort((a, b) => parseFloat(String(a.totalPool ?? a.totalPoolEth ?? 0)) - parseFloat(String(b.totalPool ?? b.totalPoolEth ?? 0)));
     }
     if (sortBy === "closing-soon") {
       return list.sort((a, b) => (a.status === "closing-soon" ? -1 : 1));

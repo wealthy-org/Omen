@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import ActivityFeed, { ActivityItem, ActivityType } from "@/components/ActivityFeed";
-import { ApiActivityEvent, ActivityApiResponse } from "@/types/api";
+import ActivityFeed from "@/components/ActivityFeed";
+import type { ApiActivityEvent, ActivityApiResponse, ActivityItem, ActivityType, ActivityFilterCategory } from "@/types";
 
-export type ActivityFilterCategory = "all" | "stakes" | "confirmations" | "payouts";
+export type { ActivityFilterCategory };
 
 function parseActivityType(eventType: string): ActivityType {
   const norm = (eventType || "").toUpperCase();

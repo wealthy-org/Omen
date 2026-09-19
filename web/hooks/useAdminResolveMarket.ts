@@ -5,23 +5,9 @@ import {
   useAccount,
 } from "wagmi";
 import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import type { ResolveMarketParams, ResolveMarketResult } from "@/types";
 
-export interface ResolveMarketParams {
-  marketId: string | number;
-  outcome: "YES" | "NO" | "CANCEL";
-  notes?: string;
-  cancellationReason?: string;
-}
-
-export interface ResolveMarketResult {
-  resolveMarket: (params: ResolveMarketParams) => Promise<string>;
-  txHash: `0x${string}` | undefined;
-  isPending: boolean;
-  isConfirming: boolean;
-  isConfirmed: boolean;
-  isSyncing: boolean;
-  error: Error | null;
-}
+export type { ResolveMarketParams, ResolveMarketResult };
 
 export function useAdminResolveMarket(): ResolveMarketResult {
   const { address } = useAccount();

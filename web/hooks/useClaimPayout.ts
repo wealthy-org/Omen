@@ -1,14 +1,8 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import type { ClaimPayoutResult } from "@/types";
 
-export interface ClaimPayoutResult {
-  claimPayout: (marketId: string | number) => Promise<string>;
-  txHash: `0x${string}` | undefined;
-  isPending: boolean;
-  isConfirming: boolean;
-  isConfirmed: boolean;
-  error: Error | null;
-}
+export type { ClaimPayoutResult };
 
 export function useClaimPayout(): ClaimPayoutResult {
   const {

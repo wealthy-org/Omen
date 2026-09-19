@@ -3,10 +3,9 @@
 import React from "react";
 import Image from "next/image";
 
-export interface InfraItem {
-  name: string;
-  icon: string;
-}
+import { InfraItem, InfraMarqueeProps } from "@/types";
+
+export type { InfraItem, InfraMarqueeProps };
 
 export const INFRA_STACK: InfraItem[] = [
   { name: "Ethereum Sepolia", icon: "/icons/eth.webp" },
@@ -20,10 +19,6 @@ export const INFRA_STACK: InfraItem[] = [
   { name: "Foundry", icon: "/icons/foundry.webp" },
   { name: "Farcaster", icon: "/icons/farcaster.webp" },
 ];
-
-export interface InfraMarqueeProps {
-  theme?: "dark" | "light";
-}
 
 export default function InfraMarquee(_props: InfraMarqueeProps) {
   const marqueeItems = [...INFRA_STACK, ...INFRA_STACK, ...INFRA_STACK];

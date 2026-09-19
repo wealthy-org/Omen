@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 
-export interface OnboardingJourneyProps {
-  theme?: "dark" | "light";
-}
+import { OnboardingJourneyProps } from "@/types";
+
+export type { OnboardingJourneyProps };
 
 export default function OnboardingJourney({}: OnboardingJourneyProps) {
   const STEPS = [

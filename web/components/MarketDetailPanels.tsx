@@ -6,40 +6,18 @@ import { PositionPanel } from "./PositionPanel";
 import { CreatorConfirmation } from "./CreatorConfirmation";
 import { useClaim } from "@/hooks/useClaim";
 
-export interface MarketDetailData {
-  id: string;
-  statement: string;
-  authorHandle: string | null;
-  creatorAddress: string | null;
-  sourceUrl?: string | null;
-  sourcePlatform?: string | null;
-  createdAt: string;
-  closesAt: string;
-  isConfirmed: boolean;
-  status: "OPEN" | "CLOSED" | "RESOLVED" | "SETTLED";
-  winningSide?: "AGREE" | "DISAGREE" | null;
-  agreePoolEth: number;
-  disagreePoolEth: number;
-  totalVolumeEth: number;
-  socialConsensusPct: number;
-  marketAddress: string | null;
-  chainId: number;
-  oracleFeed: string | null;
-  targetPrice: number | null;
-  resolutionType: string | null;
-}
+import { MarketDetailData, MarketDetailPanelsProps } from "@/types";
 
-export interface MarketDetailPanelsProps {
-  market: MarketDetailData;
-  onPositionUpdated?: () => void;
-}
+export type { MarketDetailData, MarketDetailPanelsProps };
 
 export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPanelsProps) {
   const [activeMarket, setActiveMarket] = useState(market);
   const { claim, isPending: isClaiming, isSuccess: isClaimSuccess, error: claimError } = useClaim(activeMarket.marketAddress ?? undefined);
 
-  const totalPool = activeMarket.agreePoolEth + activeMarket.disagreePoolEth;
-  const agreePct = totalPool > 0 ? Math.round((activeMarket.agreePoolEth / totalPool) * 100) : 0;
+  const agreePoolEth = activeMarket.agreePoolEth ?? 0;
+  const disagreePoolEth = activeMarket.disagreePoolEth ?? 0;
+  const totalPool = agreePoolEth + disagreePoolEth;
+  const agreePct = totalPool > 0 ? Math.round((agreePoolEth / totalPool) * 100) : 0;
   const disagreePct = totalPool > 0 ? 100 - agreePct : 0;
 
   const explorerBase = activeMarket.chainId === 46630
@@ -82,7 +60,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
                   {activeMarket.status}
                 </span>
                 <span className="text-xs font-mono text-zinc-500 dark:text-zinc-400" suppressHydrationWarning>
-                  Created {new Date(activeMarket.createdAt).toLocaleDateString()}
+                  Created {new Date(activeMarket.createdAt || Date.now()).toLocaleDateString()}
                 </span>
               </div>
 
@@ -158,7 +136,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
           <div className="pt-3 border-t border-zinc-100 dark:border-white/10">
             <CreatorConfirmation
               beliefId={activeMarket.id}
-              statement={activeMarket.statement}
+              statement={activeMarket.statement || activeMarket.title || ""}
               authorHandle={activeMarket.authorHandle ?? ""}
               creatorAddress={activeMarket.creatorAddress ?? undefined}
               isConfirmed={activeMarket.isConfirmed}
@@ -172,47 +150,44 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-white/10">
             <h2 className="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-white flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Oracle & Resolution Rules</span>
+              Contract & Verification Details
             </h2>
-            <span className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400">Chainlink Verified</span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">
+              {activeMarket.isConfirmed ? "EIP-712 Active" : "Unsigned Claim"}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
-              <span className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 block mb-1">Target Price Threshold</span>
-              <span className="text-base font-black text-zinc-900 dark:text-white font-mono">
-                ${(activeMarket.targetPrice ?? 0).toLocaleString()}
-              </span>
+          <div className="space-y-3 text-xs">
+            <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between">
+              <span className="text-zinc-500 dark:text-zinc-400 font-medium">Oracle Resolution Type</span>
+              <span className="font-mono font-bold text-zinc-800 dark:text-zinc-200">{activeMarket.resolutionType || "Chainlink Relative"}</span>
             </div>
-            <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
-              <span className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 block mb-1">Settlement Condition</span>
-              <span className="text-xs font-bold text-purple-600 dark:text-purple-400 font-mono">
-                {activeMarket.resolutionType ?? "PRICE_ABOVE"}
-              </span>
-            </div>
-          </div>
 
-          <div className="pt-2 border-t border-zinc-100 dark:border-white/10">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs uppercase font-bold text-zinc-500 dark:text-zinc-400">On-Chain Transparency</h3>
+            <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10 flex items-center justify-between">
+              <span className="text-zinc-500 dark:text-zinc-400 font-medium">Chainlink Price Target</span>
+              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                {activeMarket.targetPrice !== null && activeMarket.targetPrice !== undefined ? `$${activeMarket.targetPrice.toLocaleString()}` : "Market Close State"}
+              </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+
+            <div className="grid grid-cols-2 gap-3 pt-1">
               <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10 flex flex-col justify-between">
-                <span className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 block mb-1">Market Contract</span>
+                <span className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 block mb-1">Source Truth</span>
                 <a
-                  href={`${explorerBase}/address/${activeMarket.marketAddress ?? ""}`}
+                  href={activeMarket.sourceUrl ?? "https://x.com"}
                   target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-emerald-600 dark:text-emerald-400 hover:underline break-all font-bold text-[11px]"
+                  rel="noreferrer"
+                  className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1 truncate"
                 >
-                  {activeMarket.marketAddress ? `${activeMarket.marketAddress.slice(0, 10)}...${activeMarket.marketAddress.slice(-6)}` : "N/A"} ↗
+                  <span className="truncate">{activeMarket.sourcePlatform || "Social Feed"}</span>
+                  <span className="text-[10px]">↗</span>
                 </a>
               </div>
 
               <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10 flex flex-col justify-between">
                 <span className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 block mb-1">Resolution Deadline</span>
                 <span className="text-zinc-800 dark:text-zinc-200 font-semibold text-[11px]" suppressHydrationWarning>
-                  {new Date(activeMarket.closesAt).toLocaleDateString()}
+                  {new Date(activeMarket.closesAt || activeMarket.closingDate || Date.now()).toLocaleDateString()}
                 </span>
               </div>
             </div>
@@ -224,23 +199,47 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
         <div className="bg-white dark:bg-[#070D09]/95 border border-zinc-200 dark:border-emerald-500/20 rounded-3xl p-6 sm:p-7 backdrop-blur-md shadow-xl space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-white/10">
             <h2 className="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-white">Consensus & Pool Metrics</h2>
-            <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">{activeMarket.totalVolumeEth.toFixed(2)} ETH Pool</span>
+            <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">{(activeMarket.totalVolumeEth ?? activeMarket.totalPoolEth ?? 0).toFixed(2)} ETH Pool</span>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between text-xs font-mono font-bold mb-2">
-              <span className="text-emerald-600 dark:text-emerald-400">AGREE: {agreePct}%</span>
-              <span className="text-rose-600 dark:text-rose-400">DISAGREE: {disagreePct}%</span>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between items-center text-xs font-bold mb-1.5 font-mono">
+                <span className="text-emerald-600 dark:text-emerald-400">AGREE: {activeMarket.agreePercentage}%</span>
+                <span className="text-rose-600 dark:text-rose-400">DISAGREE: {activeMarket.disagreePercentage}%</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-zinc-100 dark:bg-black/60 overflow-hidden flex p-0.5 border border-zinc-200/50 dark:border-white/5">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-l-full transition-all duration-500"
+                  style={{ width: `${activeMarket.agreePercentage}%` }}
+                />
+                <div
+                  className="h-full bg-gradient-to-r from-rose-500 to-red-400 rounded-r-full transition-all duration-500"
+                  style={{ width: `${activeMarket.disagreePercentage}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full h-3 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden flex p-0.5 border border-zinc-200 dark:border-white/10">
-              <div
-                style={{ width: `${agreePct}%` }}
-                className="bg-emerald-500 h-full rounded-l-full transition-all duration-500"
-              />
-              <div
-                style={{ width: `${disagreePct}%` }}
-                className="bg-rose-500 h-full rounded-r-full transition-all duration-500"
-              />
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-400 font-mono">AGREE POOL</span>
+                  <span className="text-xs font-black font-mono text-emerald-600 dark:text-emerald-400">{activeMarket.agreeMultiplier}x</span>
+                </div>
+                <div className="text-lg font-black text-zinc-900 dark:text-white font-mono">
+                  {agreePoolEth.toFixed(3)} <span className="text-xs text-zinc-500 font-normal">ETH</span>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-rose-500/5 border border-rose-500/20">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] uppercase font-bold text-rose-700 dark:text-rose-400 font-mono">DISAGREE POOL</span>
+                  <span className="text-xs font-black font-mono text-rose-600 dark:text-rose-400">{activeMarket.disagreeMultiplier}x</span>
+                </div>
+                <div className="text-lg font-black text-zinc-900 dark:text-white font-mono">
+                  {disagreePoolEth.toFixed(3)} <span className="text-xs text-zinc-500 font-normal">ETH</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -248,7 +247,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
             <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
               <span className="text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 block mb-1">Staked Pool</span>
               <span className="text-base font-black text-zinc-900 dark:text-white font-mono">
-                {activeMarket.totalVolumeEth.toFixed(3)} ETH
+                {(activeMarket.totalVolumeEth ?? activeMarket.totalPoolEth ?? 0).toFixed(3)} ETH
               </span>
             </div>
             <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">

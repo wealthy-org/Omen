@@ -5,11 +5,9 @@ import { Address } from "viem";
 import { useAccount, useWriteContract } from "wagmi";
 import { OMEN_MARKET_ABI } from "@/lib/contracts";
 import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
+import type { ClaimPayoutParams } from "@/types";
 
-export interface ClaimPayoutParams {
-  marketAddress: string;
-  marketId?: string;
-}
+export type { ClaimPayoutParams };
 
 export function useClaim(defaultMarketAddress?: string) {
   const { address } = useAccount();

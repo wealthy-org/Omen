@@ -2,21 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { MarketData, MarketOutcome } from "./MarketCard";
 import { usePlaceBet } from "@/hooks/usePlaceBet";
+import { MarketData, MarketOutcome, BettingModalProps } from "@/types";
 
-export interface BettingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  market: MarketData | null;
-  initialOutcome?: MarketOutcome;
-  userBalance?: string;
-  onConfirmBet?: (params: {
-    marketId: string | number;
-    outcome: MarketOutcome;
-    amount: string;
-  }) => Promise<void> | void;
-}
+export type { BettingModalProps };
 
 export const PRESET_AMOUNTS = ["0.01", "0.05", "0.10"];
 
@@ -28,8 +17,9 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   userBalance = "1.50",
   onConfirmBet,
 }) => {
+  const normalizedInitial: MarketOutcome = initialOutcome === "NO" || initialOutcome === "DISAGREE" ? "NO" : "YES";
   const { placeBet, isPending: isWeb3Pending } = usePlaceBet();
-  const [selectedOutcome, setSelectedOutcome] = useState<MarketOutcome>(initialOutcome);
+  const [selectedOutcome, setSelectedOutcome] = useState<MarketOutcome>(normalizedInitial);
   const [amount, setAmount] = useState<string>("0.05");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -44,7 +34,8 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   if (initialOutcome !== prevInitialOutcome) {
     setPrevInitialOutcome(initialOutcome);
     if (initialOutcome) {
-      setSelectedOutcome(initialOutcome);
+      const nextOutcome: MarketOutcome = initialOutcome === "NO" || initialOutcome === "DISAGREE" ? "NO" : "YES";
+      setSelectedOutcome(nextOutcome);
     }
   }
 

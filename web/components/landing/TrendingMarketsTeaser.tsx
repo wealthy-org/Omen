@@ -2,18 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import BeliefMarketCard, { BeliefMarket } from "../BeliefMarketCard";
+import BeliefMarketCard from "../BeliefMarketCard";
+import {
+  BeliefMarket,
+  TrendingMarketsTeaserProps,
+  TabCategory,
+  CategoryTabItem,
+} from "@/types";
 
-export interface TrendingMarketsTeaserProps {
-  theme?: "dark" | "light";
-}
-
-export type TabCategory = "all" | "eth" | "btc" | "arb" | "macro";
-
-export interface CategoryTabItem {
-  id: TabCategory;
-  label: string;
-}
+export type { TrendingMarketsTeaserProps, TabCategory, CategoryTabItem };
 
 export const CATEGORY_TABS: CategoryTabItem[] = [
   { id: "all", label: "All" },

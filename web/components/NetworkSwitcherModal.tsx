@@ -2,15 +2,9 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-export interface NetworkSwitcherModalProps {
-  isOpen: boolean;
-  currentChainId?: number;
-  currentNetworkName?: string;
-  targetChainId?: number;
-  targetNetworkName?: string;
-  onSwitchNetwork?: (chainId?: number) => Promise<void> | void;
-  onClose?: () => void;
-}
+import { NetworkSwitcherModalProps } from "@/types";
+
+export type { NetworkSwitcherModalProps };
 
 export default function NetworkSwitcherModal({
   isOpen,

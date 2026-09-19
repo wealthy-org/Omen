@@ -4,9 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { Flame, Zap } from "lucide-react";
 
-export interface FeaturePillarsProps {
-  theme?: "dark" | "light";
-}
+import { FeaturePillarsProps } from "@/types";
+
+export type { FeaturePillarsProps };
 
 export default function FeaturePillars({}: FeaturePillarsProps) {
   const [betAmount, setBetAmount] = useState<string>("0.1");

@@ -3,31 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
-export interface ActivityItem {
-  id: string;
-  address: string;
-  action: "agreed" | "disagreed";
-  claim: string;
-  amount: string;
-  timeAgo: string;
-}
+import { LandingActivityItem, CreatorSpotlight, LandingActivityStreamProps } from "@/types";
 
-export interface CreatorSpotlight {
-  id: string;
-  name: string;
-  handle: string;
-  address: string;
-  avatarInitials: string;
-  gradient: string;
-  since: string;
-  confirmed: number;
-  resolved: number;
-  correct: number;
-  accuracyRate: number;
-  volumeEth: number;
-  topCategory: { name: string; winRate: number };
-  weakestCategory: { name: string; winRate: number };
-}
+export type { LandingActivityItem, CreatorSpotlight, LandingActivityStreamProps };
+export type ActivityItem = LandingActivityItem;
 
 const CREATOR_SPOTLIGHTS: CreatorSpotlight[] = [
   {
@@ -112,10 +91,6 @@ const SAMPLE_CLAIMS = [
   "Arbitrum TVL doubles",
   "Memecoin cull in 90d",
 ];
-
-export interface LandingActivityStreamProps {
-  theme?: "dark" | "light";
-}
 
 export default function LandingActivityStream(_props: LandingActivityStreamProps) {
   const [creatorIndex, setCreatorIndex] = useState(0);
