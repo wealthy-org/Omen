@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { keccak256, toHex } from "viem";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { computeBeliefHashes, createOnChainMarket } from "@/lib/market/factory-client";
 import { ETHEREUM_SEPOLIA_CHAIN_ID, DEFAULT_MARKET_DURATION_SECONDS } from "@/lib/constants";
@@ -161,6 +162,40 @@ export async function POST(req: NextRequest) {
       })
       .select()
       .single();
+
+    if (author && typeof author === "string" && author.trim()) {
+      try {
+        const cleanHandle = author.trim().startsWith("@") ? author.trim() : `@${author.trim()}`;
+        const cleanName = author.trim().replace(/^@/, "");
+
+        const { data: existingProfile } = await supabase
+          .from("creator_profiles")
+          .select("*")
+          .or(`handle.ilike.${cleanHandle},handle.ilike.${cleanName}`)
+          .maybeSingle();
+
+        if (!existingProfile) {
+          const fallbackWallet = submitted_by_wallet || `0x${keccak256(toHex(cleanHandle.toLowerCase())).slice(26)}`;
+          await supabase
+            .from("creator_profiles")
+            .insert({
+              handle: cleanHandle,
+              wallet_address: fallbackWallet.toLowerCase(),
+              confirmed_beliefs_count: 1,
+              resolved_count: 0,
+              correct_count: 0,
+            });
+        } else {
+          await supabase
+            .from("creator_profiles")
+            .update({
+              confirmed_beliefs_count: (existingProfile.confirmed_beliefs_count || 0) + 1,
+            })
+            .eq("id", existingProfile.id);
+        }
+      } catch {
+      }
+    }
 
     return NextResponse.json({
       success: true,
