@@ -1,16 +1,4 @@
--- ============================================================
--- OMEN PROTOCOL V1 - DATABASE SEED SCRIPT
--- ============================================================
--- Contains two distinct batches in a single file:
---   SECTION 1: Initial Base Seed Data (Markets #1 s/d #8)
---   SECTION 2: New Expansion Seed Data (Markets #9 s/d #24)
--- Safe to execute in Supabase SQL Editor (all statements idempotent)
--- ============================================================
 
-
--- ============================================================
--- SECTION 1: INITIAL BASE SEED DATA (BATCH 1)
--- ============================================================
 
 -- 1.1 Insert Base Users (#1 s/d #8)
 INSERT INTO users (id, wallet_address, created_at)
