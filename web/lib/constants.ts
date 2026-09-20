@@ -2,6 +2,16 @@ import { Address, defineChain } from "viem";
 
 export const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
 export const ROBINHOOD_TESTNET_CHAIN_ID = 46630;
+export const DEFAULT_CHAIN_ID = ETHEREUM_SEPOLIA_CHAIN_ID;
+
+export const SECONDS_PER_MINUTE = 60;
+export const SECONDS_PER_HOUR = 3600;
+export const SECONDS_PER_DAY = 86400;
+export const DEFAULT_MARKET_DURATION_DAYS = 7;
+export const DEFAULT_MARKET_DURATION_SECONDS = DEFAULT_MARKET_DURATION_DAYS * SECONDS_PER_DAY;
+
+export const BASIS_POINTS_DIVISOR = 10000;
+export const BPS_DENOMINATOR = BASIS_POINTS_DIVISOR;
 
 export const ETHEREUM_SEPOLIA_RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
 export const ROBINHOOD_TESTNET_RPC_URL = "https://rpc.testnet.chain.robinhood.com";
@@ -25,14 +35,7 @@ export const CHAINLINK_PRICE_FEEDS: Record<number, Record<string, Address>> = {
     LINK: CHAINLINK_LINK_USD_FEED,
     SOL: CHAINLINK_SOL_USD_FEED,
   },
-  [ROBINHOOD_TESTNET_CHAIN_ID]: {
-    ETH: CHAINLINK_ETH_USD_FEED,
-    BTC: CHAINLINK_BTC_USD_FEED,
-    LINK: CHAINLINK_LINK_USD_FEED,
-    SOL: CHAINLINK_SOL_USD_FEED,
-  },
 };
-
 
 export const robinhoodChain = defineChain({
   id: ROBINHOOD_TESTNET_CHAIN_ID,

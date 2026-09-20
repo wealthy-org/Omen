@@ -1,39 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
-import { normalizeOutcome, calculateSettlementPool } from "@/lib/market/resolution-helper";
+import { normalizeOutcome } from "@/lib/market/resolution-helper";
+import { updateCreatorProfile, insertResolutionRecord, insertSettlementRecord } from "@/lib/market/resolution-service";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import type { DbMarketStatus, Market } from "@/types/database";
-
-function isAuthorizedAdmin(req: NextRequest): boolean {
-  const adminKeyHeader = req.headers.get("x-admin-key")?.trim();
-  const authHeader = req.headers.get("authorization")?.trim();
-  const bearerToken = authHeader?.toLowerCase().startsWith("bearer ")
-    ? authHeader.slice(7).trim()
-    : null;
-  const adminWalletHeader = req.headers.get("x-admin-wallet")?.trim().toLowerCase();
-
-  const validAdminKeys = [
-    process.env.ADMIN_SECRET_KEY?.trim(),
-    process.env.ADMIN_API_KEY?.trim(),
-  ].filter(Boolean) as string[];
-
-  const validAdminWallets = [
-    ...(process.env.ADMIN_WALLET_ADDRESS?.split(",").map((s) => s.trim().toLowerCase()) || []),
-  ].filter(Boolean) as string[];
-
-  if (adminKeyHeader && validAdminKeys.includes(adminKeyHeader)) {
-    return true;
-  }
-
-  if (bearerToken && validAdminKeys.includes(bearerToken)) {
-    return true;
-  }
-
-  if (adminWalletHeader && validAdminWallets.includes(adminWalletHeader)) {
-    return true;
-  }
-
-  return false;
-}
 
 export async function POST(
   req: NextRequest,
@@ -129,85 +99,27 @@ export async function POST(
     }
 
     if (market.belief_id) {
-      try {
-        await supabase
-          .from("beliefs")
-          .update({ status: "RESOLVED" })
-          .eq("id", market.belief_id);
-
-        const { data: belief } = await supabase
-          .from("beliefs")
-          .select("*")
-          .eq("id", market.belief_id)
-          .maybeSingle();
-
-        if (belief?.author) {
-          const normalizedAuthor = belief.author.toLowerCase();
-          const { data: profile } = await supabase
-            .from("creator_profiles")
-            .select("*")
-            .eq("wallet_address", normalizedAuthor)
-            .maybeSingle();
-
-          if (profile) {
-            const isCorrect = outcome === "AGREE";
-            await supabase
-              .from("creator_profiles")
-              .upsert({
-                ...profile,
-                wallet_address: normalizedAuthor,
-                resolved_count: (profile.resolved_count || 0) + 1,
-                correct_count: (profile.correct_count || 0) + (isCorrect ? 1 : 0),
-              })
-              .select();
-          }
-        }
-      } catch {
-        void 0;
-      }
+      await updateCreatorProfile(supabase, market.belief_id, outcome);
     }
 
-    let resolution = null;
-    try {
-      const resResult = await supabase
-        .from("market_resolutions")
-        .insert({
-          market_id: market.id,
-          oracle_source: effectiveSource || "manual_admin",
-          start_price: start_price !== undefined && start_price !== null ? Number(start_price) : null,
-          end_price: end_price !== undefined && end_price !== null ? Number(end_price) : null,
-          resolved_outcome: outcome,
-          resolution_tx_hash: resolution_tx_hash || null,
-          resolved_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      resolution = resResult.data;
-    } catch {
-      void 0;
-    }
+    const resolution = await insertResolutionRecord(supabase, {
+      marketId: market.id,
+      oracleSource: effectiveSource || "manual_admin",
+      startPrice: start_price,
+      endPrice: end_price,
+      resolvedOutcome: outcome,
+      resolutionTxHash: resolution_tx_hash,
+    });
 
     const agreePool = Number(updatedMarket.agree_pool ?? 0);
     const disagreePool = Number(updatedMarket.disagree_pool ?? 0);
-    const settlement = calculateSettlementPool(agreePool, disagreePool, outcome);
 
-    let settlementData = null;
-    try {
-      const setRes = await supabase
-        .from("market_settlements")
-        .insert({
-          market_id: market.id,
-          total_pool: settlement.totalPool,
-          distributable_pool: settlement.distributablePool,
-          protocol_fee: settlement.protocolFee,
-          settled_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-      settlementData = setRes.data;
-    } catch {
-      void 0;
-    }
+    const { settlementData, settlement } = await insertSettlementRecord(supabase, {
+      marketId: market.id,
+      agreePool,
+      disagreePool,
+      outcome,
+    });
 
     return NextResponse.json({
       success: true,

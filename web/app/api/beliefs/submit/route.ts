@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { computeBeliefHashes, createOnChainMarket } from "@/lib/market/factory-client";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, DEFAULT_MARKET_DURATION_SECONDS } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   try {
@@ -68,8 +69,8 @@ export async function POST(req: NextRequest) {
 
     const nowSec = Math.floor(Date.now() / 1000);
     const effectiveOpenTime = open_time !== undefined && open_time !== null ? Number(open_time) : nowSec;
-    const effectiveCloseTime = close_time !== undefined && close_time !== null ? Number(close_time) : (nowSec + 7 * 86400);
-    const effectiveChainId = chain_id !== undefined && chain_id !== null ? Number(chain_id) : 11155111;
+    const effectiveCloseTime = close_time !== undefined && close_time !== null ? Number(close_time) : (nowSec + DEFAULT_MARKET_DURATION_SECONDS);
+    const effectiveChainId = chain_id !== undefined && chain_id !== null ? Number(chain_id) : ETHEREUM_SEPOLIA_CHAIN_ID;
 
     const { beliefHash, sourceHash, resolutionHash } = computeBeliefHashes(
       statement,

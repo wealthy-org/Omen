@@ -4,7 +4,8 @@ import {
   useWaitForTransactionReceipt,
   useConnection,
 } from "wagmi";
-import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI, getOmenFactoryAddress } from "@/lib/contracts";
+import { Address } from "viem";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
 import type { ResolveMarketParams, ResolveMarketResult } from "@/types";
 
 export type { ResolveMarketParams, ResolveMarketResult };
@@ -30,32 +31,34 @@ export function useAdminResolveMarket(): ResolveMarketResult {
     outcome,
     notes = "",
     cancellationReason,
-  }: ResolveMarketParams): Promise<string> => {
+    contractAddress,
+  }: ResolveMarketParams & { contractAddress?: string }): Promise<string> => {
     setSyncError(null);
-    const numericStr = String(marketId).replace(/\D/g, "");
-    const numericMarketId = BigInt(numericStr.length > 0 ? numericStr : "1");
 
     if (!mutateAsync) {
       throw new Error("Wallet not connected or contract write unavailable.");
     }
-    const targetAddress = (getOmenFactoryAddress() || OMEN_FACTORY_ADDRESS) as `0x${string}`;
 
-    let hash: `0x${string}`;
-    if (outcome === "CANCEL" || outcome === "VOID") {
-      hash = await mutateAsync({
-        address: targetAddress,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: "cancelMarket",
-        args: [numericMarketId],
-      });
-    } else {
-      const result = outcome === "AGREE";
-      hash = await mutateAsync({
-        address: targetAddress,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: "resolveMarket",
-        args: [numericMarketId, result],
-      });
+    const targetAddress = (contractAddress || (typeof marketId === "string" && marketId.startsWith("0x") ? marketId : undefined)) as Address | undefined;
+
+    let hash = "0x" as `0x${string}`;
+
+    if (targetAddress && targetAddress.startsWith("0x") && targetAddress.length === 42) {
+      if (outcome === "CANCEL" || outcome === "VOID") {
+        hash = await mutateAsync({
+          address: targetAddress,
+          abi: OMEN_MARKET_ABI as any,
+          functionName: "voidMarket",
+        });
+      } else {
+        const outcomeUint = outcome === "AGREE" ? 1 : 2;
+        hash = await mutateAsync({
+          address: targetAddress,
+          abi: OMEN_MARKET_ABI as any,
+          functionName: "resolveMarket",
+          args: [outcomeUint],
+        });
+      }
     }
 
     try {
@@ -78,7 +81,7 @@ export function useAdminResolveMarket(): ResolveMarketResult {
           resolution_source: notes,
           cancellation_reason: cancellationReason,
           admin_wallet: address,
-          tx_hash: hash,
+          resolution_tx_hash: hash !== "0x" ? hash : null,
         }),
       });
 

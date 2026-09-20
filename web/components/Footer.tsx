@@ -5,7 +5,7 @@ import Image from "next/image";
 import {
   ETHEREUM_SEPOLIA_EXPLORER_URL,
   ROBINHOOD_TESTNET_EXPLORER_URL,
-} from "@/lib/contracts";
+} from "@/lib/constants";
 
 const PLATFORM_LINKS = [
   { label: "Trending Markets", href: "/#markets" },

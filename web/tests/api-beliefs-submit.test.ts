@@ -6,6 +6,7 @@ import { POST as submitBelief } from "../app/api/beliefs/submit/route";
 import { computeBeliefHashes } from "../lib/market/factory-client";
 import * as factoryClientLib from "../lib/market/factory-client";
 import * as supabaseLib from "../lib/supabase";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "../lib/constants";
 
 describe("TICKET-85: Submit Belief & On-Chain Market Creation API", () => {
   beforeEach(() => {
@@ -93,7 +94,7 @@ describe("TICKET-85: Submit Belief & On-Chain Market Creation API", () => {
       id: "m-uuid-1",
       belief_id: "b-uuid-1",
       contract_address: "0xmarketContract123456789012345678901234",
-      chain_id: 11155111,
+      chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
       status: "OPEN",
       agree_pool: 0,
       disagree_pool: 0,
@@ -141,7 +142,7 @@ describe("TICKET-85: Submit Belief & On-Chain Market Creation API", () => {
       close_time: 1727164800,
       resolution_type: "PRICE_ABOVE",
       resolution_config: { targetPrice: 200 },
-      chain_id: 11155111,
+      chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
     });
 
     const res = await submitBelief(req);

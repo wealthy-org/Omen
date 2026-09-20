@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
-
-const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+import { isValidEvmAddress } from "@/lib/validators";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = req.nextUrl;
     const walletAddress = searchParams.get("wallet_address")?.trim();
 
-    if (!walletAddress || !EVM_ADDRESS_REGEX.test(walletAddress)) {
+    if (!isValidEvmAddress(walletAddress)) {
       return NextResponse.json(
         { error: "Invalid or missing wallet_address query parameter. Must be a valid 42-character EVM address." },
         { status: 400 }
       );
     }
 
-    const normalizedAddress = walletAddress.toLowerCase();
+    const normalizedAddress = walletAddress!.toLowerCase();
     const supabase = getSupabaseAdminClient();
 
     const { data: bets, error: betsError } = await supabase

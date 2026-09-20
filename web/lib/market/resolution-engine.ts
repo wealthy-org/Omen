@@ -3,8 +3,10 @@ import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import { getSupabaseAdminClient } from "../supabase";
 import { fetchChainlinkPrice } from "../oracle/chainlink";
-import { evaluateOracleCondition, calculateSettlementPool } from "./resolution-helper";
-import { OMEN_MARKET_ABI, ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain } from "../contracts";
+import { evaluateOracleCondition } from "./resolution-helper";
+import { updateCreatorProfile, insertResolutionRecord, insertSettlementRecord } from "./resolution-service";
+import { OMEN_MARKET_ABI } from "../contracts";
+import { ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain } from "../constants";
 import type { ResolvedOutcome, ResolutionExecutionResult, ResolutionEngineSummary, DbMarketStatus } from "@/types";
 
 export type { ResolutionExecutionResult, ResolutionEngineSummary };
@@ -60,6 +62,7 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
     .from("oracle_snapshots")
     .select("*")
     .eq("market_id", market.id)
+    .eq("snapshot_type", "START")
     .maybeSingle();
 
   if (startSnapshot) {
@@ -133,69 +136,28 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
     .single();
 
   if (market.belief_id) {
-    await supabase
-      .from("beliefs")
-      .update({ status: "RESOLVED" })
-      .eq("id", market.belief_id);
-
-    const { data: belief } = await supabase
-      .from("beliefs")
-      .select("*")
-      .eq("id", market.belief_id)
-      .maybeSingle();
-
-    if (belief?.author) {
-      const normalizedAuthor = belief.author.toLowerCase();
-      const { data: profile } = await supabase
-        .from("creator_profiles")
-        .select("*")
-        .eq("wallet_address", normalizedAuthor)
-        .maybeSingle();
-
-      if (profile) {
-        const isCorrect = outcome === "AGREE";
-        await supabase
-          .from("creator_profiles")
-          .upsert({
-            ...profile,
-            wallet_address: normalizedAuthor,
-            resolved_count: (profile.resolved_count || 0) + 1,
-            correct_count: (profile.correct_count || 0) + (isCorrect ? 1 : 0),
-          })
-          .select();
-      }
-    }
+    await updateCreatorProfile(supabase, market.belief_id, outcome);
   }
 
-  await supabase
-    .from("market_resolutions")
-    .insert({
-      market_id: market.id,
-      oracle_source: "chainlink",
-      start_price: startPrice || null,
-      end_price: endPrice || null,
-      resolved_outcome: outcome,
-      resolution_tx_hash: txHash,
-      resolved_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
+  await insertResolutionRecord(supabase, {
+    marketId: market.id,
+    oracleSource: "chainlink",
+    startPrice: startPrice || null,
+    endPrice: endPrice || null,
+    resolvedOutcome: outcome,
+    resolutionTxHash: txHash,
+    resolvedAt: new Date().toISOString(),
+  });
 
   const agreePool = Number(market.agree_pool ?? 0);
   const disagreePool = Number(market.disagree_pool ?? 0);
-  const settlement = calculateSettlementPool(agreePool, disagreePool, outcome);
 
-  await supabase
-    .from("market_settlements")
-    .insert({
-      market_id: market.id,
-      total_pool: settlement.totalPool,
-      distributable_pool: settlement.distributablePool,
-      protocol_fee: settlement.protocolFee,
-      settled_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
+  await insertSettlementRecord(supabase, {
+    marketId: market.id,
+    agreePool,
+    disagreePool,
+    outcome,
+  });
 
   return {
     success: true,

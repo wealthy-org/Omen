@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt, useConnection } from "wagmi";
 import { parseEther, Address } from "viem";
-import { getOmenFactoryAddress, OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI, OMEN_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
 import type { PlaceBetParams } from "@/types";
 
 export type { PlaceBetParams };
@@ -27,33 +27,28 @@ export function usePlaceBet() {
     outcome = "AGREE",
     amount = "0",
     contractAddress,
-    chainId,
   }: PlaceBetParams & { contractAddress?: string; chainId?: number }) => {
     setIndexerError(null);
     const side = outcome === "AGREE";
     const value = parseEther(amount);
 
-    let hash: string;
+    const targetAddress = (contractAddress || (typeof marketId === "string" && marketId.startsWith("0x") ? marketId : undefined)) as Address | undefined;
 
-    if (contractAddress && contractAddress.startsWith("0x") && contractAddress.length === 42 && contractAddress !== OMEN_FACTORY_ADDRESS) {
-      const functionName = side ? "depositAgree" : "depositDisagree";
-      hash = await mutateAsync({
-        address: contractAddress as Address,
-        abi: OMEN_MARKET_ABI,
-        functionName,
-        value,
-      });
-    } else {
-      const numericMarketId = BigInt(String(marketId).replace(/\D/g, "") || "1");
-      const targetAddress = getOmenFactoryAddress(chainId) || OMEN_FACTORY_ADDRESS;
-      hash = await mutateAsync({
-        address: targetAddress,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: "placeBet",
-        args: [numericMarketId, side],
-        value,
-      });
+    if (!targetAddress || !targetAddress.startsWith("0x") || targetAddress.length !== 42) {
+      throw new Error("Valid market contract address is required to place a bet");
     }
+
+    if (!mutateAsync) {
+      throw new Error("Wallet not connected or contract write unavailable.");
+    }
+
+    const functionName = side ? "depositAgree" : "depositDisagree";
+    const hash = await mutateAsync({
+      address: targetAddress,
+      abi: OMEN_MARKET_ABI as any,
+      functionName,
+      value,
+    });
 
     try {
       setIsIndexing(true);

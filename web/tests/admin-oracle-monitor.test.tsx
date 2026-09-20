@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import AdminOracleMonitor from "../components/AdminOracleMonitor";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 describe("AdminOracleMonitor Component", () => {
   it("renders live oracle feed cards with prices and contract addresses", () => {
@@ -66,7 +67,7 @@ describe("AdminOracleMonitor Component", () => {
             updatedAt: "2026-09-18T00:00:00.000Z",
             heartbeatSec: 3600,
             contractAddress: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
-            chainId: 11155111,
+            chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
             status: "HEALTHY",
           },
         ],

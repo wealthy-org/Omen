@@ -4,6 +4,7 @@ import { useConfig, useChainId } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { Web3Providers } from "@/app/providers";
 import { config, robinhoodTestnet } from "@/lib/wagmi";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 function TestConsumer() {
   const wagmiConfig = useConfig();
@@ -42,13 +43,13 @@ describe("Web3Providers Component", () => {
     expect(screen.getByTestId("consumer-content")).toBeInTheDocument();
     expect(screen.getByTestId("has-wagmi-config")).toHaveTextContent("yes");
     expect(screen.getByTestId("has-query-client")).toHaveTextContent("yes");
-    expect(screen.getByTestId("chain-id")).toHaveTextContent("11155111");
+    expect(screen.getByTestId("chain-id")).toHaveTextContent(String(ETHEREUM_SEPOLIA_CHAIN_ID));
   });
 
   it("has correct Wagmi configuration for Sepolia and Robinhood Testnet", () => {
     expect(config.chains).toBeDefined();
     expect(config.chains.length).toBeGreaterThanOrEqual(2);
-    expect(config.chains.map((c) => c.id)).toContain(11155111);
+    expect(config.chains.map((c) => c.id)).toContain(ETHEREUM_SEPOLIA_CHAIN_ID);
     expect(config.chains.map((c) => c.id)).toContain(robinhoodTestnet.id);
   });
 });

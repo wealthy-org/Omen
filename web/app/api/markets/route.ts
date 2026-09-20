@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,6 +45,8 @@ export async function GET(req: NextRequest) {
       query = query.order("deadline", { ascending: true });
     } else if (tabParam === "most_volume" || sortParam === "highest_pool") {
       query = query.order("agree_pool", { ascending: false });
+    } else if (tabParam === "popular") {
+      query = query.order("created_at", { ascending: false });
     } else {
       query = query.order("created_at", { ascending: false });
     }
@@ -65,12 +69,13 @@ export async function GET(req: NextRequest) {
       const positions = Array.isArray(m.market_positions) ? m.market_positions : [];
       const agreeParticipants = positions.filter((p: any) => p.side === "AGREE").length;
       const disagreeParticipants = positions.filter((p: any) => p.side === "DISAGREE").length;
+      const uniqueParticipants = new Set(positions.map((p: any) => p.wallet_address)).size;
 
       return {
         id: m.id,
         contract_market_id: m.contract_market_id,
         contract_address: m.contract_address ?? null,
-        chain_id: typeof m.chain_id === "number" ? m.chain_id : 11155111,
+        chain_id: typeof m.chain_id === "number" ? m.chain_id : ETHEREUM_SEPOLIA_CHAIN_ID,
         belief_id: m.belief_id,
         title: m.title ?? m.beliefs?.statement ?? null,
         description: m.description ?? null,
@@ -79,6 +84,9 @@ export async function GET(req: NextRequest) {
         open_time: m.open_time,
         close_time: m.close_time ?? m.deadline ?? null,
         status: m.status,
+        resolution_source: m.resolution_source ?? null,
+        resolution_type: m.resolution_type,
+        resolution_config: m.resolution_config,
         winner: m.winner,
         agree_pool: agreePool,
         disagree_pool: disagreePool,
@@ -86,17 +94,30 @@ export async function GET(req: NextRequest) {
         capital_consensus: Math.round(capitalConsensus * 100) / 100,
         agree_participants: agreeParticipants,
         disagree_participants: disagreeParticipants,
-        resolution_type: m.resolution_type,
-        resolution_config: m.resolution_config,
-        resolution_source: m.resolution_source ?? null,
+        participants_count: uniqueParticipants,
         metadata_hash: m.metadata_hash,
         beliefs: m.beliefs,
         created_at: m.created_at,
+        belief: m.beliefs
+          ? {
+              id: m.beliefs.id,
+              author: m.beliefs.author,
+              statement: m.beliefs.statement,
+              source_url: m.beliefs.source_url,
+              source_platform: m.beliefs.source_platform,
+              source_timestamp: m.beliefs.source_timestamp,
+              ai_confidence: m.beliefs.ai_confidence,
+              status: m.beliefs.status,
+              created_at: m.beliefs.created_at,
+              sources: m.beliefs.belief_sources || [],
+            }
+          : null,
       };
     });
 
     return NextResponse.json({
       success: true,
+      data: formattedMarkets,
       count: formattedMarkets.length,
       total: count ?? formattedMarkets.length,
       markets: formattedMarkets,
@@ -105,38 +126,6 @@ export async function GET(req: NextRequest) {
     const errorMessage = err instanceof Error ? err.message : "Internal Server Error";
     return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
-}
-
-function isAuthorizedAdmin(req: NextRequest): boolean {
-  const adminKeyHeader = req.headers.get("x-admin-key")?.trim();
-  const authHeader = req.headers.get("authorization")?.trim();
-  const bearerToken = authHeader?.toLowerCase().startsWith("bearer ")
-    ? authHeader.slice(7).trim()
-    : null;
-  const adminWalletHeader = req.headers.get("x-admin-wallet")?.trim().toLowerCase();
-
-  const validAdminKeys = [
-    process.env.ADMIN_SECRET_KEY?.trim(),
-    process.env.ADMIN_API_KEY?.trim(),
-  ].filter(Boolean) as string[];
-
-  const validAdminWallets = [
-    ...(process.env.ADMIN_WALLET_ADDRESS?.split(",").map((s) => s.trim().toLowerCase()) || []),
-  ].filter(Boolean) as string[];
-
-  if (adminKeyHeader && validAdminKeys.includes(adminKeyHeader)) {
-    return true;
-  }
-
-  if (bearerToken && validAdminKeys.includes(bearerToken)) {
-    return true;
-  }
-
-  if (adminWalletHeader && validAdminWallets.includes(adminWalletHeader)) {
-    return true;
-  }
-
-  return false;
 }
 
 export async function POST(req: NextRequest) {
@@ -231,13 +220,13 @@ export async function POST(req: NextRequest) {
         contract_market_id: parsedMarketId,
         belief_id: belief_id || null,
         contract_address: contract_address || null,
-        chain_id: chain_id ? Number(chain_id) : 11155111,
+        chain_id: chain_id ? Number(chain_id) : ETHEREUM_SEPOLIA_CHAIN_ID,
         title: title.trim(),
         description: sanitizedDescription,
         category: sanitizedCategory,
         deadline: new Date(deadline).toISOString(),
         close_time: new Date(deadline).toISOString(),
-        status: "active",
+        status: "OPEN",
         agree_pool: 0,
         disagree_pool: 0,
         resolution_source: sanitizedResolutionSource,

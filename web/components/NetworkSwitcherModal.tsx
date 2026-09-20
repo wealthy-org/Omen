@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import { NetworkSwitcherModalProps } from "@/types";
-import { ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID } from "@/lib/contracts";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID } from "@/lib/constants";
 
 export type { NetworkSwitcherModalProps };
 

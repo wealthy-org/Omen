@@ -1,5 +1,5 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { getOmenFactoryAddress, OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI, OMEN_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
 import type { ClaimPayoutResult } from "@/types";
 import { Address } from "viem";
 
@@ -17,27 +17,22 @@ export function useClaimPayout(): ClaimPayoutResult {
     hash: txHash,
   });
 
-  const claimPayout = async (marketIdOrAddress: string | number, chainId?: number): Promise<string> => {
-    const isAddress = typeof marketIdOrAddress === "string" && marketIdOrAddress.startsWith("0x") && marketIdOrAddress.length === 42 && marketIdOrAddress !== OMEN_FACTORY_ADDRESS;
-
-    let hash: string;
-
-    if (isAddress) {
-      hash = await mutateAsync({
-        address: marketIdOrAddress as Address,
-        abi: OMEN_MARKET_ABI,
-        functionName: "claimPayout",
-      });
-    } else {
-      const numericMarketId = BigInt(String(marketIdOrAddress).replace(/\D/g, "") || "1");
-      const targetAddress = getOmenFactoryAddress(chainId) || OMEN_FACTORY_ADDRESS;
-      hash = await mutateAsync({
-        address: targetAddress,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: "claim",
-        args: [numericMarketId],
-      });
+  const claimPayout = async (marketIdOrAddress: string | number): Promise<string> => {
+    if (!mutateAsync) {
+      throw new Error("Wallet not connected or contract write unavailable.");
     }
+
+    const targetAddress = (typeof marketIdOrAddress === "string" && marketIdOrAddress.startsWith("0x") ? marketIdOrAddress : undefined) as Address | undefined;
+
+    if (!targetAddress || !targetAddress.startsWith("0x") || targetAddress.length !== 42) {
+      throw new Error("Valid market contract address is required to claim payout");
+    }
+
+    const hash = await mutateAsync({
+      address: targetAddress,
+      abi: OMEN_MARKET_ABI as any,
+      functionName: "claimPayout",
+    });
 
     return hash;
   };

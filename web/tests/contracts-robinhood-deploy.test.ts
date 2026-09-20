@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { getOmenFactoryAddress } from "../lib/contracts";
 import {
   ROBINHOOD_TESTNET_CHAIN_ID,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
-  getOmenFactoryAddress,
-} from "../lib/contracts";
+} from "../lib/constants";
 
 describe("TICKET-98: Robinhood Chain Testnet Deployment Script & Configuration", () => {
   it("should adhere strictly to Zero-Comment Policy in Robinhood deploy script", () => {
@@ -32,7 +32,7 @@ describe("TICKET-98: Robinhood Chain Testnet Deployment Script & Configuration",
   it("should export Robinhood Chain ID 46630 and factory address resolver", () => {
     expect(ROBINHOOD_TESTNET_CHAIN_ID).toBe(46630);
 
-    const resolvedAddress = getOmenFactoryAddress(46630);
+    const resolvedAddress = getOmenFactoryAddress(ROBINHOOD_TESTNET_CHAIN_ID);
     expect(resolvedAddress).toBe(OMEN_FACTORY_ADDRESS_ROBINHOOD);
     expect(resolvedAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
   });

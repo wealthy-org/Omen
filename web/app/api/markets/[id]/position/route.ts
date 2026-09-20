@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
-
-const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+import { isValidEvmAddress } from "@/lib/validators";
 
 export async function POST(
   req: NextRequest,
@@ -35,7 +34,7 @@ export async function POST(
 
     const { wallet_address, side, amount, tx_hash, block_number } = body;
 
-    if (!wallet_address || typeof wallet_address !== "string" || !EVM_ADDRESS_REGEX.test(wallet_address.trim())) {
+    if (!isValidEvmAddress(wallet_address)) {
       return NextResponse.json(
         { success: false, error: "Invalid or missing wallet_address: must be a valid 42-character EVM address" },
         { status: 400 }

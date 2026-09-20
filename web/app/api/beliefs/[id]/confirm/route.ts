@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { verifyBeliefConfirmationSignature } from "@/lib/eip712/confirmation";
-
-const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+import { isValidEvmAddress } from "@/lib/validators";
 
 export async function POST(
   req: NextRequest,
@@ -36,7 +35,7 @@ export async function POST(
 
     const { creator_address, signature, timestamp, chain_id, tx_hash } = body;
 
-    if (!creator_address || typeof creator_address !== "string" || !EVM_ADDRESS_REGEX.test(creator_address.trim())) {
+    if (!isValidEvmAddress(creator_address)) {
       return NextResponse.json(
         { success: false, error: "Invalid or missing creator_address: must be a valid 42-character EVM address" },
         { status: 400 }

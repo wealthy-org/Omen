@@ -80,6 +80,7 @@ export interface CreateMarketResult {
 export interface ResolveMarketParams {
   marketId: string | number;
   outcome: "AGREE" | "DISAGREE" | "CANCEL" | "VOID";
+  contractAddress?: `0x${string}` | string;
   notes?: string;
   payoutRecipient?: string;
   cancellationReason?: string;

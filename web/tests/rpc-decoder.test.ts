@@ -7,6 +7,10 @@ import {
   decodeRawCalldata,
   fetchAndDecodeTransaction,
 } from "../lib/rpc-decoder";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+} from "../lib/constants";
 import OmenMarketJson from "../contracts/OmenMarket.json";
 import OmenFactoryJson from "../contracts/OmenFactory.json";
 
@@ -29,12 +33,12 @@ describe("RPC Decoder & On-Chain Transaction Fetcher", () => {
     }
   });
 
-  it("should return public client for Sepolia (11155111) and Robinhood (46630)", () => {
-    const sepoliaClient = getPublicClientForChain(11155111);
-    expect(sepoliaClient.chain?.id).toBe(11155111);
+  it("should return public client for Sepolia and Robinhood", () => {
+    const sepoliaClient = getPublicClientForChain(ETHEREUM_SEPOLIA_CHAIN_ID);
+    expect(sepoliaClient.chain?.id).toBe(ETHEREUM_SEPOLIA_CHAIN_ID);
 
-    const robinhoodClient = getPublicClientForChain(46630);
-    expect(robinhoodClient.chain?.id).toBe(46630);
+    const robinhoodClient = getPublicClientForChain(ROBINHOOD_TESTNET_CHAIN_ID);
+    expect(robinhoodClient.chain?.id).toBe(ROBINHOOD_TESTNET_CHAIN_ID);
   });
 
   it("should decode depositAgree function calldata", () => {
@@ -106,7 +110,7 @@ describe("RPC Decoder & On-Chain Transaction Fetcher", () => {
   });
 
   it("should handle invalid transaction hash format gracefully", async () => {
-    const result = await fetchAndDecodeTransaction("invalid-hash", 11155111);
+    const result = await fetchAndDecodeTransaction("invalid-hash", ETHEREUM_SEPOLIA_CHAIN_ID);
     expect(result.foundOnRpc).toBe(false);
     expect(result.status).toBe("unknown");
     expect(result.errorMessage).toBe("Invalid transaction hash format.");
@@ -114,8 +118,8 @@ describe("RPC Decoder & On-Chain Transaction Fetcher", () => {
 
   it("should return not found result when RPC returns null transaction and receipt", async () => {
     const randomHash = "0x9999999999999999999999999999999999999999999999999999999999999999";
-    const result = await fetchAndDecodeTransaction(randomHash, 11155111);
+    const result = await fetchAndDecodeTransaction(randomHash, ETHEREUM_SEPOLIA_CHAIN_ID);
     expect(result.foundOnRpc).toBe(false);
-    expect(result.chainId).toBe(11155111);
+    expect(result.chainId).toBe(ETHEREUM_SEPOLIA_CHAIN_ID);
   });
 });

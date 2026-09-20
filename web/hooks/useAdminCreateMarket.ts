@@ -1,18 +1,21 @@
 import { useState } from "react";
-import { decodeEventLog } from "viem";
+import { decodeEventLog, keccak256, toHex, Address } from "viem";
 import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useConnection,
   usePublicClient,
+  useChainId,
 } from "wagmi";
-import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI, getOmenFactoryAddress } from "@/lib/contracts";
+import { OMEN_FACTORY_ABI, getOmenFactoryAddress } from "@/lib/contracts";
+import { CHAINLINK_ETH_USD_FEED, ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 import type { CreateMarketParams, CreateMarketResult } from "@/types";
 
 export type { CreateMarketParams, CreateMarketResult };
 
 export function useAdminCreateMarket(): CreateMarketResult {
   const { address } = useConnection();
+  const chainId = useChainId();
   const publicClient = usePublicClient();
   const {
     mutateAsync,
@@ -31,26 +34,45 @@ export function useAdminCreateMarket(): CreateMarketResult {
   const createMarket = async ({
     title = "",
     category = "CRYPTO",
-    endTime = new Date().toISOString(),
+    endTime = new Date(Date.now() + 86400000).toISOString(),
     resolutionSourceUrl = "",
     resolutionCriteria = "",
     initialLiquidity = "0.50",
-  }: CreateMarketParams): Promise<{ hash: string; contractMarketId: string }> => {
+    beliefId,
+  }: CreateMarketParams): Promise<{ hash: string; contractMarketId: string; contractAddress?: string }> => {
     setSyncError(null);
-    const deadline = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
 
     if (!mutateAsync) {
       throw new Error("Wallet not connected or contract write unavailable.");
     }
-    const targetAddress = getOmenFactoryAddress() || OMEN_FACTORY_ADDRESS;
+
+    const openTime = BigInt(Math.floor(Date.now() / 1000));
+    const closeTime = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
+
+    const beliefHash = keccak256(toHex(title.trim() || "OMEN_BELIEF"));
+    const sourceHash = keccak256(toHex(resolutionSourceUrl.trim() || "OMEN_SOURCE"));
+    const resolutionHash = keccak256(toHex(resolutionCriteria.trim() || JSON.stringify({ category })));
+
+    const resolutionConfig = {
+      resType: 0,
+      assetAFeed: CHAINLINK_ETH_USD_FEED,
+      assetBFeed: CHAINLINK_ETH_USD_FEED,
+      targetPrice: BigInt(0),
+      startTimestamp: openTime,
+      endTimestamp: closeTime,
+    };
+
+    const targetAddress = getOmenFactoryAddress(chainId);
+
     const hash = await mutateAsync({
-      address: targetAddress as `0x${string}`,
-      abi: PREDICTION_MARKET_ABI,
+      address: targetAddress,
+      abi: OMEN_FACTORY_ABI as any,
       functionName: "createMarket",
-      args: [title, deadline],
+      args: [beliefHash, sourceHash, resolutionHash, openTime, closeTime, resolutionConfig],
     });
 
     let contractMarketId = String(Date.now());
+    let deployedMarketAddress: string | undefined;
 
     if (publicClient && hash) {
       try {
@@ -58,16 +80,19 @@ export function useAdminCreateMarket(): CreateMarketResult {
         for (const log of receipt.logs) {
           try {
             const decoded = decodeEventLog({
-              abi: PREDICTION_MARKET_ABI,
+              abi: OMEN_FACTORY_ABI,
               data: log.data,
               topics: log.topics,
             });
             if (decoded.eventName === "MarketCreated" && decoded.args) {
-              const argsObj = decoded.args as { marketId?: bigint };
+              const argsObj = decoded.args as { marketId?: bigint; marketAddress?: Address };
               if (argsObj.marketId !== undefined) {
                 contractMarketId = argsObj.marketId.toString();
-                break;
               }
+              if (argsObj.marketAddress) {
+                deployedMarketAddress = argsObj.marketAddress;
+              }
+              break;
             }
           } catch {
           }
@@ -87,10 +112,13 @@ export function useAdminCreateMarket(): CreateMarketResult {
           ...(adminWallet ? { "x-admin-wallet": adminWallet } : {}),
         },
         body: JSON.stringify({
-          contract_market_id: contractMarketId,
+          contract_market_id: parseInt(contractMarketId, 10) || Date.now(),
+          contract_address: deployedMarketAddress,
+          chain_id: chainId || ETHEREUM_SEPOLIA_CHAIN_ID,
+          belief_id: beliefId,
           title,
           category,
-          deadline: new Date(Number(deadline) * 1000).toISOString(),
+          deadline: new Date(Number(closeTime) * 1000).toISOString(),
           description: resolutionCriteria,
           resolution_source: resolutionSourceUrl,
           initial_liquidity: parseFloat(initialLiquidity) || 0,
@@ -108,7 +136,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
       setIsSyncing(false);
     }
 
-    return { hash, contractMarketId };
+    return { hash, contractMarketId, contractAddress: deployedMarketAddress };
   };
 
   return {

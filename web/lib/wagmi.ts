@@ -7,7 +7,7 @@ import {
   ETHEREUM_SEPOLIA_RPC_URL,
   ROBINHOOD_TESTNET_RPC_URL,
   ROBINHOOD_TESTNET_EXPLORER_URL,
-} from "./contracts";
+} from "./constants";
 
 export const robinhoodTestnet = defineChain({
   id: ROBINHOOD_TESTNET_CHAIN_ID,

@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 process.env.ADMIN_SECRET_KEY = "omen-admin-2026";
 process.env.ADMIN_WALLET_ADDRESS = "0x1234567890abcdef1234567890abcdef12345678,0xAdmin99999999999999999999999999999999999";
@@ -24,7 +25,7 @@ vi.mock("wagmi", async (importOriginal) => {
     useWaitForTransactionReceipt: () => ({ isLoading: false, isSuccess: false }),
     usePublicClient: () => ({ waitForTransactionReceipt: vi.fn().mockResolvedValue({ logs: [] }) }),
     useReadContract: () => ({ data: undefined, isLoading: false, refetch: vi.fn() }),
-    useChainId: () => 11155111,
+    useChainId: () => ETHEREUM_SEPOLIA_CHAIN_ID,
     useSignTypedData: () => {
       const mockSign = vi.fn().mockResolvedValue("0xmocksignature");
       return {

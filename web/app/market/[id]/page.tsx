@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { MarketDetailPanels } from "@/components/MarketDetailPanels";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 import { MarketDetailData, MarketDetailPageProps } from "@/types";
 
 export type { MarketDetailPageProps };
@@ -36,7 +37,7 @@ function mapToMarketDetailData(raw: Record<string, unknown>, idFallback: string)
     totalVolumeEth: totalVolume,
     socialConsensusPct: typeof raw.socialConsensusPct === "number" ? raw.socialConsensusPct : 0,
     marketAddress: typeof raw.marketAddress === "string" ? raw.marketAddress : (typeof raw.contract_address === "string" ? raw.contract_address : null),
-    chainId: typeof raw.chainId === "number" ? raw.chainId : 11155111,
+    chainId: typeof raw.chainId === "number" ? raw.chainId : ETHEREUM_SEPOLIA_CHAIN_ID,
     oracleFeed: typeof raw.oracleFeed === "string" ? raw.oracleFeed : (typeof raw.resolution_source === "string" ? raw.resolution_source : null),
     targetPrice: typeof raw.targetPrice === "number" ? raw.targetPrice : null,
     resolutionType: typeof raw.resolutionType === "string" ? raw.resolutionType : null,

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
-
-const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
+import { isValidEvmAddress } from "@/lib/validators";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +13,7 @@ export async function POST(req: NextRequest) {
     }
 
     const rawAddress = body.wallet_address.trim();
-    if (!EVM_ADDRESS_REGEX.test(rawAddress)) {
+    if (!isValidEvmAddress(rawAddress)) {
       return NextResponse.json(
         { error: "Invalid EVM wallet address format" },
         { status: 400 }

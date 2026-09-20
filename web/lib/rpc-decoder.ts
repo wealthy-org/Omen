@@ -1,71 +1,23 @@
 import {
-  createPublicClient,
-  http,
-  defineChain,
   decodeFunctionData,
   formatEther,
   formatGwei,
-  Address,
   Hex,
 } from "viem";
 import OmenMarketJson from "@/contracts/OmenMarket.json";
 import OmenFactoryJson from "@/contracts/OmenFactory.json";
-import PredictionMarketJson from "@/contracts/PredictionMarket.json";
-
 import { DecodedParameter, DecodedTxResult } from "@/types";
 import {
   ETHEREUM_SEPOLIA_CHAIN_ID,
   ROBINHOOD_TESTNET_CHAIN_ID,
-  ETHEREUM_SEPOLIA_RPC_URL,
-  ROBINHOOD_TESTNET_RPC_URL,
-  ETHEREUM_SEPOLIA_EXPLORER_URL,
-  ROBINHOOD_TESTNET_EXPLORER_URL,
   OMEN_FACTORY_ADDRESS_SEPOLIA,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
 } from "./constants";
+import { getPublicClientForChain } from "./oracle/chainlink";
 
 export type { DecodedParameter, DecodedTxResult };
 
-const sepoliaChain = defineChain({
-  id: ETHEREUM_SEPOLIA_CHAIN_ID,
-  name: "Ethereum Sepolia",
-  nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: [ETHEREUM_SEPOLIA_RPC_URL],
-    },
-  },
-  blockExplorers: {
-    default: { name: "Etherscan", url: ETHEREUM_SEPOLIA_EXPLORER_URL },
-  },
-});
-
-const robinhoodChain = defineChain({
-  id: ROBINHOOD_TESTNET_CHAIN_ID,
-  name: "Robinhood Chain Testnet",
-  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-  rpcUrls: {
-    default: {
-      http: [ROBINHOOD_TESTNET_RPC_URL],
-    },
-  },
-  blockExplorers: {
-    default: { name: "Robinhood Explorer", url: ROBINHOOD_TESTNET_EXPLORER_URL },
-  },
-});
-
-export function getPublicClientForChain(chainId?: number) {
-  if (chainId === ROBINHOOD_TESTNET_CHAIN_ID) {
-    return createPublicClient({
-      chain: robinhoodChain,
-      transport: http(),
-    });
-  }
-  return createPublicClient({
-    chain: sepoliaChain,
-    transport: http(),
-  });
-}
+export { getPublicClientForChain };
 
 export function decodeRawCalldata(data?: Hex): { functionName: string; params: DecodedParameter[] } | null {
   if (!data || data === "0x") {
@@ -75,7 +27,6 @@ export function decodeRawCalldata(data?: Hex): { functionName: string; params: D
   const abis = [
     { name: "OmenMarket", abi: OmenMarketJson },
     { name: "OmenFactory", abi: OmenFactoryJson },
-    { name: "PredictionMarket", abi: PredictionMarketJson },
   ];
 
   for (const { abi } of abis) {
@@ -148,7 +99,7 @@ export async function fetchAndDecodeTransaction(
   }
 
   try {
-    const client = getPublicClientForChain(chainId);
+    const client = getPublicClientForChain(effectiveChainId);
     const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 2500));
     const [tx, receipt, latestBlock] = await Promise.all([
       Promise.race([client.getTransaction({ hash: txHash as Hex }).catch(() => null), timeoutPromise]),

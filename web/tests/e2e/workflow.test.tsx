@@ -23,6 +23,8 @@ const {
   };
 });
 
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
+
 vi.mock("wagmi", () => ({
   WagmiContext: mockWagmiContext,
   useWriteContract: () => ({
@@ -36,6 +38,7 @@ vi.mock("wagmi", () => ({
   }),
   useWaitForTransactionReceipt: () => mockUseWaitForTransactionReceipt(),
   useConnection: () => mockUseConnection(),
+  useChainId: () => ETHEREUM_SEPOLIA_CHAIN_ID,
   usePublicClient: () => ({
     waitForTransactionReceipt: mockWaitForTransactionReceipt,
   }),

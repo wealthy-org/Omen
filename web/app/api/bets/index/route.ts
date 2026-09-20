@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
-
-const EVM_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
-const TX_HASH_REGEX = /^0x[a-fA-F0-9]{10,}$/;
+import { isValidEvmAddress, isValidTxHash } from "@/lib/validators";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const { tx_hash, contract_market_id, wallet_address, side, amount } = body;
 
-    if (!tx_hash || typeof tx_hash !== "string" || !TX_HASH_REGEX.test(tx_hash.trim())) {
+    if (!isValidTxHash(tx_hash)) {
       return NextResponse.json(
         { error: "Invalid or missing tx_hash: must be a valid hex transaction hash starting with 0x" },
         { status: 400 }
@@ -39,7 +37,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!wallet_address || typeof wallet_address !== "string" || !EVM_ADDRESS_REGEX.test(wallet_address.trim())) {
+    if (!isValidEvmAddress(wallet_address)) {
       return NextResponse.json(
         { error: "Invalid or missing wallet_address: must be a valid 42-character EVM address" },
         { status: 400 }

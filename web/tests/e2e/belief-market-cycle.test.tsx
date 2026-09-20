@@ -8,12 +8,12 @@ import { useClaim } from "../../hooks/useClaim";
 import { calculateResolutionResult } from "../../lib/oracle/chainlink";
 import { MarketDetailPanels } from "../../components/MarketDetailPanels";
 import { CreatorConfirmation } from "../../components/CreatorConfirmation";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 const mocks = vi.hoisted(() => ({
   writeContractAsyncMock: vi.fn().mockResolvedValue("0xMockTxHashExecution"),
   signTypedDataAsyncMock: vi.fn().mockResolvedValue("0xMockEIP712CreatorSignature"),
   accountAddress: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
-  chainId: 11155111,
 }));
 
 vi.mock("wagmi", () => ({
@@ -35,7 +35,7 @@ vi.mock("wagmi", () => ({
       ],
     }),
   }),
-  useChainId: () => mocks.chainId,
+  useChainId: () => ETHEREUM_SEPOLIA_CHAIN_ID,
   useWriteContract: () => ({
     writeContract: mocks.writeContractAsyncMock,
     writeContractAsync: mocks.writeContractAsyncMock,
@@ -138,7 +138,7 @@ describe("E2E Belief Market Full Cycle (Sepolia & Robinhood)", () => {
       totalVolumeEth: 2.0,
       socialConsensusPct: 85,
       marketAddress: deployedMarketAddress,
-      chainId: 11155111,
+      chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
       oracleFeed: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
       targetPrice: 150000,
       resolutionType: "PRICE_ABOVE",

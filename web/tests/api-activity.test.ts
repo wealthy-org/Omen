@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { GET as getActivityFeed } from "../app/api/activity/route";
 import * as supabaseLib from "../lib/supabase";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "../lib/constants";
 
 describe("TICKET-90: Public Activity Feed API", () => {
   beforeEach(() => {
@@ -49,7 +50,7 @@ describe("TICKET-90: Public Activity Feed API", () => {
         markets: {
           id: "m-101",
           contract_address: "0xmarket1",
-          chain_id: 11155111,
+          chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
           status: "OPEN",
           belief_id: "b-101",
           beliefs: {
@@ -71,7 +72,7 @@ describe("TICKET-90: Public Activity Feed API", () => {
         markets: {
           id: "m-102",
           contract_address: "0xmarket2",
-          chain_id: 11155111,
+          chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
           status: "RESOLVED",
           belief_id: "b-102",
           beliefs: {
@@ -123,7 +124,7 @@ describe("TICKET-90: Public Activity Feed API", () => {
         markets: {
           id: "m-101",
           contract_address: "0xmarket1",
-          chain_id: 11155111,
+          chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
           status: "OPEN",
           belief_id: "b-101",
           beliefs: {

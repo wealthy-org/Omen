@@ -7,7 +7,8 @@ import { CreatorConfirmation } from "./CreatorConfirmation";
 import { useClaim } from "@/hooks/useClaim";
 
 import { MarketDetailData, MarketDetailPanelsProps } from "@/types";
-import { ROBINHOOD_TESTNET_CHAIN_ID, getExplorerBaseUrl } from "@/lib/contracts";
+import { getExplorerBaseUrl } from "@/lib/contracts";
+import { ROBINHOOD_TESTNET_CHAIN_ID } from "@/lib/constants";
 
 export type { MarketDetailData, MarketDetailPanelsProps };
 

@@ -1,4 +1,5 @@
 import { ResolvedOutcome } from "@/types/database";
+import { BASIS_POINTS_DIVISOR } from "../constants";
 
 export function normalizeOutcome(outcomeOrStatus: string): ResolvedOutcome | null {
   if (!outcomeOrStatus || typeof outcomeOrStatus !== "string") return null;
@@ -23,7 +24,7 @@ export function calculateSettlementPool(
   agreePool: number,
   disagreePool: number,
   outcome: ResolvedOutcome,
-  protocolFeeBps = 200
+  protocolFeeBps = 0
 ): {
   totalPool: number;
   distributablePool: number;
@@ -41,7 +42,7 @@ export function calculateSettlementPool(
     };
   }
 
-  const protocolFee = Number(((totalPool * protocolFeeBps) / 10000).toFixed(6));
+  const protocolFee = Number(((totalPool * protocolFeeBps) / BASIS_POINTS_DIVISOR).toFixed(6));
   const distributablePool = Number((totalPool - protocolFee).toFixed(6));
 
   return {

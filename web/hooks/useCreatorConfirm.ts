@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useConnection, useSignTypedData, useChainId } from "wagmi";
 import { Address } from "viem";
-import { getOmenFactoryAddress } from "@/lib/contracts";
 import type { ConfirmBeliefPayload, UseCreatorConfirmResult } from "@/types";
 
 export type { ConfirmBeliefPayload, UseCreatorConfirmResult };
@@ -42,19 +41,15 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
       const timestampSec = Math.floor(Date.now() / 1000);
       const timestamp = BigInt(timestampSec);
 
-      const verifyingContract = (payload.marketAddress || getOmenFactoryAddress(chainId)) as Address;
-
       const domain = {
-        name: "Omen Belief Protocol",
+        name: "OMEN",
         version: "1",
         chainId,
-        verifyingContract,
       } as const;
 
       const types = {
-        ConfirmBelief: [
+        BeliefConfirmation: [
           { name: "beliefId", type: "string" },
-          { name: "creator", type: "address" },
           { name: "statement", type: "string" },
           { name: "timestamp", type: "uint256" },
         ],
@@ -63,10 +58,9 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
       const signedSig = await signTypedDataAsync({
         domain,
         types,
-        primaryType: "ConfirmBelief",
+        primaryType: "BeliefConfirmation",
         message: {
           beliefId: payload.beliefId,
-          creator: creatorAddress,
           statement: payload.statement,
           timestamp,
         },

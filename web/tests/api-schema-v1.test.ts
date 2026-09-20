@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "../lib/constants";
 import type {
   Database,
   Belief,
@@ -152,7 +153,7 @@ describe("TICKET-65: Supabase Schema V1 Beliefs Migration", () => {
       id: "m1",
       belief_id: mockBelief.id,
       contract_address: "0x345",
-      chain_id: 11155111,
+      chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
       agree_pool: 10,
       disagree_pool: 5,
       open_time: "2026-09-01T00:00:00Z",

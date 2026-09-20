@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
-import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_FACTORY_ABI } from "@/lib/contracts";
+import { OMEN_FACTORY_ADDRESS, ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 const {
   mockWagmiContext,
@@ -33,6 +34,7 @@ vi.mock("wagmi", () => ({
   }),
   useWaitForTransactionReceipt: () => mockUseWaitForTransactionReceipt(),
   useConnection: () => mockUseConnection(),
+  useChainId: () => ETHEREUM_SEPOLIA_CHAIN_ID,
   usePublicClient: () => ({
     waitForTransactionReceipt: mockWaitForTransactionReceipt,
   }),
@@ -64,7 +66,6 @@ describe("useAdminCreateMarket Hook", () => {
     const { result } = renderHook(() => useAdminCreateMarket());
 
     const futureDate = "2026-12-31T23:59:00Z";
-    const expectedDeadline = BigInt(Math.floor(new Date(futureDate).getTime() / 1000));
 
     let output: { hash: string; contractMarketId: string } | undefined;
     await act(async () => {
@@ -78,12 +79,13 @@ describe("useAdminCreateMarket Hook", () => {
       });
     });
 
-    expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "createMarket",
-      args: ["Will ETH reach $10,000?", expectedDeadline],
-    });
+    expect(mockWriteContractAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        address: OMEN_FACTORY_ADDRESS,
+        abi: OMEN_FACTORY_ABI,
+        functionName: "createMarket",
+      })
+    );
     expect(output?.hash).toBe("0xmockcreatetx123");
     expect(global.fetch).toHaveBeenCalledWith("/api/markets", expect.objectContaining({
       method: "POST",

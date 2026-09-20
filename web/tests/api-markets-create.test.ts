@@ -32,7 +32,7 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
       description: "BTC prediction",
       category: "crypto",
       deadline: "2026-12-31T23:59:59.000Z",
-      status: "active",
+      status: "OPEN",
       agree_pool: 0,
       disagree_pool: 0,
       resolution_source: "CoinGecko Oracle",
@@ -84,7 +84,7 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
         contract_market_id: 10,
         title: "Will Bitcoin hit 100k?",
         category: "crypto",
-        status: "active",
+        status: "OPEN",
       })
     );
   });
@@ -97,7 +97,7 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
       description: null,
       category: "crypto",
       deadline: "2026-12-31T23:59:59.000Z",
-      status: "active",
+      status: "OPEN",
       agree_pool: 0,
       disagree_pool: 0,
       resolution_source: null,
@@ -143,7 +143,7 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
       description: null,
       category: "layer2",
       deadline: "2026-12-31T23:59:59.000Z",
-      status: "active",
+      status: "OPEN",
       agree_pool: 0,
       disagree_pool: 0,
       resolution_source: null,

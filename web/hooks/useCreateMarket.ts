@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useConnection, useWriteContract, usePublicClient } from "wagmi";
 import { Address, Hash, parseUnits, decodeEventLog } from "viem";
-import { getOmenFactoryAddress, OMEN_FACTORY_ABI, CHAINLINK_ETH_USD_FEED } from "@/lib/contracts";
+import { getOmenFactoryAddress, OMEN_FACTORY_ABI } from "@/lib/contracts";
+import { CHAINLINK_ETH_USD_FEED } from "@/lib/constants";
 import type { CreateMarketParams, UseCreateMarketResult } from "@/types";
 
 export type { CreateMarketParams, UseCreateMarketResult };

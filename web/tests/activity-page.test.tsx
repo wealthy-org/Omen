@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ActivityPage from "@/app/activity/page";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID } from "@/lib/constants";
 
 const MOCK_ACTIVITIES = [
   {
@@ -12,7 +13,7 @@ const MOCK_ACTIVITIES = [
     statement: "Will Ethereum exceed $4000 in Q4?",
     amount: 0.5,
     tx_hash: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    market_chain_id: 11155111,
+    market_chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
     created_at: new Date().toISOString(),
   },
   {
@@ -24,7 +25,7 @@ const MOCK_ACTIVITIES = [
     statement: "AI agents will handle 50% DEX volume.",
     amount: null,
     tx_hash: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    market_chain_id: 46630,
+    market_chain_id: ROBINHOOD_TESTNET_CHAIN_ID,
     created_at: new Date().toISOString(),
   },
   {
@@ -36,7 +37,7 @@ const MOCK_ACTIVITIES = [
     statement: "Will Ethereum exceed $4000 in Q4?",
     amount: 1.25,
     tx_hash: "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-    market_chain_id: 11155111,
+    market_chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
     created_at: new Date().toISOString(),
   },
 ];

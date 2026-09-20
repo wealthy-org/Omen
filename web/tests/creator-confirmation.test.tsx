@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { renderHook, act } from "@testing-library/react";
 import { useCreatorConfirm } from "../hooks/useCreatorConfirm";
 import { CreatorConfirmation } from "../components/CreatorConfirmation";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 const mocks = vi.hoisted(() => ({
   signTypedDataAsyncMock: vi.fn().mockResolvedValue("0xMockSignatureValidEIP712"),
@@ -15,7 +16,7 @@ vi.mock("wagmi", () => ({
     address: mocks.accountAddress,
     isConnected: mocks.isConnected,
   }),
-  useChainId: () => 11155111,
+  useChainId: () => ETHEREUM_SEPOLIA_CHAIN_ID,
   useSignTypedData: () => ({
     signTypedData: mocks.signTypedDataAsyncMock,
     signTypedDataAsync: mocks.signTypedDataAsyncMock,

@@ -1,13 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { supportedChains, DEFAULT_CHAIN_ID } from "../../lib/wagmi";
 import { calculateResolutionResult } from "../../lib/oracle/chainlink";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID } from "../../lib/constants";
 
 describe("Dual-Chain Workflow & Settlement Mechanics (Sepolia + Robinhood)", () => {
   it("supports both Ethereum Sepolia and Robinhood Chain Testnet with valid configs", () => {
     const chainIds = supportedChains.map((c) => c.id);
-    expect(chainIds).toContain(11155111);
-    expect(chainIds).toContain(46630);
-    expect(DEFAULT_CHAIN_ID).toBe(11155111);
+    expect(chainIds).toContain(ETHEREUM_SEPOLIA_CHAIN_ID);
+    expect(chainIds).toContain(ROBINHOOD_TESTNET_CHAIN_ID);
+    expect(DEFAULT_CHAIN_ID).toBe(ETHEREUM_SEPOLIA_CHAIN_ID);
   });
 
   it("calculates accurate proportional payout distribution for winning stakers", () => {

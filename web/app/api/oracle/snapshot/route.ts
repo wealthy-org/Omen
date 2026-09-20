@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { fetchChainlinkPrice } from "@/lib/oracle/chainlink";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 import type { SnapshotType, OracleSnapshotSource } from "@/types/database";
 
 export async function POST(req: NextRequest) {
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
     if (resolvedPrice === undefined || resolvedPrice === null) {
       const oracleData = await fetchChainlinkPrice(
         asset,
-        chain_id ? Number(chain_id) : 11155111,
+        chain_id ? Number(chain_id) : ETHEREUM_SEPOLIA_CHAIN_ID,
         feed_address
       );
       resolvedPrice = oracleData.price;

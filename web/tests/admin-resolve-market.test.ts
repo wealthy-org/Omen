@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useAdminResolveMarket } from "@/hooks/useAdminResolveMarket";
-import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
 
 const {
   mockWagmiContext,
@@ -34,6 +34,8 @@ vi.mock("wagmi", () => ({
 }));
 
 describe("useAdminResolveMarket Hook", () => {
+  const marketAddress = "0x1111111111111111111111111111111111111111";
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseConnection.mockReturnValue({
@@ -50,7 +52,7 @@ describe("useAdminResolveMarket Hook", () => {
     });
   });
 
-  it("calls resolveMarket with result = true for AGREE outcome and syncs to backend", async () => {
+  it("calls resolveMarket with outcome = 1 for AGREE outcome and syncs to backend", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmockresolvetx123");
 
     const { result } = renderHook(() => useAdminResolveMarket());
@@ -59,16 +61,17 @@ describe("useAdminResolveMarket Hook", () => {
     await act(async () => {
       txHash = await result.current.resolveMarket({
         marketId: "market-101",
+        contractAddress: marketAddress,
         outcome: "AGREE",
         notes: "Official verification passed",
       });
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
+      address: marketAddress,
+      abi: OMEN_MARKET_ABI,
       functionName: "resolveMarket",
-      args: [BigInt(101), true],
+      args: [1],
     });
     expect(txHash).toBe("0xmockresolvetx123");
     expect(global.fetch).toHaveBeenCalledWith("/api/markets/market-101/resolve", expect.objectContaining({
@@ -80,27 +83,28 @@ describe("useAdminResolveMarket Hook", () => {
     }));
   });
 
-  it("calls resolveMarket with result = false for DISAGREE outcome", async () => {
+  it("calls resolveMarket with outcome = 2 for DISAGREE outcome", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmockresolvetx456");
 
     const { result } = renderHook(() => useAdminResolveMarket());
 
     await act(async () => {
       await result.current.resolveMarket({
-        marketId: 42,
+        marketId: "42",
+        contractAddress: marketAddress,
         outcome: "DISAGREE",
       });
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
+      address: marketAddress,
+      abi: OMEN_MARKET_ABI,
       functionName: "resolveMarket",
-      args: [BigInt(42), false],
+      args: [2],
     });
   });
 
-  it("calls cancelMarket for CANCEL outcome", async () => {
+  it("calls voidMarket for CANCEL outcome", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmockcanceltx789");
 
     const { result } = renderHook(() => useAdminResolveMarket());
@@ -108,16 +112,16 @@ describe("useAdminResolveMarket Hook", () => {
     await act(async () => {
       await result.current.resolveMarket({
         marketId: "15",
+        contractAddress: marketAddress,
         outcome: "CANCEL",
         cancellationReason: "EVENT_CANCELLED",
       });
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "cancelMarket",
-      args: [BigInt(15)],
+      address: marketAddress,
+      abi: OMEN_MARKET_ABI,
+      functionName: "voidMarket",
     });
   });
 
@@ -130,6 +134,7 @@ describe("useAdminResolveMarket Hook", () => {
       act(async () => {
         await result.current.resolveMarket({
           marketId: "1",
+          contractAddress: marketAddress,
           outcome: "AGREE",
         });
       })

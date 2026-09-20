@@ -20,11 +20,11 @@ import {
 
 import { ActivityType, ActivityItem, ActivityFeedProps } from "@/types";
 import { fetchAndDecodeTransaction, DecodedTxResult } from "@/lib/rpc-decoder";
+import { getExplorerTxUrl } from "@/lib/contracts";
 import {
   ETHEREUM_SEPOLIA_CHAIN_ID,
   ROBINHOOD_TESTNET_CHAIN_ID,
-  getExplorerTxUrl,
-} from "@/lib/contracts";
+} from "@/lib/constants";
 
 export type { ActivityType, ActivityItem, ActivityFeedProps };
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { usePlaceBet } from "@/hooks/usePlaceBet";
-import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
 import { parseEther } from "viem";
 
 const { mockWagmiContext, mockWriteContractAsync, mockUseConnection, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
@@ -30,6 +30,8 @@ vi.mock("wagmi", () => ({
 }));
 
 describe("usePlaceBet Hook", () => {
+  const marketAddress = "0x2222222222222222222222222222222222222222";
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseConnection.mockReturnValue({
@@ -46,7 +48,7 @@ describe("usePlaceBet Hook", () => {
     });
   });
 
-  it("calls writeContractAsync with correct contract address, ABI, and parsed wei value for AGREE bet", async () => {
+  it("calls writeContractAsync with depositAgree and parsed wei value for AGREE bet", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmocktxhash123");
 
     const { result } = renderHook(() => usePlaceBet());
@@ -55,16 +57,16 @@ describe("usePlaceBet Hook", () => {
     await act(async () => {
       txHash = await result.current.placeBet({
         marketId: "1",
+        contractAddress: marketAddress,
         outcome: "AGREE",
         amount: "0.5",
       });
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "placeBet",
-      args: [BigInt(1), true],
+      address: marketAddress,
+      abi: OMEN_MARKET_ABI,
+      functionName: "depositAgree",
       value: parseEther("0.5"),
     });
     expect(txHash).toBe("0xmocktxhash123");
@@ -81,7 +83,7 @@ describe("usePlaceBet Hook", () => {
     }));
   });
 
-  it("calls writeContractAsync with side = false for DISAGREE bet", async () => {
+  it("calls writeContractAsync with depositDisagree for DISAGREE bet", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmocktxhash456");
 
     const { result } = renderHook(() => usePlaceBet());
@@ -89,16 +91,16 @@ describe("usePlaceBet Hook", () => {
     await act(async () => {
       await result.current.placeBet({
         marketId: 42,
+        contractAddress: marketAddress,
         outcome: "DISAGREE",
         amount: "0.1",
       });
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "placeBet",
-      args: [BigInt(42), false],
+      address: marketAddress,
+      abi: OMEN_MARKET_ABI,
+      functionName: "depositDisagree",
       value: parseEther("0.1"),
     });
   });
@@ -112,6 +114,7 @@ describe("usePlaceBet Hook", () => {
       act(async () => {
         await result.current.placeBet({
           marketId: "1",
+          contractAddress: marketAddress,
           outcome: "AGREE",
           amount: "0.2",
         });

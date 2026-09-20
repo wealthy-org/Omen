@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useClaimPayout } from "@/hooks/useClaimPayout";
-import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_MARKET_ABI } from "@/lib/contracts";
 
 const { mockWagmiContext, mockWriteContractAsync, mockUseConnection, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
   const React = require("react");
@@ -29,6 +29,8 @@ vi.mock("wagmi", () => ({
 }));
 
 describe("useClaimPayout Hook", () => {
+  const marketAddress = "0x3333333333333333333333333333333333333333";
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockUseConnection.mockReturnValue({
@@ -41,42 +43,22 @@ describe("useClaimPayout Hook", () => {
     });
   });
 
-  it("calls writeContractAsync with correct contract address, ABI, function name, and BigInt marketId", async () => {
+  it("calls writeContractAsync with correct contract address, ABI, and claimPayout function name", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmockclaimtx789");
 
     const { result } = renderHook(() => useClaimPayout());
 
     let txHash: string | undefined;
     await act(async () => {
-      txHash = await result.current.claimPayout("7");
+      txHash = await result.current.claimPayout(marketAddress);
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "claim",
-      args: [BigInt(7)],
+      address: marketAddress,
+      abi: OMEN_MARKET_ABI,
+      functionName: "claimPayout",
     });
     expect(txHash).toBe("0xmockclaimtx789");
-  });
-
-  it("calls writeContractAsync when marketId is provided as a number", async () => {
-    mockWriteContractAsync.mockResolvedValueOnce("0xmockclaimtx999");
-
-    const { result } = renderHook(() => useClaimPayout());
-
-    let txHash: string | undefined;
-    await act(async () => {
-      txHash = await result.current.claimPayout(12);
-    });
-
-    expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: OMEN_FACTORY_ADDRESS,
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "claim",
-      args: [BigInt(12)],
-    });
-    expect(txHash).toBe("0xmockclaimtx999");
   });
 
   it("propagates error when claim transaction fails or user rejects", async () => {
@@ -86,7 +68,7 @@ describe("useClaimPayout Hook", () => {
 
     await expect(
       act(async () => {
-        await result.current.claimPayout("1");
+        await result.current.claimPayout(marketAddress);
       })
     ).rejects.toThrow("User rejected claim transaction");
   });

@@ -15,13 +15,13 @@ import {
   LiveActivityExplorerProps,
 } from "@/types";
 import { fetchAndDecodeTransaction, DecodedTxResult } from "@/lib/rpc-decoder";
+import { getExplorerTxUrl } from "@/lib/contracts";
 import {
   ETHEREUM_SEPOLIA_CHAIN_ID,
   ROBINHOOD_TESTNET_CHAIN_ID,
-  getExplorerTxUrl,
   OMEN_FACTORY_ADDRESS_SEPOLIA,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
-} from "@/lib/contracts";
+} from "@/lib/constants";
 
 export type {
   ActivityMethod,

@@ -55,10 +55,15 @@ describe("TICKET-92: Market Resolution API V1 & Helper", () => {
     expect(normalizeOutcome("cancelled")).toBe("VOID");
     expect(normalizeOutcome("INVALID")).toBeNull();
 
-    const standardSettlement = calculateSettlementPool(10, 5, "AGREE");
-    expect(standardSettlement.totalPool).toBe(15);
-    expect(standardSettlement.distributablePool).toBe(14.7);
-    expect(standardSettlement.protocolFee).toBe(0.3);
+    const defaultSettlement = calculateSettlementPool(10, 5, "AGREE");
+    expect(defaultSettlement.totalPool).toBe(15);
+    expect(defaultSettlement.distributablePool).toBe(15);
+    expect(defaultSettlement.protocolFee).toBe(0);
+
+    const feeSettlement = calculateSettlementPool(10, 5, "AGREE", 200);
+    expect(feeSettlement.totalPool).toBe(15);
+    expect(feeSettlement.distributablePool).toBe(14.7);
+    expect(feeSettlement.protocolFee).toBe(0.3);
 
     const voidSettlement = calculateSettlementPool(10, 5, "VOID");
     expect(voidSettlement.totalPool).toBe(15);
@@ -108,7 +113,7 @@ describe("TICKET-92: Market Resolution API V1 & Helper", () => {
   it("should resolve market with outcome AGREE and coordinate updates across tables", async () => {
     const marketId = "m-101";
     const beliefId = "b-101";
-    const creatorWallet = "0xcreator1111111111111111111111111111111111";
+    const creatorWallet = "0x1111111111111111111111111111111111111111";
 
     const mockMarket = {
       id: marketId,
@@ -162,7 +167,7 @@ describe("TICKET-92: Market Resolution API V1 & Helper", () => {
     const mockSettlementInsert: any = {};
     mockSettlementInsert.select = vi.fn().mockReturnValue(mockSettlementInsert);
     mockSettlementInsert.single = vi.fn().mockResolvedValue({
-      data: { id: "set-1", market_id: marketId, distributable_pool: 9.8 },
+      data: { id: "set-1", market_id: marketId, distributable_pool: 10 },
       error: null,
     });
 
@@ -170,8 +175,12 @@ describe("TICKET-92: Market Resolution API V1 & Helper", () => {
     mockProfileQuery.eq = vi.fn().mockReturnValue(mockProfileQuery);
     mockProfileQuery.maybeSingle = vi.fn().mockResolvedValue({ data: mockProfile, error: null });
 
-    const mockProfileUpsert: any = {};
-    mockProfileUpsert.select = vi.fn().mockResolvedValue({ data: null, error: null });
+    const mockProfileUpdate: any = {};
+    mockProfileUpdate.eq = vi.fn().mockResolvedValue({ data: null, error: null });
+
+    const mockConfirmationQuery: any = {};
+    mockConfirmationQuery.eq = vi.fn().mockReturnValue(mockConfirmationQuery);
+    mockConfirmationQuery.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
 
     vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
       from: vi.fn((table: string) => {
@@ -200,7 +209,13 @@ describe("TICKET-92: Market Resolution API V1 & Helper", () => {
         if (table === "creator_profiles") {
           return {
             select: vi.fn().mockReturnValue(mockProfileQuery),
-            upsert: vi.fn().mockReturnValue(mockProfileUpsert),
+            update: vi.fn().mockReturnValue(mockProfileUpdate),
+            upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
+          };
+        }
+        if (table === "creator_confirmations") {
+          return {
+            select: vi.fn().mockReturnValue(mockConfirmationQuery),
           };
         }
         return {} as any;

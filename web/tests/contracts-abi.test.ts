@@ -4,11 +4,15 @@ import path from "node:path";
 import {
   OMEN_FACTORY_ABI,
   OMEN_MARKET_ABI,
+  getOmenFactoryAddress,
+} from "../lib/contracts";
+import {
   OMEN_FACTORY_ADDRESS_SEPOLIA,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
   OMEN_FACTORY_ADDRESS,
-  getOmenFactoryAddress,
-} from "../lib/contracts";
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+} from "../lib/constants";
 
 describe("TICKET-71: Smart Contract ABI Exports & Static Configuration", () => {
   it("should adhere strictly to Zero-Comment Policy in contracts config, mock config, and deploy script", () => {
@@ -68,10 +72,10 @@ describe("TICKET-71: Smart Contract ABI Exports & Static Configuration", () => {
   });
 
   it("should resolve static factory address for supported chains", () => {
-    const sepoliaAddr = getOmenFactoryAddress(11155111);
+    const sepoliaAddr = getOmenFactoryAddress(ETHEREUM_SEPOLIA_CHAIN_ID);
     expect(sepoliaAddr).toBe(OMEN_FACTORY_ADDRESS_SEPOLIA);
 
-    const robinhoodAddr = getOmenFactoryAddress(46630);
+    const robinhoodAddr = getOmenFactoryAddress(ROBINHOOD_TESTNET_CHAIN_ID);
     expect(robinhoodAddr).toBe(OMEN_FACTORY_ADDRESS_ROBINHOOD);
 
     const defaultAddr = getOmenFactoryAddress();

@@ -5,6 +5,7 @@ import path from "node:path";
 import { privateKeyToAccount } from "viem/accounts";
 import { POST as confirmBelief } from "../app/api/beliefs/[id]/confirm/route";
 import * as supabaseLib from "../lib/supabase";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "../lib/constants";
 
 describe("TICKET-88: EIP-712 Creator Confirmation API", () => {
   const TEST_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
@@ -49,7 +50,7 @@ describe("TICKET-88: EIP-712 Creator Confirmation API", () => {
     const beliefId = "b-uuid-101";
     const statement = "Solana will flip Ethereum in fees";
     const timestamp = 1726500000;
-    const chainId = 11155111;
+    const chainId = ETHEREUM_SEPOLIA_CHAIN_ID;
 
     const signature = await testAccount.signTypedData({
       domain: {
@@ -154,7 +155,7 @@ describe("TICKET-88: EIP-712 Creator Confirmation API", () => {
     const beliefId = "b-uuid-101";
     const statement = "Solana will flip Ethereum in fees";
     const timestamp = 1726500000;
-    const chainId = 11155111;
+    const chainId = ETHEREUM_SEPOLIA_CHAIN_ID;
 
     const fakeSignature = await otherAccount.signTypedData({
       domain: {
@@ -224,7 +225,7 @@ describe("TICKET-88: EIP-712 Creator Confirmation API", () => {
       creator_address: testAccount.address,
       signature: "0x1234",
       timestamp: 1726500000,
-      chain_id: 11155111,
+      chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
     });
 
     const res = await confirmBelief(req, { params: Promise.resolve({ id: "non-existent" }) });

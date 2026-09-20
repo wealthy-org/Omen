@@ -5,6 +5,7 @@ import path from "node:path";
 import { GET as getMarketsList } from "../app/api/markets/route";
 import { GET as getMarketDetail } from "../app/api/markets/[id]/route";
 import * as supabaseLib from "../lib/supabase";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "../lib/constants";
 
 describe("TICKET-86: Markets V1 API Routes (GET /api/markets & GET /api/markets/[id])", () => {
   beforeEach(() => {
@@ -41,7 +42,7 @@ describe("TICKET-86: Markets V1 API Routes (GET /api/markets & GET /api/markets/
         id: "m-uuid-1",
         belief_id: "b-1",
         contract_address: "0x1234567890123456789012345678901234567890",
-        chain_id: 11155111,
+        chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
         agree_pool: "7.5",
         disagree_pool: "2.5",
         open_time: "2026-09-01T00:00:00Z",

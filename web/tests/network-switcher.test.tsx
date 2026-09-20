@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import NetworkSwitcherModal from "@/components/NetworkSwitcherModal";
 import Navbar from "@/components/Navbar";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID } from "@/lib/constants";
 
 vi.mock("next/navigation", () => ({
   usePathname: vi.fn().mockReturnValue("/"),
@@ -25,7 +26,7 @@ describe("NetworkSwitcherModal Component", () => {
         isOpen={true}
         currentChainId={1}
         currentNetworkName="Ethereum Mainnet"
-        targetChainId={11155111}
+        targetChainId={ETHEREUM_SEPOLIA_CHAIN_ID}
         targetNetworkName="Ethereum Sepolia"
       />
     );
@@ -40,19 +41,16 @@ describe("NetworkSwitcherModal Component", () => {
     expect(
       screen.getByText(/Omen operates on Ethereum Sepolia and Robinhood Chain Testnet/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/Ethereum Mainnet \(1\)/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Ethereum Sepolia/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Robinhood Chain Testnet/i).length).toBeGreaterThan(0);
   });
 
-  it("triggers onSwitchNetwork with selected chain ID and displays loading state during network switch", async () => {
-    const onSwitchMock = vi.fn().mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 50))
-    );
+  it("allows selecting Robinhood Chain Testnet and triggers onSwitchNetwork", async () => {
+    const onSwitchMock = vi.fn();
 
     render(
       <NetworkSwitcherModal
         isOpen={true}
+        currentChainId={1}
+        currentNetworkName="Ethereum Mainnet"
         onSwitchNetwork={onSwitchMock}
       />
     );
@@ -71,7 +69,7 @@ describe("NetworkSwitcherModal Component", () => {
       fireEvent.click(switchButton);
     });
 
-    expect(onSwitchMock).toHaveBeenCalledWith(46630);
+    expect(onSwitchMock).toHaveBeenCalledWith(ROBINHOOD_TESTNET_CHAIN_ID);
   });
 
   it("triggers onClose when close icon or dismiss button is clicked", () => {

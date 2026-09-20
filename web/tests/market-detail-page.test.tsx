@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import MarketDetailPage from "../app/market/[id]/page";
 import { MarketDetailPanels } from "../components/MarketDetailPanels";
+import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 const mocks = vi.hoisted(() => ({
   writeContractAsyncMock: vi.fn().mockResolvedValue("0xMockTxHash"),
@@ -13,7 +14,7 @@ vi.mock("wagmi", () => ({
     address: mocks.accountAddress,
     isConnected: true,
   }),
-  useChainId: () => 11155111,
+  useChainId: () => ETHEREUM_SEPOLIA_CHAIN_ID,
   useWriteContract: () => ({
     writeContract: mocks.writeContractAsyncMock,
     writeContractAsync: mocks.writeContractAsyncMock,
@@ -59,7 +60,7 @@ describe("Market Detail Page (/market/[id])", () => {
           totalVolumeEth: 75.0,
           socialConsensusPct: 82,
           marketAddress: "0xMarketAddress123",
-          chainId: 11155111,
+          chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
           oracleFeed: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
           targetPrice: 100000,
           resolutionType: "PRICE_ABOVE",
@@ -96,7 +97,7 @@ describe("Market Detail Page (/market/[id])", () => {
       totalVolumeEth: 15.0,
       socialConsensusPct: 90,
       marketAddress: "0xResolvedMarketAddress",
-      chainId: 11155111,
+      chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
       oracleFeed: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
       targetPrice: 4000,
       resolutionType: "PRICE_ABOVE",
