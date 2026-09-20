@@ -1,4 +1,4 @@
-import { createPublicClient, createWalletClient, http, parseEther, defineChain, Address } from "viem";
+import { createPublicClient, createWalletClient, http, parseEther, formatEther, defineChain, Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { createClient } from "@supabase/supabase-js";
 import { OMEN_MARKET_ABI } from "../lib/contracts";
@@ -107,9 +107,15 @@ async function main() {
         transport: http(),
       });
 
+      const bal = await publicClient.getBalance({ address: account.address });
+      if (bal < parseEther("0.0006")) {
+        console.log(`Skipping wallet ${account.address} on ${name}: insufficient balance (${formatEther(bal)} ETH).`);
+        continue;
+      }
+
       const market = targetMarkets[i % targetMarkets.length];
       const side = i % 2 === 0 ? "AGREE" : "DISAGREE";
-      const stakeAmountEth = (0.001 * (i + 1)).toFixed(3);
+      const stakeAmountEth = (0.0002 * (i + 1)).toFixed(4);
       const parsedWei = parseEther(stakeAmountEth);
 
       if (!market.contract_address) {

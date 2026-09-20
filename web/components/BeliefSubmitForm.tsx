@@ -124,11 +124,12 @@ export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to deploy market");
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        throw new Error(data?.error || `Failed to deploy market (HTTP ${res.status})`);
       }
 
-      const data = await res.json();
       const marketId = data.marketId || data.data?.market_id;
       if (!marketId) {
         throw new Error("Market ID not returned");
@@ -139,8 +140,8 @@ export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
       } else {
         router.push(`/market/${marketId}`);
       }
-    } catch {
-      setErrorMessage("Failed to deploy market. Please try again.");
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Failed to deploy market. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

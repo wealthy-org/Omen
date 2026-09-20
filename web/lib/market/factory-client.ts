@@ -7,6 +7,8 @@ import {
   ROBINHOOD_TESTNET_CHAIN_ID,
   robinhoodChain,
   CHAINLINK_ETH_USD_FEED,
+  ETHEREUM_SEPOLIA_RPC_URL,
+  ROBINHOOD_TESTNET_RPC_URL,
 } from "../constants";
 import type { BeliefHashes, CreateOnChainMarketParams, CreatedMarketResult } from "@/types";
 
@@ -42,28 +44,37 @@ export async function createOnChainMarket(
   }
 
   const account = privateKeyToAccount(privateKey);
-  const chain = chainId === ROBINHOOD_TESTNET_CHAIN_ID ? robinhoodChain : sepolia;
+  const isRobinhood = chainId === ROBINHOOD_TESTNET_CHAIN_ID;
+  const chain = isRobinhood ? robinhoodChain : sepolia;
+  const rpcUrl = isRobinhood ? ROBINHOOD_TESTNET_RPC_URL : ETHEREUM_SEPOLIA_RPC_URL;
 
   const publicClient = createPublicClient({
     chain,
-    transport: http(),
+    transport: http(rpcUrl),
   });
 
   const walletClient = createWalletClient({
     account,
     chain,
-    transport: http(),
+    transport: http(rpcUrl),
   });
 
   const factoryAddress = getOmenFactoryAddress(chainId);
-
   const defaultFeed = CHAINLINK_ETH_USD_FEED;
+
+  let rawTargetPrice: bigint = 0n;
+  if (params.config?.targetPrice !== undefined && params.config?.targetPrice !== null) {
+    const num = Number(params.config.targetPrice);
+    if (!Number.isNaN(num)) {
+      rawTargetPrice = BigInt(Math.round(num));
+    }
+  }
 
   const resolutionConfig = {
     resType: params.config?.resType || 0,
     assetAFeed: (params.config?.assetAFeed || defaultFeed) as Address,
     assetBFeed: (params.config?.assetBFeed || defaultFeed) as Address,
-    targetPrice: BigInt(params.config?.targetPrice || 0),
+    targetPrice: rawTargetPrice,
     startTimestamp: BigInt(params.config?.startTimestamp || params.openTime || 0),
     endTimestamp: BigInt(params.config?.endTimestamp || params.closeTime || 0),
   };
@@ -80,6 +91,7 @@ export async function createOnChainMarket(
       BigInt(params.closeTime || 0),
       resolutionConfig,
     ],
+    gas: 2000000n,
   });
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });

@@ -96,6 +96,13 @@ async function main() {
     const chain = chainId === ROBINHOOD_TESTNET_CHAIN_ID ? robinhoodChain : sepoliaChain;
     const chainName = chainId === ROBINHOOD_TESTNET_CHAIN_ID ? "Robinhood Chain Testnet" : "Ethereum Sepolia";
 
+    const placeholderAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+    const currentAddr = (m.contract_address || "").toLowerCase();
+    if (currentAddr && currentAddr !== placeholderAddress && currentAddr !== "0x0000000000000000000000000000000000000000") {
+      console.log(`Market "${m.title}" already deployed on-chain at ${m.contract_address} (ID: ${m.contract_market_id}). Skipping.`);
+      continue;
+    }
+
     const publicClient = createPublicClient({ chain, transport: http() });
     const walletClient = createWalletClient({ account: adminAccount, chain, transport: http() });
 
@@ -111,14 +118,22 @@ async function main() {
     const config = m.resolution_config || {};
     const defaultFeed = CHAINLINK_ETH_USD_FEED;
 
+    let resType = 0;
+    if (m.resolution_type === "PRICE_BELOW" || config.resType === 1) resType = 1;
+    else if (m.resolution_type === "RELATIVE_PERFORMANCE" || config.resType === 2) resType = 2;
+
+    const rawTarget = config.targetPrice ?? config.target ?? 0;
+    const safeTargetPrice = typeof rawTarget === "number"
+      ? Number.isInteger(rawTarget) ? BigInt(rawTarget) : BigInt(Math.round(rawTarget * 1e8))
+      : BigInt(rawTarget || 0);
+
     const resolutionConfig = {
-      resType: config.resType || 0,
+      resType,
       assetAFeed: (config.assetAFeed || defaultFeed) as Address,
       assetBFeed: (config.assetBFeed || defaultFeed) as Address,
-      targetPrice: BigInt(config.targetPrice || 0),
-      startTimestamp: BigInt(config.startTimestamp || openTime),
-      endTimestamp: BigInt(config.endTimestamp || closeTime),
-      strikePrice: BigInt(config.strikePrice || 0),
+      targetPrice: safeTargetPrice,
+      startTimestamp: BigInt(config.startTimestamp ? Math.floor(new Date(config.startTimestamp).getTime() / 1000) : openTime),
+      endTimestamp: BigInt(config.endTimestamp ? Math.floor(new Date(config.endTimestamp).getTime() / 1000) : closeTime),
     };
 
     console.log(`Deploying on-chain market for "${m.title}" on ${chainName}...`);

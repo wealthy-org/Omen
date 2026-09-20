@@ -13,10 +13,16 @@ export const StructuredBeliefSchema = z.object({
   comparison_asset: z.string().trim().nullable().optional(),
   direction: z.enum(["OUTPERFORM", "ABOVE_PRICE", "BELOW_PRICE"]),
   target_value: z.number().nullable().optional(),
-  timeframe_days: z.number().positive().default(30),
+  timeframe_days: z.preprocess((val) => {
+    const num = Number(val);
+    return isNaN(num) || num <= 0 ? 30 : Math.round(num);
+  }, z.number().min(1).default(30)),
   statement_summary: z.string().trim().min(1, "Statement summary is required"),
   oracle_recommendation: z.enum(["chainlink", "robinhood_market_data"]).default("chainlink"),
-  confidence_score: z.number().min(0).max(1).default(0.8),
+  confidence_score: z.preprocess((val) => {
+    const num = Number(val);
+    return isNaN(num) ? 0.8 : Math.min(Math.max(num, 0), 1);
+  }, z.number().min(0).max(1).default(0.8)),
 });
 
 export type StructuredBelief = z.infer<typeof StructuredBeliefSchema>;
