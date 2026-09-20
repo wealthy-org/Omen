@@ -31,7 +31,7 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
     return { req, context };
   }
 
-  it("should resolve market to resolved_yes with resolution_source successfully", async () => {
+  it("should resolve market to RESOLVED AGREE with resolution_source successfully", async () => {
     const activeMarket = {
       id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
       contract_market_id: 1,
@@ -40,15 +40,16 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
       category: "crypto",
       deadline: "2026-10-01T00:00:00.000Z",
       status: "active",
-      total_pool_yes: 100,
-      total_pool_no: 50,
+      agree_pool: 100,
+      disagree_pool: 50,
       resolution_source: null,
       created_at: "2026-09-16T12:00:00.000Z",
     };
 
     const resolvedMarket = {
       ...activeMarket,
-      status: "resolved_yes",
+      status: "RESOLVED",
+      winner: "AGREE",
       resolution_source: "https://oracle.binance.com/eth-usd",
     };
 
@@ -65,13 +66,18 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
       from: vi.fn().mockReturnValue({
         select: mockSelectFind,
         update: mockUpdate,
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: {}, error: null }),
+          }),
+        }),
       }),
     } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
 
     const { req, context } = createMockRequest(
       "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
       {
-        status: "resolved_yes",
+        outcome: "AGREE",
         resolution_source: "https://oracle.binance.com/eth-usd",
       },
       { "x-admin-key": "omen-admin-2026" }
@@ -82,7 +88,8 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
 
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.market.status).toBe("resolved_yes");
+    expect(body.market.status).toBe("RESOLVED");
+    expect(body.market.winner).toBe("AGREE");
     expect(body.market.resolution_source).toBe("https://oracle.binance.com/eth-usd");
     expect(body.market.total_pool).toBe(150);
   });
@@ -96,15 +103,16 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
       category: "crypto",
       deadline: "2026-10-01T00:00:00.000Z",
       status: "active",
-      total_pool_yes: 20,
-      total_pool_no: 30,
+      agree_pool: 20,
+      disagree_pool: 30,
       resolution_source: null,
       created_at: "2026-09-16T12:00:00.000Z",
     };
 
     const resolvedMarket = {
       ...activeMarket,
-      status: "resolved_no",
+      status: "RESOLVED",
+      winner: "DISAGREE",
     };
 
     const mockMaybeSingle = vi.fn().mockResolvedValue({ data: activeMarket, error: null });
@@ -120,12 +128,17 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
       from: vi.fn().mockReturnValue({
         select: mockSelectFind,
         update: mockUpdate,
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: {}, error: null }),
+          }),
+        }),
       }),
     } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
 
     const { req, context } = createMockRequest(
       "5",
-      { status: "resolved_no" },
+      { outcome: "DISAGREE" },
       { authorization: "Bearer omen-admin-2026" }
     );
 
@@ -136,24 +149,24 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
 
   it("should return 401 Unauthorized when credentials are not admin", async () => {
     const { req, context } = createMockRequest("any-id", {
-      status: "resolved_yes",
+      outcome: "AGREE",
     });
 
     const res = await POST(req, context);
     expect(res.status).toBe(401);
   });
 
-  it("should return 400 Bad Request when resolve status is invalid", async () => {
+  it("should return 400 Bad Request when resolve outcome is invalid", async () => {
     const { req, context } = createMockRequest(
       "any-id",
-      { status: "invalid_status" },
+      { outcome: "invalid_status" },
       { "x-admin-key": "omen-admin-2026" }
     );
 
     const res = await POST(req, context);
     expect(res.status).toBe(400);
     const body = await res.json();
-    expect(body.error).toContain("Invalid status");
+    expect(body.error).toContain("Invalid status or outcome");
   });
 
   it("should return 404 Not Found when market does not exist", async () => {
@@ -167,7 +180,7 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
 
     const { req, context } = createMockRequest(
       "non-existent-id",
-      { status: "resolved_yes" },
+      { outcome: "AGREE" },
       { "x-admin-key": "omen-admin-2026" }
     );
 
@@ -179,7 +192,8 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
     const alreadyResolvedMarket = {
       id: "already-resolved-uuid",
       contract_market_id: 2,
-      status: "resolved_yes",
+      status: "RESOLVED",
+      winner: "AGREE",
     };
 
     const mockMaybeSingle = vi.fn().mockResolvedValue({ data: alreadyResolvedMarket, error: null });
@@ -192,7 +206,7 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
 
     const { req, context } = createMockRequest(
       "already-resolved-uuid",
-      { status: "resolved_no" },
+      { outcome: "DISAGREE" },
       { "x-admin-key": "omen-admin-2026" }
     );
 
@@ -227,7 +241,7 @@ describe("TICKET-32: API Route Pembaruan Status Resolusi Pasar (POST /api/market
 
     const { req, context } = createMockRequest(
       "fail-uuid",
-      { status: "cancelled" },
+      { outcome: "VOID", status: "cancelled" },
       { "x-admin-key": "omen-admin-2026" }
     );
 

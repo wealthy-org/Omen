@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import DailyCheckinWidget from "@/components/DailyCheckinWidget";
-import QuestCard from "@/components/QuestCard";
 import { AdminMarketCreateForm } from "@/components/AdminMarketCreateForm";
 import AdminMarketResolutionTable from "@/components/AdminMarketResolutionTable";
 import { BettingModal } from "@/components/BettingModal";
@@ -11,7 +9,7 @@ import { ClaimPayoutButton } from "@/components/ClaimPayoutButton";
 const {
   mockWagmiContext,
   mockWriteContractAsync,
-  mockUseAccount,
+  mockUseConnection,
   mockUseWaitForTransactionReceipt,
   mockWaitForTransactionReceipt,
 } = vi.hoisted(() => {
@@ -19,7 +17,7 @@ const {
   return {
     mockWagmiContext: React.createContext({}),
     mockWriteContractAsync: vi.fn(),
-    mockUseAccount: vi.fn(),
+    mockUseConnection: vi.fn(),
     mockUseWaitForTransactionReceipt: vi.fn(),
     mockWaitForTransactionReceipt: vi.fn(),
   };
@@ -37,7 +35,7 @@ vi.mock("wagmi", () => ({
     error: null,
   }),
   useWaitForTransactionReceipt: () => mockUseWaitForTransactionReceipt(),
-  useAccount: () => mockUseAccount(),
+  useConnection: () => mockUseConnection(),
   usePublicClient: () => ({
     waitForTransactionReceipt: mockWaitForTransactionReceipt,
   }),
@@ -46,7 +44,7 @@ vi.mock("wagmi", () => ({
 describe("Omen Full Lifecycle End-to-End Test Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAccount.mockReturnValue({
+    mockUseConnection.mockReturnValue({
       address: "0x1234567890123456789012345678901234567890",
       isConnected: true,
     });
@@ -59,66 +57,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
     });
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ success: true, points: 50 }),
-    });
-  });
-
-  describe("Phase 1: User Onboarding, Daily Streak & Quest Completion", () => {
-    it("completes daily check-in streak and awards points", async () => {
-      let pointsAwarded = 0;
-      const handleCheckin = vi.fn().mockImplementation((_day: number, pts: number) => {
-        pointsAwarded += pts;
-      });
-
-      render(
-        <DailyCheckinWidget
-          currentStreak={2}
-          initialCanCheckIn={true}
-          cooldownSeconds={3600}
-          onCheckIn={handleCheckin}
-        />
-      );
-
-      const checkinBtn = screen.getByRole("button", { name: /claim day 3 reward/i });
-      expect(checkinBtn).toBeInTheDocument();
-
-      await act(async () => {
-        fireEvent.click(checkinBtn);
-      });
-
-      expect(handleCheckin).toHaveBeenCalledWith(3, 150);
-      expect(pointsAwarded).toBe(150);
-      expect(screen.getByText(/Points Claimed!/i)).toBeInTheDocument();
-    });
-
-    it("verifies and completes active quest granting reward points", async () => {
-      let currentPoints = 150;
-      const handleAction = vi.fn().mockImplementation(() => {
-        currentPoints += 100;
-      });
-
-      render(
-        <QuestCard
-          id="quest-1"
-          title="Place Your First Prediction"
-          description="Place any prediction with at least 0.01 ETH to earn 100 XP."
-          category="ON-CHAIN"
-          points={100}
-          status="AVAILABLE"
-          onAction={handleAction}
-        />
-      );
-
-      const questActionBtn = screen.getByRole("button", { name: /start quest/i });
-      expect(questActionBtn).toBeInTheDocument();
-      expect(screen.getByText("+100 PTS")).toBeInTheDocument();
-
-      await act(async () => {
-        fireEvent.click(questActionBtn);
-      });
-
-      expect(handleAction).toHaveBeenCalledTimes(1);
-      expect(currentPoints).toBe(250);
+      json: async () => ({ success: true }),
     });
   });
 
@@ -140,7 +79,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
 
       const criteriaInput = screen.getByLabelText(/resolution rules & criteria/i);
       fireEvent.change(criteriaInput, {
-        target: { value: "Resolves to YES if DefiLlama L2 TVL metric reaches or exceeds 50 Billion USD." },
+        target: { value: "Resolves to AGREE if DefiLlama L2 TVL metric reaches or exceeds 50 Billion USD." },
       });
 
       const submitBtn = screen.getByRole("button", { name: /review & deploy market/i });
@@ -159,7 +98,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
   });
 
   describe("Phase 3: Web3 Dual Bettor Placement & Pool Ratio Balancing", () => {
-    it("allows Bettor 1 to place YES bet and syncs indexer", async () => {
+    it("allows Bettor 1 to place AGREE bet and syncs indexer", async () => {
       const mockMarket = {
         id: "mkt-100",
         title: "Will Ethereum L2 TVL surpass $50B in 2026?",
@@ -167,8 +106,8 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
         status: "active" as const,
         endTime: "Ends in 14d",
         totalPool: "0.00",
-        yesPercentage: 50,
-        noPercentage: 50,
+        agreePercentage: 50,
+        disagreePercentage: 50,
         volume: "0.00",
       };
 
@@ -178,7 +117,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
           isOpen={true}
           onClose={() => {}}
           market={mockMarket}
-          initialOutcome="YES"
+          initialOutcome="AGREE"
           userBalance="2.00"
           onConfirmBet={handleConfirmBet}
         />
@@ -195,13 +134,13 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
       await waitFor(() => {
         expect(handleConfirmBet).toHaveBeenCalledWith({
           marketId: "mkt-100",
-          outcome: "YES",
+          outcome: "AGREE",
           amount: "0.05",
         });
       });
     });
 
-    it("allows Bettor 2 to place NO bet and balances pool ratio 50/50", async () => {
+    it("allows Bettor 2 to place DISAGREE bet and balances pool ratio 50/50", async () => {
       const mockMarket = {
         id: "mkt-100",
         title: "Will Ethereum L2 TVL surpass $50B in 2026?",
@@ -209,8 +148,8 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
         status: "active" as const,
         endTime: "Ends in 14d",
         totalPool: "0.05",
-        yesPercentage: 100,
-        noPercentage: 0,
+        agreePercentage: 100,
+        disagreePercentage: 0,
         volume: "0.05",
       };
 
@@ -220,7 +159,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
           isOpen={true}
           onClose={() => {}}
           market={mockMarket}
-          initialOutcome="NO"
+          initialOutcome="DISAGREE"
           userBalance="1.50"
           onConfirmBet={handleConfirmBet}
         />
@@ -237,7 +176,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
       await waitFor(() => {
         expect(handleConfirmBet).toHaveBeenCalledWith({
           marketId: "mkt-100",
-          outcome: "NO",
+          outcome: "DISAGREE",
           amount: "0.05",
         });
       });
@@ -245,7 +184,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
   });
 
   describe("Phase 4: Market Settlement & Payout Claiming", () => {
-    it("resolves market as YES by admin and triggers resolution settlement", async () => {
+    it("resolves market as AGREE by admin and triggers resolution settlement", async () => {
       const pendingMarket = [
         {
           id: "mkt-100",
@@ -253,11 +192,11 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
           category: "L2",
           totalPool: 100000,
           volume: 250000,
-          yesPercentage: 50,
-          noPercentage: 50,
+          agreePercentage: 50,
+          disagreePercentage: 50,
           endTime: "2026-03-01T00:00:00Z",
           resolutionSourceUrl: "https://defillama.com",
-          resolutionCriteria: "Resolves to YES if L2 TVL reaches 50B.",
+          resolutionCriteria: "Resolves to AGREE if L2 TVL reaches 50B.",
           status: "PENDING_RESOLUTION" as const,
         },
       ];
@@ -270,8 +209,8 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
         />
       );
 
-      const resolveYesBtn = screen.getByRole("button", { name: /^resolve yes$/i });
-      fireEvent.click(resolveYesBtn);
+      const resolveAgreeBtn = screen.getByRole("button", { name: /^resolve agree$/i });
+      fireEvent.click(resolveAgreeBtn);
 
       const notesInput = screen.getByLabelText(/resolution oracle citation/i);
       fireEvent.change(notesInput, {
@@ -281,7 +220,7 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
       const checkbox = screen.getByRole("checkbox");
       fireEvent.click(checkbox);
 
-      const executeBtn = screen.getByRole("button", { name: /execute settlement \(yes\)/i });
+      const executeBtn = screen.getByRole("button", { name: /execute settlement \(agree\)/i });
       await act(async () => {
         fireEvent.click(executeBtn);
       });
@@ -289,11 +228,11 @@ describe("Omen Full Lifecycle End-to-End Test Suite", () => {
       await waitFor(() => {
         expect(handleResolve).toHaveBeenCalledWith(
           "mkt-100",
-          "YES",
+          "AGREE",
           "DefiLlama confirmed TVL passed $50B.",
           undefined
         );
-        expect(screen.getByText(/successfully resolved as \[yes\]/i)).toBeInTheDocument();
+        expect(screen.getByText(/successfully resolved as \[agree\]/i)).toBeInTheDocument();
       });
     });
 

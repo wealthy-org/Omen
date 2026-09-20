@@ -46,10 +46,12 @@ describe("TICKET-92: Market Resolution API V1 & Helper", () => {
 
   it("should correctly normalize outcome aliases and calculate pool settlements", () => {
     expect(normalizeOutcome("AGREE")).toBe("AGREE");
-    expect(normalizeOutcome("resolved_yes")).toBe("AGREE");
+    expect(normalizeOutcome("agree")).toBe("AGREE");
     expect(normalizeOutcome("DISAGREE")).toBe("DISAGREE");
-    expect(normalizeOutcome("resolved_no")).toBe("DISAGREE");
+    expect(normalizeOutcome("disagree")).toBe("DISAGREE");
     expect(normalizeOutcome("VOID")).toBe("VOID");
+    expect(normalizeOutcome("void")).toBe("VOID");
+    expect(normalizeOutcome("CANCEL")).toBe("VOID");
     expect(normalizeOutcome("cancelled")).toBe("VOID");
     expect(normalizeOutcome("INVALID")).toBeNull();
 

@@ -11,8 +11,8 @@ const MOCK_LIVE_MARKETS = [
     category: "crypto",
     status: "active",
     deadline: "2026-10-01T00:00:00Z",
-    yes_pool: 28.5,
-    no_pool: 15.5,
+    agree_pool: 28.5,
+    disagree_pool: 15.5,
   },
   {
     id: "mkt-2",
@@ -21,8 +21,8 @@ const MOCK_LIVE_MARKETS = [
     category: "meme",
     status: "active",
     deadline: "2026-10-15T00:00:00Z",
-    yes_pool: 12.0,
-    no_pool: 20.0,
+    agree_pool: 12.0,
+    disagree_pool: 20.0,
   },
   {
     id: "mkt-3",
@@ -31,8 +31,8 @@ const MOCK_LIVE_MARKETS = [
     category: "crypto",
     status: "active",
     deadline: "2026-12-31T00:00:00Z",
-    yes_pool: 45.0,
-    no_pool: 15.0,
+    agree_pool: 45.0,
+    disagree_pool: 15.0,
   },
 ];
 
@@ -49,7 +49,7 @@ describe("PredictionsPage Component", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: /prediction markets/i })
     ).toBeInTheDocument();
-    expect(screen.getByText("Live Arbitrum Sepolia Markets")).toBeInTheDocument();
+    expect(screen.getByText("Live Multi-Chain Markets")).toBeInTheDocument();
   });
 
   it("renders dynamic market cards after fetching from api", async () => {
@@ -187,7 +187,7 @@ describe("PredictionsPage Component", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens confirmation modal when clicking Bet YES and places bet successfully", async () => {
+  it("opens confirmation modal when clicking Bet Agree and places bet successfully", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
       const urlString = String(url);
       if (urlString.includes("/api/markets")) {
@@ -210,10 +210,10 @@ describe("PredictionsPage Component", () => {
       ).toBeInTheDocument();
     });
 
-    const betYesBtn = screen.getByRole("button", {
-      name: /bet yes on will eth reach \$5,000 before q4 2026\?/i,
+    const betAgreeBtn = screen.getByRole("button", {
+      name: /bet agree on will eth reach \$5,000 before q4 2026\?/i,
     });
-    fireEvent.click(betYesBtn);
+    fireEvent.click(betAgreeBtn);
 
     const dialog = screen.getByRole("dialog");
     expect(dialog).toBeInTheDocument();
@@ -229,7 +229,7 @@ describe("PredictionsPage Component", () => {
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
       expect(screen.getByRole("status")).toHaveTextContent(
-        'Confirmed bet of 0.05 ETH on YES for "Will ETH reach $5,000 before Q4 2026?"! Position registered.'
+        'Confirmed bet of 0.05 ETH on AGREE for "Will ETH reach $5,000 before Q4 2026?"! Position registered.'
       );
     });
   });

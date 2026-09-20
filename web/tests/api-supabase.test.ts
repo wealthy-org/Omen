@@ -18,9 +18,7 @@ describe("TICKET-24: Supabase Database Client Helper", () => {
 
   it("should throw error if public environment variables are missing for client", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.SUPABASE_URL;
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    delete process.env.SUPABASE_ANON_KEY;
 
     expect(() => getSupabaseClient()).toThrow("Missing Supabase public configuration");
   });

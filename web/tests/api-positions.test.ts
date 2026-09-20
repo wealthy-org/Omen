@@ -46,8 +46,6 @@ describe("TICKET-87: Positions Indexer & History APIs", () => {
       id: "m-uuid-1",
       agree_pool: "5.0",
       disagree_pool: "5.0",
-      total_pool_yes: 5.0,
-      total_pool_no: 5.0,
     };
 
     const mockPosition = {

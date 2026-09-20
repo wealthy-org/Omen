@@ -22,35 +22,29 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
     });
   }
 
-  it("should successfully index a yes bet, update total_pool_yes, and award 50 activity points", async () => {
-    const mockMarket = {
-      id: "market-uuid-1",
-      contract_market_id: 1,
-      title: "ETH to 5k",
-      total_pool_yes: 100,
-      total_pool_no: 50,
-    };
-
+  it("should successfully index an agree bet and update agree_pool", async () => {
     const mockCreatedBet = {
       id: "bet-uuid-1",
-      market_id: "market-uuid-1",
+      market_id: "m-uuid-1",
       wallet_address: normalizedWallet,
-      side: "yes",
+      side: "AGREE",
       amount: 25,
       claimed: false,
-      tx_hash: validTxHash.toLowerCase(),
-      created_at: "2026-09-16T12:00:00.000Z",
+      tx_hash: validTxHash,
+      created_at: new Date().toISOString(),
+    };
+
+    const mockMarket = {
+      id: "m-uuid-1",
+      contract_market_id: 1,
+      title: "Market 1",
+      agree_pool: 100,
+      disagree_pool: 50,
     };
 
     const mockCheckSelect = vi.fn().mockReturnValue({
       eq: vi.fn().mockReturnValue({
         maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-      }),
-    });
-
-    const mockMarketSelect = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        maybeSingle: vi.fn().mockResolvedValue({ data: mockMarket, error: null }),
       }),
     });
 
@@ -60,18 +54,17 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
       }),
     });
 
+    const mockMarketSelect = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        maybeSingle: vi.fn().mockResolvedValue({ data: mockMarket, error: null }),
+      }),
+    });
+
     const mockMarketUpdate = vi.fn().mockReturnValue({
       eq: vi.fn().mockResolvedValue({ error: null }),
     });
 
-    const mockUserSelect = vi.fn().mockReturnValue({
-      eq: vi.fn().mockReturnValue({
-        maybeSingle: vi.fn().mockResolvedValue({ data: { total_points: 150 }, error: null }),
-      }),
-    });
-
     const mockUserUpsert = vi.fn().mockResolvedValue({ error: null });
-    const mockPointsInsert = vi.fn().mockResolvedValue({ error: null });
 
     vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
       from: vi.fn().mockImplementation((table: string) => {
@@ -89,13 +82,7 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
         }
         if (table === "users") {
           return {
-            select: mockUserSelect,
             upsert: mockUserUpsert,
-          };
-        }
-        if (table === "points_events") {
-          return {
-            insert: mockPointsInsert,
           };
         }
         return {};
@@ -106,7 +93,7 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
       tx_hash: validTxHash,
       contract_market_id: 1,
       wallet_address: validWallet,
-      side: "YES",
+      side: "AGREE",
       amount: 25,
     });
 
@@ -116,46 +103,38 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
     const data = await res.json();
     expect(data.success).toBe(true);
     expect(data.bet.id).toBe("bet-uuid-1");
-    expect(data.bet.side).toBe("yes");
-    expect(data.points_awarded).toBe(50);
-    expect(data.updated_pools.total_pool_yes).toBe(125);
-    expect(data.updated_pools.total_pool_no).toBe(50);
+    expect(data.bet.side).toBe("AGREE");
+    expect(data.updated_pools.agree_pool).toBe(125);
+    expect(data.updated_pools.disagree_pool).toBe(50);
     expect(data.updated_pools.total_pool).toBe(175);
 
     expect(mockMarketUpdate).toHaveBeenCalledWith({
-      total_pool_yes: 125,
-      total_pool_no: 50,
+      agree_pool: 125,
+      disagree_pool: 50,
     });
 
     expect(mockUserUpsert).toHaveBeenCalledWith(
       {
         wallet_address: normalizedWallet,
-        total_points: 200,
       },
       { onConflict: "wallet_address" }
     );
-
-    expect(mockPointsInsert).toHaveBeenCalledWith({
-      wallet_address: normalizedWallet,
-      source: "prediction_market",
-      points: 50,
-    });
   });
 
-  it("should successfully index a no bet and update total_pool_no", async () => {
+  it("should successfully index a disagree bet and update disagree_pool", async () => {
     const mockMarket = {
       id: "market-uuid-2",
       contract_market_id: 2,
       title: "Solana ATH",
-      total_pool_yes: 80,
-      total_pool_no: 40,
+      agree_pool: 80,
+      disagree_pool: 40,
     };
 
     const mockCreatedBet = {
       id: "bet-uuid-2",
       market_id: "market-uuid-2",
       wallet_address: normalizedWallet,
-      side: "no",
+      side: "DISAGREE",
       amount: 60,
       claimed: false,
       tx_hash: validTxHash.toLowerCase(),
@@ -194,16 +173,8 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
         }
         if (table === "users") {
           return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-              }),
-            }),
             upsert: vi.fn().mockResolvedValue({ error: null }),
           };
-        }
-        if (table === "points_events") {
-          return { insert: vi.fn().mockResolvedValue({ error: null }) };
         }
         return {};
       }),
@@ -213,15 +184,15 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
       tx_hash: validTxHash,
       contract_market_id: 2,
       wallet_address: validWallet,
-      side: "no",
+      side: "DISAGREE",
       amount: 60,
     });
 
     const res = await POST(req);
     expect(res.status).toBe(201);
     const data = await res.json();
-    expect(data.updated_pools.total_pool_yes).toBe(80);
-    expect(data.updated_pools.total_pool_no).toBe(100);
+    expect(data.updated_pools.agree_pool).toBe(80);
+    expect(data.updated_pools.disagree_pool).toBe(100);
     expect(data.updated_pools.total_pool).toBe(180);
   });
 
@@ -240,7 +211,7 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
       tx_hash: validTxHash,
       contract_market_id: 1,
       wallet_address: validWallet,
-      side: "yes",
+      side: "AGREE",
       amount: 10,
     });
 
@@ -265,15 +236,15 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
 
   it("should return 400 Bad Request when fields are missing or invalid", async () => {
     const invalidPayloads = [
-      { contract_market_id: 1, wallet_address: validWallet, side: "yes", amount: 10 },
-      { tx_hash: "invalid-hash", contract_market_id: 1, wallet_address: validWallet, side: "yes", amount: 10 },
-      { tx_hash: validTxHash, contract_market_id: -1, wallet_address: validWallet, side: "yes", amount: 10 },
-      { tx_hash: validTxHash, contract_market_id: "abc", wallet_address: validWallet, side: "yes", amount: 10 },
-      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: "not-evm", side: "yes", amount: 10 },
+      { contract_market_id: 1, wallet_address: validWallet, side: "AGREE", amount: 10 },
+      { tx_hash: "invalid-hash", contract_market_id: 1, wallet_address: validWallet, side: "AGREE", amount: 10 },
+      { tx_hash: validTxHash, contract_market_id: -1, wallet_address: validWallet, side: "AGREE", amount: 10 },
+      { tx_hash: validTxHash, contract_market_id: "abc", wallet_address: validWallet, side: "AGREE", amount: 10 },
+      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: "not-evm", side: "AGREE", amount: 10 },
       { tx_hash: validTxHash, contract_market_id: 1, wallet_address: validWallet, side: "maybe", amount: 10 },
-      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: validWallet, side: "yes", amount: 0 },
-      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: validWallet, side: "yes", amount: -5 },
-      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: validWallet, side: "yes", amount: "abc" },
+      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: validWallet, side: "AGREE", amount: 0 },
+      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: validWallet, side: "AGREE", amount: -5 },
+      { tx_hash: validTxHash, contract_market_id: 1, wallet_address: validWallet, side: "AGREE", amount: "abc" },
     ];
 
     for (const payload of invalidPayloads) {
@@ -312,7 +283,7 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
       tx_hash: validTxHash,
       contract_market_id: 9999,
       wallet_address: validWallet,
-      side: "yes",
+      side: "AGREE",
       amount: 10,
     });
 
@@ -343,7 +314,7 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
           return {
             select: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
-                maybeSingle: vi.fn().mockResolvedValue({ data: { id: "m-1", total_pool_yes: 0, total_pool_no: 0 }, error: null }),
+                maybeSingle: vi.fn().mockResolvedValue({ data: { id: "m-1", agree_pool: 0, disagree_pool: 0 }, error: null }),
               }),
             }),
           };
@@ -356,7 +327,7 @@ describe("TICKET-34: API Route Indexer Taruhan (POST /api/bets/index)", () => {
       tx_hash: validTxHash,
       contract_market_id: 1,
       wallet_address: validWallet,
-      side: "yes",
+      side: "AGREE",
       amount: 10,
     });
 

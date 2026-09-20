@@ -61,6 +61,27 @@ describe("Landing Page V1 Components", () => {
           }),
         } as Response);
       }
+      if (urlString.includes("/api/creators")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            success: true,
+            data: [
+              {
+                id: "creator-1",
+                wallet_address: "0x1111111111111111111111111111111111111111",
+                handle: "@TraderX",
+                display_name: "TraderX",
+                confirmed_beliefs_count: 47,
+                resolved_count: 31,
+                correct_count: 24,
+                created_at: new Date().toISOString(),
+                accuracy_percentage: 77,
+              },
+            ],
+          }),
+        } as Response);
+      }
       return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
     });
   });
@@ -139,13 +160,16 @@ describe("Landing Page V1 Components", () => {
     expect(screen.getByText(/Live On-Chain Activity/i)).toBeInTheDocument();
   });
 
-  it("renders the dual-track consensus signal gap visualizer", () => {
+  it("renders the dual-track consensus signal gap visualizer", async () => {
     render(<HomePage />);
 
     expect(screen.getByText(/The Signal Gap: Words vs\. Capital/i)).toBeInTheDocument();
     expect(screen.getByText(/Dual-Track Consensus Engine/i)).toBeInTheDocument();
-    expect(screen.getByText(/Track 1: Social Sentiments/i)).toBeInTheDocument();
-    expect(screen.getByText(/Track 2: Staked Capital Pool/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText(/Track 1: Social Sentiments/i)).toBeInTheDocument();
+      expect(screen.getByText(/Track 2: Staked Capital Pool/i)).toBeInTheDocument();
+    });
   });
 
   it("renders the interactive FAQ accordion section", () => {

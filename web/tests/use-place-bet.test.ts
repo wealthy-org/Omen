@@ -4,12 +4,12 @@ import { usePlaceBet } from "@/hooks/usePlaceBet";
 import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 import { parseEther } from "viem";
 
-const { mockWagmiContext, mockWriteContractAsync, mockUseAccount, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
+const { mockWagmiContext, mockWriteContractAsync, mockUseConnection, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
   const React = require("react");
   return {
     mockWagmiContext: React.createContext({}),
     mockWriteContractAsync: vi.fn(),
-    mockUseAccount: vi.fn(),
+    mockUseConnection: vi.fn(),
     mockUseWaitForTransactionReceipt: vi.fn(),
   };
 });
@@ -26,13 +26,13 @@ vi.mock("wagmi", () => ({
     error: null,
   }),
   useWaitForTransactionReceipt: () => mockUseWaitForTransactionReceipt(),
-  useAccount: () => mockUseAccount(),
+  useConnection: () => mockUseConnection(),
 }));
 
 describe("usePlaceBet Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAccount.mockReturnValue({
+    mockUseConnection.mockReturnValue({
       address: "0x1111111111111111111111111111111111111111",
       isConnected: true,
     });
@@ -46,7 +46,7 @@ describe("usePlaceBet Hook", () => {
     });
   });
 
-  it("calls writeContractAsync with correct contract address, ABI, and parsed wei value for YES bet", async () => {
+  it("calls writeContractAsync with correct contract address, ABI, and parsed wei value for AGREE bet", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmocktxhash123");
 
     const { result } = renderHook(() => usePlaceBet());
@@ -55,7 +55,7 @@ describe("usePlaceBet Hook", () => {
     await act(async () => {
       txHash = await result.current.placeBet({
         marketId: "1",
-        outcome: "YES",
+        outcome: "AGREE",
         amount: "0.5",
       });
     });
@@ -74,14 +74,14 @@ describe("usePlaceBet Hook", () => {
       body: JSON.stringify({
         contract_market_id: 1,
         wallet_address: "0x1111111111111111111111111111111111111111",
-        side: "yes",
+        side: "AGREE",
         amount: 0.5,
         tx_hash: "0xmocktxhash123",
       }),
     }));
   });
 
-  it("calls writeContractAsync with side = false for NO bet", async () => {
+  it("calls writeContractAsync with side = false for DISAGREE bet", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmocktxhash456");
 
     const { result } = renderHook(() => usePlaceBet());
@@ -89,7 +89,7 @@ describe("usePlaceBet Hook", () => {
     await act(async () => {
       await result.current.placeBet({
         marketId: 42,
-        outcome: "NO",
+        outcome: "DISAGREE",
         amount: "0.1",
       });
     });
@@ -112,7 +112,7 @@ describe("usePlaceBet Hook", () => {
       act(async () => {
         await result.current.placeBet({
           marketId: "1",
-          outcome: "YES",
+          outcome: "AGREE",
           amount: "0.2",
         });
       })

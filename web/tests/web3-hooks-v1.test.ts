@@ -7,14 +7,14 @@ import { useMarket } from "@/hooks/useMarket";
 const {
   mockWagmiContext,
   mockWriteContractAsync,
-  mockUseAccount,
+  mockUseConnection,
   mockUseReadContract,
 } = vi.hoisted(() => {
   const React = require("react");
   return {
     mockWagmiContext: React.createContext({}),
     mockWriteContractAsync: vi.fn(),
-    mockUseAccount: vi.fn(),
+    mockUseConnection: vi.fn(),
     mockUseReadContract: vi.fn(),
   };
 });
@@ -30,14 +30,15 @@ vi.mock("wagmi", () => ({
     isPending: false,
     error: null,
   }),
-  useAccount: () => mockUseAccount(),
+  useConnection: () => mockUseConnection(),
   useReadContract: (args: any) => mockUseReadContract(args),
+  useReadContracts: (args: any) => mockUseReadContract(args),
 }));
 
 describe("Web3 Hooks V1 (usePosition, useClaim, useMarket)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    mockUseAccount.mockReturnValue({
+    mockUseConnection.mockReturnValue({
       address: "0x1111111111111111111111111111111111111111",
       isConnected: true,
     });
@@ -105,6 +106,19 @@ describe("Web3 Hooks V1 (usePosition, useClaim, useMarket)", () => {
 
       expect(result.current.isSuccess).toBe(true);
       expect(result.current.isPending).toBe(false);
+    });
+
+    it("throws an error if market contract address is missing", async () => {
+      const { result } = renderHook(() => useClaim());
+
+      await expect(
+        act(async () => {
+          await result.current.claimPayout({
+            marketAddress: "",
+            marketId: "market-101",
+          });
+        })
+      ).rejects.toThrow(/Market contract address is required/i);
     });
   });
 

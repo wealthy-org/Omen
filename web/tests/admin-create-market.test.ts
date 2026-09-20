@@ -6,7 +6,7 @@ import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contract
 const {
   mockWagmiContext,
   mockWriteContractAsync,
-  mockUseAccount,
+  mockUseConnection,
   mockUseWaitForTransactionReceipt,
   mockWaitForTransactionReceipt,
 } = vi.hoisted(() => {
@@ -14,7 +14,7 @@ const {
   return {
     mockWagmiContext: React.createContext({}),
     mockWriteContractAsync: vi.fn(),
-    mockUseAccount: vi.fn(),
+    mockUseConnection: vi.fn(),
     mockUseWaitForTransactionReceipt: vi.fn(),
     mockWaitForTransactionReceipt: vi.fn(),
   };
@@ -32,7 +32,7 @@ vi.mock("wagmi", () => ({
     error: null,
   }),
   useWaitForTransactionReceipt: () => mockUseWaitForTransactionReceipt(),
-  useAccount: () => mockUseAccount(),
+  useConnection: () => mockUseConnection(),
   usePublicClient: () => ({
     waitForTransactionReceipt: mockWaitForTransactionReceipt,
   }),
@@ -41,7 +41,7 @@ vi.mock("wagmi", () => ({
 describe("useAdminCreateMarket Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAccount.mockReturnValue({
+    mockUseConnection.mockReturnValue({
       address: "0xAdminWallet1111111111111111111111111111",
       isConnected: true,
     });

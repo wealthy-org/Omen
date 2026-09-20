@@ -8,9 +8,23 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("wagmi", () => ({
-  useAccount: () => ({
+  useConnection: () => ({
     address: mocks.accountAddress,
     isConnected: true,
+  }),
+  usePublicClient: () => ({
+    waitForTransactionReceipt: vi.fn().mockResolvedValue({
+      logs: [
+        {
+          topics: [
+            "0x",
+            "0x",
+            "0x0000000000000000000000001111111111111111111111111111111111111111",
+          ],
+          data: "0x",
+        },
+      ],
+    }),
   }),
   useWriteContract: () => ({
     writeContract: mocks.writeContractAsyncMock,
@@ -24,6 +38,9 @@ vi.mock("wagmi", () => ({
 describe("useCreateMarket Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.writeContractAsyncMock.mockResolvedValue(
+      "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
+    );
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ success: true }),
@@ -44,7 +61,7 @@ describe("useCreateMarket Hook", () => {
   it("creates market successfully and returns market address and tx hash", async () => {
     const { result } = renderHook(() => useCreateMarket());
 
-    let response: { marketAddress: string; txHash: string } | undefined;
+    let response: { marketAddress: string | null; txHash: string } | undefined;
     await act(async () => {
       response = await result.current.createMarket({
         statement: "ETH will exceed $4500 by Q4 2026",
@@ -89,5 +106,30 @@ describe("useCreateMarket Hook", () => {
     expect(result.current.isSuccess).toBe(false);
     expect(result.current.marketAddress).toBeNull();
     expect(result.current.txHash).toBeNull();
+  });
+
+  it("handles failure and sets error state", async () => {
+    mocks.writeContractAsyncMock.mockRejectedValueOnce(new Error("Transaction rejected"));
+
+    const { result } = renderHook(() => useCreateMarket());
+
+    let capturedError: any;
+    await act(async () => {
+      try {
+        await result.current.createMarket({
+          statement: "Failing Market",
+          targetPrice: 2000,
+          resolutionType: 0,
+          closeTime: 1790000000,
+        });
+      } catch (err: any) {
+        capturedError = err;
+      }
+    });
+
+    expect(capturedError?.message).toBe("Transaction rejected");
+    expect(result.current.isSuccess).toBe(false);
+    expect(result.current.isDeploying).toBe(false);
+    expect(result.current.error?.message).toBe("Transaction rejected");
   });
 });

@@ -53,11 +53,10 @@ describe("TICKET-84: POST /api/beliefs/extract", () => {
 
   it("should throw an explicit error when OPENROUTER_MODEL is not configured", async () => {
     process.env.OPENROUTER_API_KEY = "valid-key";
-    delete process.env.AI_MODEL;
     delete process.env.OPENROUTER_MODEL;
 
     await expect(extractBeliefFromText("ETH to 5000")).rejects.toThrow(
-      "OPENROUTER_MODEL or AI_MODEL is not configured."
+      "OPENROUTER_MODEL is not configured."
     );
   });
 

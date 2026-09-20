@@ -6,14 +6,14 @@ import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contract
 const {
   mockWagmiContext,
   mockWriteContractAsync,
-  mockUseAccount,
+  mockUseConnection,
   mockUseWaitForTransactionReceipt,
 } = vi.hoisted(() => {
   const React = require("react");
   return {
     mockWagmiContext: React.createContext({}),
     mockWriteContractAsync: vi.fn(),
-    mockUseAccount: vi.fn(),
+    mockUseConnection: vi.fn(),
     mockUseWaitForTransactionReceipt: vi.fn(),
   };
 });
@@ -30,13 +30,13 @@ vi.mock("wagmi", () => ({
     error: null,
   }),
   useWaitForTransactionReceipt: () => mockUseWaitForTransactionReceipt(),
-  useAccount: () => mockUseAccount(),
+  useConnection: () => mockUseConnection(),
 }));
 
 describe("useAdminResolveMarket Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAccount.mockReturnValue({
+    mockUseConnection.mockReturnValue({
       address: "0xAdminAddress111111111111111111111111111",
       isConnected: true,
     });
@@ -50,7 +50,7 @@ describe("useAdminResolveMarket Hook", () => {
     });
   });
 
-  it("calls resolveMarket with result = true for YES outcome and syncs to backend", async () => {
+  it("calls resolveMarket with result = true for AGREE outcome and syncs to backend", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmockresolvetx123");
 
     const { result } = renderHook(() => useAdminResolveMarket());
@@ -59,7 +59,7 @@ describe("useAdminResolveMarket Hook", () => {
     await act(async () => {
       txHash = await result.current.resolveMarket({
         marketId: "market-101",
-        outcome: "YES",
+        outcome: "AGREE",
         notes: "Official verification passed",
       });
     });
@@ -80,7 +80,7 @@ describe("useAdminResolveMarket Hook", () => {
     }));
   });
 
-  it("calls resolveMarket with result = false for NO outcome", async () => {
+  it("calls resolveMarket with result = false for DISAGREE outcome", async () => {
     mockWriteContractAsync.mockResolvedValueOnce("0xmockresolvetx456");
 
     const { result } = renderHook(() => useAdminResolveMarket());
@@ -88,7 +88,7 @@ describe("useAdminResolveMarket Hook", () => {
     await act(async () => {
       await result.current.resolveMarket({
         marketId: 42,
-        outcome: "NO",
+        outcome: "DISAGREE",
       });
     });
 
@@ -130,7 +130,7 @@ describe("useAdminResolveMarket Hook", () => {
       act(async () => {
         await result.current.resolveMarket({
           marketId: "1",
-          outcome: "YES",
+          outcome: "AGREE",
         });
       })
     ).rejects.toThrow("Admin rejected resolution");

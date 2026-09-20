@@ -12,8 +12,8 @@ describe("BettingModal Component", () => {
     status: "active",
     endTime: "Ends in 2d 18h",
     totalPool: "28.50",
-    yesPercentage: 68,
-    noPercentage: 32,
+    agreePercentage: 68,
+    disagreePercentage: 32,
     volume: "74.20",
   };
 
@@ -21,7 +21,7 @@ describe("BettingModal Component", () => {
     isOpen: true,
     onClose: vi.fn(),
     market: mockMarket,
-    initialOutcome: "YES" as const,
+    initialOutcome: "AGREE" as const,
     userBalance: "2.00",
     onConfirmBet: vi.fn(),
   };
@@ -40,19 +40,19 @@ describe("BettingModal Component", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("2.00 ETH")).toBeInTheDocument();
 
-    const yesBtn = screen.getByRole("button", { name: /select yes outcome/i });
-    expect(yesBtn).toHaveAttribute("aria-pressed", "true");
+    const agreeBtn = screen.getByRole("button", { name: /select agree outcome/i });
+    expect(agreeBtn).toHaveAttribute("aria-pressed", "true");
   });
 
-  it("switches outcome selection between YES and NO", () => {
+  it("switches outcome selection between AGREE and DISAGREE", () => {
     render(<BettingModal {...defaultProps} />);
 
-    const noBtn = screen.getByRole("button", { name: /select no outcome/i });
-    fireEvent.click(noBtn);
+    const disagreeBtn = screen.getByRole("button", { name: /select disagree outcome/i });
+    fireEvent.click(disagreeBtn);
 
-    expect(noBtn).toHaveAttribute("aria-pressed", "true");
-    const yesBtn = screen.getByRole("button", { name: /select yes outcome/i });
-    expect(yesBtn).toHaveAttribute("aria-pressed", "false");
+    expect(disagreeBtn).toHaveAttribute("aria-pressed", "true");
+    const agreeBtn = screen.getByRole("button", { name: /select agree outcome/i });
+    expect(agreeBtn).toHaveAttribute("aria-pressed", "false");
     expect(screen.getAllByText("32%").length).toBeGreaterThanOrEqual(1);
   });
 
@@ -117,7 +117,7 @@ describe("BettingModal Component", () => {
       expect(onConfirmBet).toHaveBeenCalledTimes(1);
       expect(onConfirmBet).toHaveBeenCalledWith({
         marketId: "mkt-1",
-        outcome: "YES",
+        outcome: "AGREE",
         amount: "0.25",
       });
       expect(onClose).toHaveBeenCalledTimes(1);

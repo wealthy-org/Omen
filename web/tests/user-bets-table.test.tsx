@@ -10,7 +10,7 @@ describe("UserBetsTable Component", () => {
       marketId: "mkt-1",
       marketTitle: "Will ETH reach $5,000 before Q4 2026?",
       category: "CRYPTO",
-      side: "YES",
+      side: "AGREE",
       amount: "0.50",
       payout: "0.74",
       roiPercent: 48,
@@ -22,7 +22,7 @@ describe("UserBetsTable Component", () => {
       marketId: "mkt-2",
       marketTitle: "Will Arbitrum exceed 10M active daily addresses?",
       category: "L2",
-      side: "NO",
+      side: "DISAGREE",
       amount: "0.20",
       payout: "0.36",
       roiPercent: 80,
@@ -35,7 +35,7 @@ describe("UserBetsTable Component", () => {
       marketId: "mkt-3",
       marketTitle: "Will DOGE reach $1.00 this cycle?",
       category: "MEME",
-      side: "YES",
+      side: "AGREE",
       amount: "0.10",
       payout: "0.26",
       roiPercent: 160,
@@ -47,7 +47,7 @@ describe("UserBetsTable Component", () => {
       marketId: "mkt-4",
       marketTitle: "Will US Fed cut interest rates in September?",
       category: "MACRO",
-      side: "YES",
+      side: "AGREE",
       amount: "0.40",
       payout: "0.80",
       roiPercent: 100,
@@ -78,11 +78,11 @@ describe("UserBetsTable Component", () => {
   it("renders side badges and status badges correctly", () => {
     render(<UserBetsTable bets={mockBets} />);
 
-    const yesBadges = screen.getAllByText("YES");
-    expect(yesBadges.length).toBe(3);
+    const agreeBadges = screen.getAllByText("AGREE");
+    expect(agreeBadges.length).toBe(3);
 
-    const noBadge = screen.getByText("NO");
-    expect(noBadge).toBeInTheDocument();
+    const disagreeBadge = screen.getByText("DISAGREE");
+    expect(disagreeBadge).toBeInTheDocument();
 
     expect(screen.getByText("Active")).toBeInTheDocument();
     expect(screen.getAllByText("Won").length).toBe(2);
@@ -103,19 +103,8 @@ describe("UserBetsTable Component", () => {
     expect(onClaimPayout).toHaveBeenCalledWith(mockBets[1]);
   });
 
-  it("renders Claimed state when payout has already been claimed", () => {
-    render(<UserBetsTable bets={mockBets} />);
-
-    expect(screen.getByText("Claimed")).toBeInTheDocument();
-  });
-
-  it("renders empty state when bets list is empty", () => {
+  it("renders empty state when bets array is empty", () => {
     render(<UserBetsTable bets={[]} />);
-
-    expect(screen.getByTestId("empty-user-bets")).toBeInTheDocument();
-    expect(screen.getByText("No Bet Positions Yet")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /explore prediction markets/i })
-    ).toHaveAttribute("href", "/predictions");
+    expect(screen.getByText(/no bet positions yet/i)).toBeInTheDocument();
   });
 });

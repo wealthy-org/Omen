@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("wagmi", () => ({
-  useAccount: () => ({
+  useConnection: () => ({
     address: mocks.accountAddress,
     isConnected: true,
   }),

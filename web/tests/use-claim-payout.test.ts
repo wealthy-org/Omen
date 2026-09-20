@@ -3,12 +3,12 @@ import { renderHook, act } from "@testing-library/react";
 import { useClaimPayout } from "@/hooks/useClaimPayout";
 import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
-const { mockWagmiContext, mockWriteContractAsync, mockUseAccount, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
+const { mockWagmiContext, mockWriteContractAsync, mockUseConnection, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
   const React = require("react");
   return {
     mockWagmiContext: React.createContext({}),
     mockWriteContractAsync: vi.fn(),
-    mockUseAccount: vi.fn(),
+    mockUseConnection: vi.fn(),
     mockUseWaitForTransactionReceipt: vi.fn(),
   };
 });
@@ -25,13 +25,13 @@ vi.mock("wagmi", () => ({
     error: null,
   }),
   useWaitForTransactionReceipt: () => mockUseWaitForTransactionReceipt(),
-  useAccount: () => mockUseAccount(),
+  useConnection: () => mockUseConnection(),
 }));
 
 describe("useClaimPayout Hook", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockUseAccount.mockReturnValue({
+    mockUseConnection.mockReturnValue({
       address: "0x2222222222222222222222222222222222222222",
       isConnected: true,
     });

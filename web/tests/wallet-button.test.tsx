@@ -132,7 +132,7 @@ describe("ConnectWalletButton Component", () => {
     expect(screen.getByText("Copy Address")).toBeInTheDocument();
   });
 
-  it("renders explorer link pointing to Arbiscan Sepolia", () => {
+  it("renders explorer link pointing to Etherscan Sepolia", () => {
     render(
       <ConnectWalletButton
         initialStatus="connected"
@@ -146,7 +146,7 @@ describe("ConnectWalletButton Component", () => {
     const explorerLink = screen.getByRole("menuitem", { name: /view on explorer/i });
     expect(explorerLink).toHaveAttribute(
       "href",
-      "https://sepolia.arbiscan.io/address/0x1234567890abcdef1234567890abcdef12345678"
+      "https://sepolia.etherscan.io/address/0x1234567890abcdef1234567890abcdef12345678"
     );
     expect(explorerLink).toHaveAttribute("target", "_blank");
     expect(explorerLink).toHaveAttribute("rel", "noopener noreferrer");

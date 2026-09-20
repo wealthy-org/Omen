@@ -24,8 +24,8 @@ describe("TICKET-30: API Route Katalog Pasar Prediksi (GET /api/markets)", () =>
         category: "crypto",
         deadline: "2026-10-01T00:00:00.000Z",
         status: "active",
-        total_pool_yes: "10.5",
-        total_pool_no: "5.5",
+        agree_pool: "10.5",
+        disagree_pool: "5.5",
         resolution_source: "Binance Oracle",
         created_at: "2026-09-16T12:00:00.000Z",
       },
@@ -45,8 +45,8 @@ describe("TICKET-30: API Route Katalog Pasar Prediksi (GET /api/markets)", () =>
     const body = await res.json();
     expect(body.success).toBe(true);
     expect(body.count).toBe(1);
-    expect(body.markets[0].total_pool_yes).toBe(10.5);
-    expect(body.markets[0].total_pool_no).toBe(5.5);
+    expect(body.markets[0].agree_pool).toBe(10.5);
+    expect(body.markets[0].disagree_pool).toBe(5.5);
     expect(body.markets[0].total_pool).toBe(16);
   });
 
@@ -79,7 +79,7 @@ describe("TICKET-30: API Route Katalog Pasar Prediksi (GET /api/markets)", () =>
     const reqResolved = createMockRequest("http://localhost:3000/api/markets?status=resolved");
     const resResolved = await GET(reqResolved);
     expect(resResolved.status).toBe(200);
-    expect(mockChainResolved.in).toHaveBeenCalledWith("status", ["resolved_yes", "resolved_no"]);
+    expect(mockChainResolved.in).toHaveBeenCalledWith("status", ["RESOLVED", "resolved"]);
   });
 
   it("should apply category filter using ilike", async () => {
@@ -111,7 +111,7 @@ describe("TICKET-30: API Route Katalog Pasar Prediksi (GET /api/markets)", () =>
     const reqPool = createMockRequest("http://localhost:3000/api/markets?sort=highest_pool");
     const resPool = await GET(reqPool);
     expect(resPool.status).toBe(200);
-    expect(mockChainPool.order).toHaveBeenCalledWith("total_pool_yes", { ascending: false });
+    expect(mockChainPool.order).toHaveBeenCalledWith("agree_pool", { ascending: false });
 
     const mockChainSoon: any = {};
     mockChainSoon.order = vi.fn().mockResolvedValue({ data: [], error: null });
@@ -147,7 +147,6 @@ describe("TICKET-30: API Route Katalog Pasar Prediksi (GET /api/markets)", () =>
   it("should strictly adhere to Zero-Comment Policy", () => {
     const filePath = path.resolve(process.cwd(), "app/api/markets/route.ts");
     expect(fs.existsSync(filePath)).toBe(true);
-
     const content = fs.readFileSync(filePath, "utf-8");
     const lines = content.split("\n");
     for (const line of lines) {

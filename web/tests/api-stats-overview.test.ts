@@ -20,9 +20,9 @@ describe("GET /api/stats/overview", () => {
         return {
           select: vi.fn().mockResolvedValue({
             data: [
-              { status: "active", yes_pool: "50.0", no_pool: "50.0" },
-              { status: "active", yes_pool: "25.5", no_pool: "25.0" },
-              { status: "resolved", yes_pool: "10.0", no_pool: "10.0" },
+              { status: "active", agree_pool: "50.0", disagree_pool: "50.0" },
+              { status: "active", agree_pool: "25.5", disagree_pool: "25.0" },
+              { status: "resolved", agree_pool: "10.0", disagree_pool: "10.0" },
             ],
             error: null,
           }),

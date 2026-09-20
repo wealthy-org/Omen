@@ -33,8 +33,8 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
       category: "crypto",
       deadline: "2026-12-31T23:59:59.000Z",
       status: "active",
-      total_pool_yes: 0,
-      total_pool_no: 0,
+      agree_pool: 0,
+      disagree_pool: 0,
       resolution_source: "CoinGecko Oracle",
       created_at: "2026-09-16T15:00:00.000Z",
     };
@@ -98,8 +98,8 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
       category: "crypto",
       deadline: "2026-12-31T23:59:59.000Z",
       status: "active",
-      total_pool_yes: 0,
-      total_pool_no: 0,
+      agree_pool: 0,
+      disagree_pool: 0,
       resolution_source: null,
       created_at: "2026-09-16T15:00:00.000Z",
     };
@@ -144,8 +144,8 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
       category: "layer2",
       deadline: "2026-12-31T23:59:59.000Z",
       status: "active",
-      total_pool_yes: 0,
-      total_pool_no: 0,
+      agree_pool: 0,
+      disagree_pool: 0,
       resolution_source: null,
       created_at: "2026-09-16T15:00:00.000Z",
     };

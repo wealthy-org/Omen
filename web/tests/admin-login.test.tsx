@@ -165,6 +165,7 @@ describe("AdminLoginForm Component", () => {
       <AdminLoginForm
         onLoginSuccess={onLoginSuccess}
         authorizedAddresses={MOCK_AUTHORIZED_ADMINS}
+        validMasterKeys={["omen-admin-2026"]}
       />
     );
 

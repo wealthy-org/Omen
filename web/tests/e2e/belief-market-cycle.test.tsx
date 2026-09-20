@@ -17,9 +17,23 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("wagmi", () => ({
-  useAccount: () => ({
+  useConnection: () => ({
     address: mocks.accountAddress,
     isConnected: true,
+  }),
+  usePublicClient: () => ({
+    waitForTransactionReceipt: vi.fn().mockResolvedValue({
+      logs: [
+        {
+          topics: [
+            "0x",
+            "0x",
+            "0x0000000000000000000000001111111111111111111111111111111111111111",
+          ],
+          data: "0x",
+        },
+      ],
+    }),
   }),
   useChainId: () => mocks.chainId,
   useWriteContract: () => ({
@@ -31,6 +45,15 @@ vi.mock("wagmi", () => ({
   }),
   useReadContract: () => ({
     data: [BigInt(2000000000000000000), BigInt(1000000000000000000), 0],
+    isLoading: false,
+    refetch: vi.fn(),
+  }),
+  useReadContracts: () => ({
+    data: [
+      { result: BigInt(2000000000000000000) },
+      { result: BigInt(1000000000000000000) },
+      { result: 0 },
+    ],
     isLoading: false,
     refetch: vi.fn(),
   }),

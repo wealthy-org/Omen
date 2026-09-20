@@ -11,8 +11,8 @@ describe("MarketCard Component", () => {
     status: "active",
     endTime: "Ends in 2d 18h",
     totalPool: "14.25",
-    yesPercentage: 68,
-    noPercentage: 32,
+    agreePercentage: 68,
+    disagreePercentage: 32,
     volume: "38.50",
   };
 
@@ -23,8 +23,8 @@ describe("MarketCard Component", () => {
     status: "closing-soon",
     endTime: "Ends in 4h 12m",
     totalPool: "6.80",
-    yesPercentage: 45,
-    noPercentage: 55,
+    agreePercentage: 45,
+    disagreePercentage: 55,
   };
 
   const resolvedMarket: MarketData = {
@@ -34,9 +34,9 @@ describe("MarketCard Component", () => {
     status: "resolved",
     endTime: "Ended",
     totalPool: "22.50",
-    yesPercentage: 100,
-    noPercentage: 0,
-    resolvedOutcome: "YES",
+    agreePercentage: 100,
+    disagreePercentage: 0,
+    resolvedOutcome: "AGREE",
   };
 
   it("renders active market card details properly", () => {
@@ -55,44 +55,44 @@ describe("MarketCard Component", () => {
 
     expect(
       screen.getByRole("button", {
-        name: /bet yes on will eth reach \$5,000 before q4 2026\?/i,
+        name: /bet agree on will eth reach \$5,000 before q4 2026\?/i,
       })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: /bet no on will eth reach \$5,000 before q4 2026\?/i,
+        name: /bet disagree on will eth reach \$5,000 before q4 2026\?/i,
       })
     ).toBeInTheDocument();
   });
 
-  it("triggers onSelectOutcome with outcome YES when Bet YES is clicked", () => {
+  it("triggers onSelectOutcome with outcome AGREE when Bet Agree is clicked", () => {
     const onSelectOutcome = vi.fn();
     render(
       <MarketCard market={activeMarket} onSelectOutcome={onSelectOutcome} />
     );
 
-    const betYesBtn = screen.getByRole("button", {
-      name: /bet yes on will eth reach \$5,000 before q4 2026\?/i,
+    const betAgreeBtn = screen.getByRole("button", {
+      name: /bet agree on will eth reach \$5,000 before q4 2026\?/i,
     });
-    fireEvent.click(betYesBtn);
+    fireEvent.click(betAgreeBtn);
 
     expect(onSelectOutcome).toHaveBeenCalledTimes(1);
-    expect(onSelectOutcome).toHaveBeenCalledWith(activeMarket, "YES");
+    expect(onSelectOutcome).toHaveBeenCalledWith(activeMarket, "AGREE");
   });
 
-  it("triggers onSelectOutcome with outcome NO when Bet NO is clicked", () => {
+  it("triggers onSelectOutcome with outcome DISAGREE when Bet Disagree is clicked", () => {
     const onSelectOutcome = vi.fn();
     render(
       <MarketCard market={activeMarket} onSelectOutcome={onSelectOutcome} />
     );
 
-    const betNoBtn = screen.getByRole("button", {
-      name: /bet no on will eth reach \$5,000 before q4 2026\?/i,
+    const betDisagreeBtn = screen.getByRole("button", {
+      name: /bet disagree on will eth reach \$5,000 before q4 2026\?/i,
     });
-    fireEvent.click(betNoBtn);
+    fireEvent.click(betDisagreeBtn);
 
     expect(onSelectOutcome).toHaveBeenCalledTimes(1);
-    expect(onSelectOutcome).toHaveBeenCalledWith(activeMarket, "NO");
+    expect(onSelectOutcome).toHaveBeenCalledWith(activeMarket, "DISAGREE");
   });
 
   it("renders closing-soon badge properly", () => {
@@ -108,9 +108,9 @@ describe("MarketCard Component", () => {
 
     expect(screen.getByText("Resolved")).toBeInTheDocument();
     expect(
-      screen.getByText(/Resolved: Outcome YES Won/i)
+      screen.getByText(/Resolved: Outcome AGREE Won/i)
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /bet yes/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /bet no/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /bet agree/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /bet disagree/i })).not.toBeInTheDocument();
   });
 });
