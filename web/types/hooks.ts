@@ -79,7 +79,7 @@ export interface CreateMarketResult {
 
 export interface ResolveMarketParams {
   marketId: string | number;
-  outcome: "YES" | "NO" | "CANCEL";
+  outcome: "AGREE" | "DISAGREE" | "CANCEL" | "VOID";
   notes?: string;
   payoutRecipient?: string;
   cancellationReason?: string;

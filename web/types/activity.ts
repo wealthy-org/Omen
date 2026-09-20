@@ -50,11 +50,11 @@ export interface StakingDetails {
 export interface Eip712Details {
   domain: string;
   verifyingContract: string;
-  authorPublicKey: string;
-  sigV: number;
-  sigR: string;
-  sigS: string;
-  messageHash: string;
+  authorPublicKey?: string;
+  sigV?: number;
+  sigR?: string;
+  sigS?: string;
+  messageHash?: string;
 }
 
 export interface MarketCreationDetails {

@@ -86,15 +86,17 @@ export async function POST(
       );
     }
 
-    try {
-      await supabase.from("market_events").insert({
-        market_id: market.id,
-        event_type: "MarketClaimed",
-        wallet_address: normalizedAddress,
-        tx_hash: typeof tx_hash === "string" ? tx_hash : null,
-      });
-    } catch {
-      void 0;
+    if (typeof tx_hash === "string" && tx_hash.length > 0) {
+      try {
+        await supabase.from("market_events").insert({
+          market_id: market.id,
+          event_type: "MarketClaimed",
+          wallet_address: normalizedAddress,
+          tx_hash,
+        });
+      } catch {
+        void 0;
+      }
     }
 
     return NextResponse.json({

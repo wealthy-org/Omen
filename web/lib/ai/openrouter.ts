@@ -45,9 +45,9 @@ export async function extractBeliefFromText(
     throw new Error("OPENROUTER_API_KEY is not configured.");
   }
 
-  const model = process.env.OPENROUTER_MODEL || process.env.AI_MODEL;
+  const model = process.env.OPENROUTER_MODEL;
   if (!model) {
-    throw new Error("OPENROUTER_MODEL or AI_MODEL is not configured.");
+    throw new Error("OPENROUTER_MODEL is not configured.");
   }
 
   const userPrompt = `Extract structured belief from:

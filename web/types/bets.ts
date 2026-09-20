@@ -1,6 +1,6 @@
 export type BetStatus = "active" | "won" | "lost" | "cancelled";
 
-export type BetSide = "YES" | "NO" | "AGREE" | "DISAGREE";
+export type BetSide = "AGREE" | "DISAGREE";
 
 export interface UserBet {
   id: string | number;
@@ -42,8 +42,8 @@ export interface ClaimPayoutButtonProps {
 
 export interface PlaceBetParams {
   marketId: number | string;
-  outcome?: "YES" | "NO";
-  side?: boolean | "YES" | "NO" | "AGREE" | "DISAGREE";
+  outcome?: "AGREE" | "DISAGREE";
+  side?: boolean | "AGREE" | "DISAGREE";
   amount?: string;
   amountEth?: string | number;
 }

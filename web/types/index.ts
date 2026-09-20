@@ -1,5 +1,4 @@
 export type {
-  PointsSource,
   MarketResolutionType,
   MarketWinner,
   MarketEventType,
@@ -8,8 +7,6 @@ export type {
   ResolvedOutcome,
   User,
   UserV1,
-  Quest,
-  PointsEvent,
   Belief,
   BeliefSource,
   Market,
@@ -34,7 +31,6 @@ export * from "./activity";
 export * from "./admin";
 export * from "./market";
 export * from "./creator";
-export * from "./quest";
 export * from "./bets";
 export * from "./hooks";
 export * from "./contracts";

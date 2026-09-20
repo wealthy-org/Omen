@@ -1,6 +1,6 @@
 export type MarketStatus = "active" | "closing-soon" | "resolved";
 
-export type MarketOutcome = "YES" | "NO";
+export type MarketOutcome = "AGREE" | "DISAGREE";
 
 export interface MarketData {
   id: string | number;
@@ -8,8 +8,8 @@ export interface MarketData {
   category: string;
   totalPool?: string | number;
   totalPoolEth?: number;
-  yesPercentage: number;
-  noPercentage: number;
+  agreePercentage: number;
+  disagreePercentage: number;
   closingDate?: string;
   closingTimeRemaining?: string;
   endTime?: string;
@@ -44,7 +44,7 @@ export interface MarketDetailData {
   closesAt?: string;
   isConfirmed?: boolean;
   status?: "OPEN" | "CLOSED" | "RESOLVED" | "SETTLED" | "CANCELLED" | string;
-  resolvedOutcome?: "YES" | "NO" | "AGREE" | "DISAGREE";
+  resolvedOutcome?: "AGREE" | "DISAGREE" | "VOID";
   winningSide?: "AGREE" | "DISAGREE" | null;
   resolutionTxHash?: string;
   totalPoolEth?: number;
@@ -100,14 +100,14 @@ export interface BettingModalProps {
   marketId?: string | number;
   marketTitle?: string;
   market?: MarketData | null;
-  selectedSide?: "YES" | "NO" | "AGREE" | "DISAGREE" | null;
-  initialOutcome?: "YES" | "NO" | "AGREE" | "DISAGREE" | string;
+  selectedSide?: "AGREE" | "DISAGREE" | null;
+  initialOutcome?: "AGREE" | "DISAGREE" | string;
   userBalance?: string;
   onSuccess?: () => void;
   onConfirmBet?: ((outcome: MarketOutcome | string, amount: string) => Promise<void> | void) | ((params: { marketId?: string | number; outcome?: MarketOutcome | string; amount: string }) => Promise<void> | void) | any;
   onPlaceBet?: (params: {
     marketId: string | number;
-    side: "YES" | "NO" | "AGREE" | "DISAGREE";
+    side: "AGREE" | "DISAGREE";
     amount: string;
   }) => Promise<void> | void;
 }
@@ -217,6 +217,7 @@ export interface SignalCase {
 
 export interface SignalGapVisualizerProps {
   theme?: "dark" | "light";
+  initialCases?: SignalCase[];
 }
 
 export interface HeroSectionProps {

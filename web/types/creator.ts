@@ -1,3 +1,19 @@
+import type { DbCreatorProfile } from "./database";
+
+export interface CreatorProfileDetail extends Partial<DbCreatorProfile> {
+  id: string;
+  wallet_address: string;
+  handle: string | null;
+  display_name?: string;
+  bio?: string;
+  avatar_url?: string | null;
+  total_beliefs_count?: number;
+  confirmed_beliefs_count: number;
+  resolved_count: number;
+  correct_count: number;
+  created_at: string;
+}
+
 export interface CreatorProfile {
   address: string;
   name: string;
@@ -36,8 +52,8 @@ export interface CreatorCardProps {
 
 export interface CreatorConfirmationProps {
   beliefId: string;
-  statement: string;
-  authorHandle: string;
+  statement?: string;
+  authorHandle?: string;
   creatorAddress?: string;
   sourceUrl?: string;
   isConfirmed?: boolean;
@@ -63,35 +79,6 @@ export interface CurrentUserProfile {
   handle?: string;
   accuracy?: number;
   totalBets?: number;
-}
-
-export interface LeaderboardEntry {
-  rank: number;
-  address: string;
-  handle?: string;
-  avatar?: string;
-  ensName?: string;
-  streakDays?: number;
-  totalPoints?: number;
-  multiplier?: string;
-  winRate?: string;
-  accuracyPercentage?: number;
-  predictionAccuracy?: number;
-  correctPredictions?: number;
-  resolvedPredictions?: number;
-  totalPredictions?: number;
-  totalVolume?: string;
-  totalVolumeEth?: number;
-  tier?: "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | string;
-  weeklyChange?: number;
-}
-
-export interface LeaderboardTableProps {
-  entries?: LeaderboardEntry[];
-  currentUserAddress?: string;
-  pageSize?: number;
-  isLoading?: boolean;
-  className?: string;
 }
 
 export interface CreatorProfileHeaderProps {

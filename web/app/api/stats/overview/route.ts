@@ -19,8 +19,8 @@ export async function GET() {
     const liveMarkets = marketsRes.data ?? [];
     const activeMarketsCount = liveMarkets.filter((m) => m.status === "active" || m.status === "OPEN").length;
     const totalTvl = liveMarkets.reduce((sum, m) => {
-      const agree = Number(m.agree_pool ?? m.total_pool_yes ?? m.yes_pool ?? 0);
-      const disagree = Number(m.disagree_pool ?? m.total_pool_no ?? m.no_pool ?? 0);
+      const agree = Number(m.agree_pool ?? 0);
+      const disagree = Number(m.disagree_pool ?? 0);
       return sum + (agree + disagree);
     }, 0);
 

@@ -108,12 +108,10 @@ export interface VerifyConfirmationParams {
 
 export interface MockMarketPool {
   marketId: number;
-  yesPool: number;
-  noPool: number;
+  agreePool: number;
+  disagreePool: number;
   totalPool: number;
-  totalYesPool?: number;
-  totalNoPool?: number;
-  status: "active" | "resolved_yes" | "resolved_no" | "cancelled" | "OPEN" | "CLOSED" | "RESOLVED" | "CANCELLED";
+  status: "active" | "cancelled" | "OPEN" | "CLOSED" | "RESOLVED" | "CANCELLED";
   resolvedOutcome?: boolean;
 }
 
@@ -122,7 +120,7 @@ export interface MockBetRecord {
   marketId: number;
   walletAddress?: string;
   user?: string;
-  side: "YES" | "NO" | boolean;
+  side: "AGREE" | "DISAGREE" | boolean;
   amountEth?: number;
   amount?: number;
   claimed: boolean;
@@ -135,4 +133,31 @@ export interface MockTransactionResult {
   status?: "success" | "reverted";
   success?: boolean;
   blockNumber: number;
+}
+
+export interface DecodedParameter {
+  name: string;
+  type: string;
+  value: string;
+}
+
+export interface DecodedTxResult {
+  foundOnRpc: boolean;
+  txHash: string;
+  chainId: number;
+  chainName: string;
+  status: "success" | "reverted" | "pending" | "unknown";
+  blockNumber?: number;
+  confirmations?: number;
+  from?: string;
+  to?: string;
+  toContractName?: string;
+  valueEth?: string;
+  gasPriceGwei?: string;
+  gasUsed?: string;
+  executionFeeEth?: string;
+  functionName?: string;
+  params?: DecodedParameter[];
+  rawInput?: string;
+  errorMessage?: string;
 }

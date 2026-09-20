@@ -58,14 +58,14 @@ export async function GET() {
         return {
           symbol: cfg.symbol,
           name: cfg.name,
-          price: cfg.asset === "ETH" ? 2454.54 : cfg.asset === "BTC" ? 76935.85 : 184.2,
+          price: 0,
           decimals: cfg.decimals,
           roundId: "0",
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(0).toISOString(),
           heartbeatSec: cfg.heartbeatSec,
           contractAddress: cfg.contractAddress,
           chainId: cfg.chainId,
-          status: "DEGRADED",
+          status: "OFFLINE",
         };
       }
     });

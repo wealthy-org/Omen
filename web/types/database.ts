@@ -1,20 +1,12 @@
-export type PointsSource =
-  | "daily_checkin"
-  | "quest"
-  | "prediction_market"
-  | "referral";
-
 export type DbMarketStatus =
   | "active"
-  | "resolved_yes"
-  | "resolved_no"
   | "cancelled"
   | "OPEN"
   | "CLOSED"
   | "RESOLVED"
   | "SETTLED";
 
-export type DbBetSide = "yes" | "no";
+export type DbBetSide = "AGREE" | "DISAGREE";
 
 export type DbBeliefStatus =
   | "DETECTED"
@@ -55,35 +47,12 @@ export type ResolvedOutcome = "AGREE" | "DISAGREE" | "VOID";
 export type User = {
   id: string;
   wallet_address: string;
-  total_points: number;
-  last_checkin_at: string | null;
-  streak_count?: number;
   created_at: string;
 };
 
 export type UserV1 = {
   id: string;
   wallet_address: string;
-  created_at: string;
-};
-
-export type Quest = {
-  id: string;
-  title: string;
-  description: string | null;
-  category?: string;
-  points_reward: number;
-  is_active: boolean;
-  action_url?: string | null;
-  created_at: string;
-};
-
-export type PointsEvent = {
-  id: string;
-  wallet_address: string;
-  quest_id: string | null;
-  source: PointsSource;
-  points: number;
   created_at: string;
 };
 
@@ -119,8 +88,6 @@ export type Market = {
   deadline?: string;
   status: DbMarketStatus;
   resolution_source?: string | null;
-  yes_pool?: number;
-  no_pool?: number;
   agree_pool?: number;
   disagree_pool?: number;
   open_time?: string;
@@ -240,22 +207,6 @@ export type Database = {
         Row: User;
         Insert: Partial<User> & { wallet_address: string };
         Update: Partial<User>;
-        Relationships: [];
-      };
-      quests: {
-        Row: Quest;
-        Insert: Partial<Quest> & { title: string; points_reward: number };
-        Update: Partial<Quest>;
-        Relationships: [];
-      };
-      points_events: {
-        Row: PointsEvent;
-        Insert: Partial<PointsEvent> & {
-          wallet_address: string;
-          source: PointsSource;
-          points: number;
-        };
-        Update: Partial<PointsEvent>;
         Relationships: [];
       };
       markets: {

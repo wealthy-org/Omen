@@ -37,8 +37,6 @@ CREATE TABLE IF NOT EXISTS markets (
   category TEXT DEFAULT 'crypto',
   agree_pool NUMERIC NOT NULL DEFAULT 0,
   disagree_pool NUMERIC NOT NULL DEFAULT 0,
-  total_pool_yes NUMERIC DEFAULT 0,
-  total_pool_no NUMERIC DEFAULT 0,
   open_time TIMESTAMPTZ NOT NULL DEFAULT now(),
   close_time TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '7 days'),
   deadline TIMESTAMPTZ,

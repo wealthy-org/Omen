@@ -132,8 +132,6 @@ export async function POST(req: NextRequest) {
         chain_id: effectiveChainId,
         agree_pool: 0,
         disagree_pool: 0,
-        total_pool_yes: 0,
-        total_pool_no: 0,
         open_time: new Date(effectiveOpenTime * 1000).toISOString(),
         close_time: new Date(effectiveCloseTime * 1000).toISOString(),
         status: "OPEN",

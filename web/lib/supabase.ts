@@ -1,14 +1,14 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "../types/database";
 
-let supabaseClient: SupabaseClient<any> | null = null;
-let supabaseAdminClient: SupabaseClient<any> | null = null;
+let supabaseClient: SupabaseClient<Database> | null = null;
+let supabaseAdminClient: SupabaseClient<Database> | null = null;
 
 const sanitizeUrl = (rawUrl: string): string => {
   return rawUrl.trim().replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, "");
 };
 
-export const getSupabaseClient = (): SupabaseClient<any> => {
+export const getSupabaseClient = (): SupabaseClient<Database> => {
   if (supabaseClient) return supabaseClient;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,11 +18,11 @@ export const getSupabaseClient = (): SupabaseClient<any> => {
     throw new Error("Missing Supabase public configuration");
   }
 
-  supabaseClient = createClient(sanitizeUrl(url), anonKey);
+  supabaseClient = createClient<Database>(sanitizeUrl(url), anonKey);
   return supabaseClient;
 };
 
-export const getSupabaseAdminClient = (): SupabaseClient<any> => {
+export const getSupabaseAdminClient = (): SupabaseClient<Database> => {
   if (supabaseAdminClient) return supabaseAdminClient;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -32,7 +32,7 @@ export const getSupabaseAdminClient = (): SupabaseClient<any> => {
     throw new Error("Missing Supabase admin configuration");
   }
 
-  supabaseAdminClient = createClient(sanitizeUrl(url), serviceKey, {
+  supabaseAdminClient = createClient<Database>(sanitizeUrl(url), serviceKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

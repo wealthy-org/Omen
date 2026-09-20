@@ -46,9 +46,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (typeof side !== "string" || (side.trim().toLowerCase() !== "yes" && side.trim().toLowerCase() !== "no")) {
+    const rawSide = typeof side === "string" ? side.trim().toUpperCase() : "";
+    if (rawSide !== "AGREE" && rawSide !== "DISAGREE") {
       return NextResponse.json(
-        { error: "Invalid or missing side: must be 'yes' or 'no'" },
+        { error: "Invalid or missing side: must be 'AGREE' or 'DISAGREE'" },
         { status: 400 }
       );
     }
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     const normalizedTxHash = tx_hash.trim().toLowerCase();
     const normalizedAddress = wallet_address.trim().toLowerCase();
-    const normalizedSide = side.trim().toLowerCase() as "yes" | "no";
+    const normalizedSide = rawSide as "AGREE" | "DISAGREE";
 
     const supabase = getSupabaseAdminClient();
 
@@ -118,16 +119,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: insertBetError.message }, { status: 500 });
     }
 
-    const currentYesPool = Number(market.total_pool_yes ?? 0);
-    const currentNoPool = Number(market.total_pool_no ?? 0);
-    const updatedYesPool = normalizedSide === "yes" ? currentYesPool + numericAmount : currentYesPool;
-    const updatedNoPool = normalizedSide === "no" ? currentNoPool + numericAmount : currentNoPool;
+    const currentAgreePool = Number(market.agree_pool ?? 0);
+    const currentDisagreePool = Number(market.disagree_pool ?? 0);
+    const updatedAgreePool = normalizedSide === "AGREE" ? currentAgreePool + numericAmount : currentAgreePool;
+    const updatedDisagreePool = normalizedSide === "DISAGREE" ? currentDisagreePool + numericAmount : currentDisagreePool;
 
     const { error: poolUpdateError } = await supabase
       .from("markets")
       .update({
-        total_pool_yes: updatedYesPool,
-        total_pool_no: updatedNoPool,
+        agree_pool: updatedAgreePool,
+        disagree_pool: updatedDisagreePool,
       })
       .eq("id", market.id);
 
@@ -135,34 +136,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: poolUpdateError.message }, { status: 500 });
     }
 
-    const awardedPoints = 50;
-
-    const { data: userRecord } = await supabase
-      .from("users")
-      .select("total_points")
-      .eq("wallet_address", normalizedAddress)
-      .maybeSingle();
-
-    const currentPoints = userRecord ? Number(userRecord.total_points) : 0;
-    const updatedPoints = currentPoints + awardedPoints;
-
     await supabase
       .from("users")
       .upsert(
         {
           wallet_address: normalizedAddress,
-          total_points: updatedPoints,
         },
         { onConflict: "wallet_address" }
       );
-
-    await supabase
-      .from("points_events")
-      .insert({
-        wallet_address: normalizedAddress,
-        source: "prediction_market",
-        points: awardedPoints,
-      });
 
     return NextResponse.json(
       {
@@ -179,13 +160,10 @@ export async function POST(req: NextRequest) {
           tx_hash: createdBet.tx_hash,
           created_at: createdBet.created_at,
         },
-        points_awarded: awardedPoints,
         updated_pools: {
-          total_pool_yes: updatedYesPool,
-          total_pool_no: updatedNoPool,
-          total_pool: updatedYesPool + updatedNoPool,
-          yes_pool: updatedYesPool,
-          no_pool: updatedNoPool,
+          agree_pool: updatedAgreePool,
+          disagree_pool: updatedDisagreePool,
+          total_pool: updatedAgreePool + updatedDisagreePool,
         },
       },
       { status: 201 }

@@ -128,18 +128,16 @@ export async function POST(
       block_number: block_number ? Number(block_number) : null,
     });
 
-    const currentAgree = Number(market.agree_pool ?? market.total_pool_yes ?? 0);
-    const currentDisagree = Number(market.disagree_pool ?? market.total_pool_no ?? 0);
+    const currentAgree = Number(market.agree_pool ?? 0);
+    const currentDisagree = Number(market.disagree_pool ?? 0);
 
     const updatePayload =
       side === "AGREE"
         ? {
             agree_pool: currentAgree + parsedAmount,
-            total_pool_yes: currentAgree + parsedAmount,
           }
         : {
             disagree_pool: currentDisagree + parsedAmount,
-            total_pool_no: currentDisagree + parsedAmount,
           };
 
     await supabase.from("markets").update(updatePayload).eq("id", market.id);

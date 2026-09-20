@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
+import type { DbBeliefStatus } from "@/types/database";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
       .select("*, belief_sources(*), markets(*)", { count: "exact" });
 
     if (statusParam && statusParam !== "ALL") {
-      query = query.eq("status", statusParam);
+      query = query.eq("status", statusParam as DbBeliefStatus);
     }
 
     if (authorParam) {

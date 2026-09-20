@@ -58,8 +58,6 @@ export interface MarketRecord {
   category: string | null;
   agree_pool: number | string;
   disagree_pool: number | string;
-  total_pool_yes: number | string | null;
-  total_pool_no: number | string | null;
   open_time: string;
   close_time: string;
   deadline: string | null;
@@ -87,8 +85,6 @@ export interface FormattedMarketDetail {
   category: string | null;
   agree_pool: number;
   disagree_pool: number;
-  total_pool_yes: number | string | null;
-  total_pool_no: number | string | null;
   open_time: string;
   close_time: string;
   deadline: string | null;

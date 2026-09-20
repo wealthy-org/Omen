@@ -19,20 +19,6 @@ export interface NavbarProps {
   isWrongNetwork?: boolean;
 }
 
-export interface DailyCheckinWidgetProps {
-  walletAddress?: string;
-  currentStreak?: number;
-  totalDays?: number;
-  streakMultiplier?: string;
-  initialCanCheckIn?: boolean;
-  cooldownSeconds?: number;
-  pointsSchedule?: number[];
-  onCheckIn?: (day: number, points: number) => Promise<void> | void;
-  onCheckinSuccess?: (xpReward: number, streak: number) => void;
-  onClaimSuccess?: (xpAwarded: number, newStreak: number) => void;
-  className?: string;
-}
-
 export interface NetworkSwitcherModalProps {
   isOpen: boolean;
   currentChainId?: number;
@@ -73,7 +59,7 @@ export interface BeliefItem {
   agreePercentage?: number;
   disagreePercentage?: number;
   confirmedAt?: string;
-  resolvedOutcome?: "YES" | "NO";
+  resolvedOutcome?: "AGREE" | "DISAGREE" | "VOID";
   subject?: string;
   comparisonAsset?: string;
   direction?: string;
@@ -118,13 +104,5 @@ export interface InfraItem {
 }
 
 export interface InfraMarqueeProps {
-  theme?: "dark" | "light";
-}
-
-export interface AirdropBannerProps {
-  theme?: "dark" | "light";
-}
-
-export interface OnboardingJourneyProps {
   theme?: "dark" | "light";
 }

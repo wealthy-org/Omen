@@ -1,12 +1,9 @@
-import type { QuestCategory } from "./quest";
-
 export type AdminTab =
   | "create"
   | "resolution"
   | "pipeline"
   | "oracle"
   | "emergency"
-  | "quests"
   | "create-market"
   | "beliefs-monitor"
   | "oracle-monitor"
@@ -22,6 +19,7 @@ export interface AdminDashboardProps {
 export interface AdminLoginFormProps {
   onLoginSuccess: (adminAddress: string) => void;
   authorizedAddresses?: string[];
+  validMasterKeys?: string[];
   className?: string;
 }
 
@@ -46,35 +44,7 @@ export interface AdminMarketCreateFormProps {
   isLoading?: boolean;
 }
 
-export type QuestRecurrence = "ONE_TIME" | "DAILY" | "WEEKLY";
-
-export interface AdminQuestItem {
-  id: string;
-  title: string;
-  description: string;
-  category: QuestCategory;
-  points?: number;
-  xp_reward?: number;
-  verification_type?: string;
-  recurrence?: QuestRecurrence;
-  actionUrl?: string;
-  action_url?: string;
-  isActive?: boolean;
-  is_active?: boolean;
-  completionsCount?: number;
-  createdAt?: string;
-  created_at?: string;
-}
-
-export interface AdminQuestManagementFormProps {
-  initialQuests?: AdminQuestItem[];
-  onCreateQuest?: (quest: AdminQuestItem) => Promise<void> | void;
-  onToggleQuestStatus?: (id: string, active: boolean) => Promise<void> | void;
-  onDeleteQuest?: (id: string) => Promise<void> | void;
-  className?: string;
-}
-
-export type ResolutionOutcome = "YES" | "NO" | "CANCEL";
+export type ResolutionOutcome = "AGREE" | "DISAGREE" | "CANCEL" | "VOID";
 
 export type CancellationReasonCategory =
   | "ORACLE_FAILURE"
@@ -93,10 +63,10 @@ export interface ResolvableMarketItem {
   totalPool?: number;
   total_pool?: number;
   volume?: number;
-  yesPercentage?: number;
-  noPercentage?: number;
-  total_yes_pool?: number;
-  total_no_pool?: number;
+  agreePercentage?: number;
+  disagreePercentage?: number;
+  total_agree_pool?: number;
+  total_disagree_pool?: number;
   endTime?: string;
   deadline?: string;
   resolutionSourceUrl?: string;

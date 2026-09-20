@@ -2,32 +2,40 @@ import { createPublicClient, createWalletClient, http, parseEther, defineChain, 
 import { privateKeyToAccount } from "viem/accounts";
 import { createClient } from "@supabase/supabase-js";
 import { OMEN_MARKET_ABI } from "../lib/contracts";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+  ETHEREUM_SEPOLIA_RPC_URL,
+  ROBINHOOD_TESTNET_RPC_URL,
+  ETHEREUM_SEPOLIA_EXPLORER_URL,
+  ROBINHOOD_TESTNET_EXPLORER_URL,
+} from "../lib/constants";
 
 const sepoliaChain = defineChain({
-  id: 11155111,
+  id: ETHEREUM_SEPOLIA_CHAIN_ID,
   name: "Ethereum Sepolia",
   nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
-      http: [process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org"],
+      http: [ETHEREUM_SEPOLIA_RPC_URL],
     },
   },
   blockExplorers: {
-    default: { name: "Etherscan", url: "https://sepolia.etherscan.io" },
+    default: { name: "Etherscan", url: ETHEREUM_SEPOLIA_EXPLORER_URL },
   },
 });
 
 const robinhoodChain = defineChain({
-  id: 46630,
+  id: ROBINHOOD_TESTNET_CHAIN_ID,
   name: "Robinhood Chain Testnet",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
-      http: [process.env.ROBINHOOD_RPC_URL || "https://rpc.testnet.robinhood.com"],
+      http: [ROBINHOOD_TESTNET_RPC_URL],
     },
   },
   blockExplorers: {
-    default: { name: "Robinhood Explorer", url: "https://explorer.testnet.robinhood.com" },
+    default: { name: "Robinhood Explorer", url: ROBINHOOD_TESTNET_EXPLORER_URL },
   },
 });
 
@@ -39,10 +47,15 @@ async function main() {
   ].filter((key): key is string => Boolean(key && key.startsWith("0x")));
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  const supabase = (supabaseUrl && supabaseKey)
-    ? createClient(supabaseUrl.trim().replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, ""), supabaseKey)
+  const supabase = (supabaseUrl && serviceRoleKey)
+    ? createClient(supabaseUrl.trim().replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, ""), serviceRoleKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      })
     : null;
 
   if (seedKeys.length === 0) {
@@ -51,8 +64,8 @@ async function main() {
   }
 
   const chains = [
-    { chain: sepoliaChain, id: 11155111, name: "Sepolia" },
-    { chain: robinhoodChain, id: 46630, name: "Robinhood Chain" },
+    { chain: sepoliaChain, id: ETHEREUM_SEPOLIA_CHAIN_ID, name: "Sepolia" },
+    { chain: robinhoodChain, id: ROBINHOOD_TESTNET_CHAIN_ID, name: "Robinhood Chain" },
   ];
 
   for (const { chain, id: chainId, name } of chains) {
@@ -80,8 +93,8 @@ async function main() {
 
     if (targetMarkets.length === 0) {
       targetMarkets = [
-        { id: `market-${chainId}-demo-1`, contract_address: "0x1111111111111111111111111111111111111111", title: "Test Market Alpha" },
-        { id: `market-${chainId}-demo-2`, contract_address: "0x2222222222222222222222222222222222222222", title: "Test Market Beta" },
+        { id: `market-${chainId}-demo-1`, contract_address: "0x5FbDB2315678afecb367f032d93F642f64180aa3", title: "Test Market Alpha" },
+        { id: `market-${chainId}-demo-2`, contract_address: "0x5FbDB2315678afecb367f032d93F642f64180aa3", title: "Test Market Beta" },
       ];
     }
 
@@ -99,7 +112,7 @@ async function main() {
       const stakeAmountEth = (0.001 * (i + 1)).toFixed(3);
       const parsedWei = parseEther(stakeAmountEth);
 
-      if (!market.contract_address || market.contract_address === "0x1111111111111111111111111111111111111111") {
+      if (!market.contract_address) {
         console.log(`Skipping on-chain tx for ${market.id}: No deployed contract address.`);
         continue;
       }

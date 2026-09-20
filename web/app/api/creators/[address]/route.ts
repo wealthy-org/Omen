@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseClient } from "@/lib/supabase";
+import type { CreatorProfileDetail, Belief } from "@/types";
 
 export async function GET(
   _req: NextRequest,
@@ -33,42 +34,43 @@ export async function GET(
       );
     }
 
-    let creatorProfile = profile;
-    let creatorBeliefs: any[] = [];
+    let creatorProfile: CreatorProfileDetail | null = profile as CreatorProfileDetail | null;
+    let creatorBeliefs: Belief[] = [];
 
     if (creatorProfile) {
       const handleFilter = creatorProfile.handle ? `author.ilike.${creatorProfile.handle},` : "";
-      const selectBuilder = supabase.from("beliefs").select("*");
-      const filteredBuilder = typeof (selectBuilder as any).or === "function"
-        ? (selectBuilder as any).or(`${handleFilter}author.ilike.${creatorProfile.wallet_address},author.ilike.${cleanName}`)
-        : selectBuilder;
+      const baseQuery = supabase.from("beliefs").select("*");
+      const builder = "or" in baseQuery && typeof baseQuery.or === "function"
+        ? baseQuery.or(`${handleFilter}author.ilike.${creatorProfile.wallet_address},author.ilike.${cleanName}`)
+        : baseQuery;
 
-      const { data: beliefs } = await filteredBuilder.order("created_at", { ascending: false });
+      const { data: beliefs } = await builder.order("created_at", { ascending: false });
 
-      creatorBeliefs = beliefs ?? [];
+      creatorBeliefs = (beliefs as Belief[]) ?? [];
     } else {
-      const selectBuilder = supabase.from("beliefs").select("*");
-      const filteredBuilder = typeof (selectBuilder as any).or === "function"
-        ? (selectBuilder as any).or(`author.ilike.${rawAddress},author.ilike.${cleanHandle},author.ilike.${cleanName}`)
-        : (typeof (selectBuilder as any).ilike === "function" ? (selectBuilder as any).ilike("author", cleanName) : selectBuilder);
+      const baseQuery = supabase.from("beliefs").select("*");
+      const builder = "or" in baseQuery && typeof baseQuery.or === "function"
+        ? baseQuery.or(`author.ilike.${rawAddress},author.ilike.${cleanHandle},author.ilike.${cleanName}`)
+        : baseQuery;
 
-      const { data: beliefs } = await filteredBuilder.order("created_at", { ascending: false });
+      const { data: beliefs } = await builder.order("created_at", { ascending: false });
 
       if (beliefs && beliefs.length > 0) {
-        creatorBeliefs = beliefs;
-        const firstBelief = beliefs[0];
-        const confirmedCount = beliefs.filter((b: any) => b.status === "CONFIRMED").length;
+        const typedBeliefs = beliefs as Belief[];
+        creatorBeliefs = typedBeliefs;
+        const firstBelief = typedBeliefs[0];
+        const confirmedCount = typedBeliefs.filter((b) => b.status === "CONFIRMED").length;
         const authorText = typeof firstBelief.author === "string" ? firstBelief.author : cleanName;
         const handleText = authorText.startsWith("@") ? authorText : `@${authorText}`;
 
         creatorProfile = {
           id: `creator-${cleanName}`,
-          wallet_address: rawAddress.startsWith("0x") && rawAddress.length === 42 ? rawAddress : `0x${Array.from({ length: 40 }, () => "0").join("")}`,
+          wallet_address: rawAddress,
           handle: handleText,
           display_name: authorText.replace("@", ""),
           bio: "Social Belief Creator on Omen Protocol",
           avatar_url: null,
-          total_beliefs_count: beliefs.length,
+          total_beliefs_count: typedBeliefs.length,
           confirmed_beliefs_count: confirmedCount,
           resolved_count: 0,
           correct_count: 0,

@@ -57,27 +57,28 @@ export async function GET(req: NextRequest) {
       let payout = 0;
 
       if (market) {
-        const yesPool = Number(market.total_pool_yes ?? market.yes_pool ?? 0);
-        const noPool = Number(market.total_pool_no ?? market.no_pool ?? 0);
-        const totalPool = yesPool + noPool;
+        const agreePool = Number(market.agree_pool ?? 0);
+        const disagreePool = Number(market.disagree_pool ?? 0);
+        const totalPool = agreePool + disagreePool;
+        const normalizedSide = String(bet.side).toUpperCase();
 
-        if (market.status === "active") {
+        if (market.status === "active" || market.status === "OPEN") {
           status = "active";
-        } else if (market.status === "cancelled") {
+        } else if (market.status === "cancelled" || market.winner === "VOID") {
           status = "cancelled";
           payout = betAmount;
-        } else if (market.status === "resolved_yes") {
-          if (bet.side === "yes") {
+        } else if (market.winner === "AGREE") {
+          if (normalizedSide === "AGREE") {
             status = "won";
-            payout = yesPool > 0 ? (betAmount / yesPool) * totalPool : betAmount;
+            payout = agreePool > 0 ? (betAmount / agreePool) * totalPool : betAmount;
           } else {
             status = "lost";
             payout = 0;
           }
-        } else if (market.status === "resolved_no") {
-          if (bet.side === "no") {
+        } else if (market.winner === "DISAGREE") {
+          if (normalizedSide === "DISAGREE") {
             status = "won";
-            payout = noPool > 0 ? (betAmount / noPool) * totalPool : betAmount;
+            payout = disagreePool > 0 ? (betAmount / disagreePool) * totalPool : betAmount;
           } else {
             status = "lost";
             payout = 0;

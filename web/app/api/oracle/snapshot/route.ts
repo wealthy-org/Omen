@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { fetchChainlinkPrice } from "@/lib/oracle/chainlink";
+import type { SnapshotType, OracleSnapshotSource } from "@/types/database";
 
 export async function POST(req: NextRequest) {
   try {
@@ -60,8 +61,8 @@ export async function POST(req: NextRequest) {
         market_id: market_id || null,
         asset: asset.toUpperCase().trim(),
         price: Number(resolvedPrice),
-        snapshot_type: typeof snapshot_type === "string" ? snapshot_type : "DISPLAY",
-        source: typeof source === "string" ? source : "chainlink",
+        snapshot_type: (typeof snapshot_type === "string" ? snapshot_type : "DISPLAY") as SnapshotType,
+        source: (typeof source === "string" ? source : "chainlink") as OracleSnapshotSource,
         recorded_at: new Date().toISOString(),
       })
       .select()
