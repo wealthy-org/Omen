@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
-import { fetchChainlinkPrice, CHAINLINK_PRICE_FEEDS } from "@/lib/oracle/chainlink";
+import { fetchChainlinkPrice } from "@/lib/oracle/chainlink";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  CHAINLINK_ETH_USD_FEED,
+  CHAINLINK_BTC_USD_FEED,
+  CHAINLINK_SOL_USD_FEED,
+} from "@/lib/constants";
 import { OracleFeedState } from "@/types/api";
 
 const CONFIG_FEEDS = [
@@ -9,8 +15,8 @@ const CONFIG_FEEDS = [
     asset: "ETH",
     decimals: 8,
     heartbeatSec: 3600,
-    chainId: 11155111,
-    contractAddress: CHAINLINK_PRICE_FEEDS[11155111]?.ETH || "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
+    contractAddress: CHAINLINK_ETH_USD_FEED,
   },
   {
     symbol: "BTC/USD",
@@ -18,8 +24,8 @@ const CONFIG_FEEDS = [
     asset: "BTC",
     decimals: 8,
     heartbeatSec: 3600,
-    chainId: 11155111,
-    contractAddress: CHAINLINK_PRICE_FEEDS[11155111]?.BTC || "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
+    contractAddress: CHAINLINK_BTC_USD_FEED,
   },
   {
     symbol: "SOL/USD",
@@ -27,8 +33,8 @@ const CONFIG_FEEDS = [
     asset: "SOL",
     decimals: 8,
     heartbeatSec: 3600,
-    chainId: 11155111,
-    contractAddress: CHAINLINK_PRICE_FEEDS[11155111]?.SOL || "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
+    contractAddress: CHAINLINK_SOL_USD_FEED,
   },
 ];
 

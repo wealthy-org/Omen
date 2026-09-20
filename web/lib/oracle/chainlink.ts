@@ -1,11 +1,28 @@
 import { createPublicClient, http, type Address } from "viem";
 import { sepolia } from "viem/chains";
-import { ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain } from "../contracts";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+  CHAINLINK_ETH_USD_FEED,
+  CHAINLINK_BTC_USD_FEED,
+  CHAINLINK_SOL_USD_FEED,
+  CHAINLINK_LINK_USD_FEED,
+  CHAINLINK_PRICE_FEEDS,
+  robinhoodChain,
+} from "../constants";
+
+export {
+  CHAINLINK_ETH_USD_FEED,
+  CHAINLINK_BTC_USD_FEED,
+  CHAINLINK_SOL_USD_FEED,
+  CHAINLINK_LINK_USD_FEED,
+  CHAINLINK_PRICE_FEEDS,
+};
 
 export const CHAINLINK_SEPOLIA_FEEDS = {
-  ETH_USD: "0x694AA1769357215DE4FAC081bf1f309aDC325306" as Address,
-  BTC_USD: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43" as Address,
-  SOL_USD: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d" as Address,
+  ETH_USD: CHAINLINK_ETH_USD_FEED,
+  BTC_USD: CHAINLINK_BTC_USD_FEED,
+  SOL_USD: CHAINLINK_SOL_USD_FEED,
 };
 
 export const CHAINLINK_AGGREGATOR_ABI = [
@@ -39,21 +56,6 @@ export const CHAINLINK_AGGREGATOR_ABI = [
 ] as const;
 
 export const AGGREGATOR_V3_ABI = CHAINLINK_AGGREGATOR_ABI;
-
-export const CHAINLINK_PRICE_FEEDS: Record<number, Record<string, Address>> = {
-  11155111: {
-    ETH: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
-    BTC: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
-    LINK: "0xc59E3633BAAC79493d908e636ee6716c2D0ca80b",
-    SOL: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
-  },
-  46630: {
-    ETH: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
-    BTC: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
-    LINK: "0xc59E3633BAAC79493d908e636ee6716c2D0ca80b",
-    SOL: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
-  },
-};
 
 import type { ResolutionType, OracleResolutionOutcome as ResolutionOutcome, ResolutionParams } from "@/types";
 
@@ -184,7 +186,7 @@ export async function getLatestPrice(
 
 export async function fetchChainlinkPrice(
   asset: string,
-  chainId = 11155111,
+  chainId = ETHEREUM_SEPOLIA_CHAIN_ID,
   customFeedAddress?: Address
 ): Promise<{ price: number; roundId: bigint; updatedAt: bigint }> {
   const normalizedAsset = asset.toUpperCase().trim();

@@ -2,7 +2,12 @@ import { keccak256, toHex, Address, Hex, createWalletClient, createPublicClient,
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import { OMEN_FACTORY_ABI, getOmenFactoryAddress } from "../contracts";
-import { ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain, CHAINLINK_ETH_USD_FEED } from "../constants";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+  robinhoodChain,
+  CHAINLINK_ETH_USD_FEED,
+} from "../constants";
 import type { BeliefHashes, CreateOnChainMarketParams, CreatedMarketResult } from "@/types";
 
 export type { BeliefHashes, CreateOnChainMarketParams, CreatedMarketResult };
@@ -26,7 +31,10 @@ export function computeBeliefHashes(
 export async function createOnChainMarket(
   params: CreateOnChainMarketParams
 ): Promise<CreatedMarketResult> {
-  const chainId = params.chainId || 11155111;
+  if (!params.chainId) {
+    throw new Error("Missing chainId for on-chain market creation");
+  }
+  const chainId = params.chainId;
   const privateKey = (process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY) as Hex | undefined;
 
   if (!privateKey) {

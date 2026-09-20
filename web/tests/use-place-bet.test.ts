@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { usePlaceBet } from "@/hooks/usePlaceBet";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 import { parseEther } from "viem";
 
 const { mockWagmiContext, mockWriteContractAsync, mockUseConnection, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
@@ -61,7 +61,7 @@ describe("usePlaceBet Hook", () => {
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: OMEN_FACTORY_ADDRESS,
       abi: PREDICTION_MARKET_ABI,
       functionName: "placeBet",
       args: [BigInt(1), true],
@@ -95,7 +95,7 @@ describe("usePlaceBet Hook", () => {
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: OMEN_FACTORY_ADDRESS,
       abi: PREDICTION_MARKET_ABI,
       functionName: "placeBet",
       args: [BigInt(42), false],

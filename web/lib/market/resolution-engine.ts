@@ -4,7 +4,7 @@ import { sepolia } from "viem/chains";
 import { getSupabaseAdminClient } from "../supabase";
 import { fetchChainlinkPrice } from "../oracle/chainlink";
 import { evaluateOracleCondition, calculateSettlementPool } from "./resolution-helper";
-import { OMEN_MARKET_ABI, ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain } from "../contracts";
+import { OMEN_MARKET_ABI, ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain } from "../contracts";
 import type { ResolvedOutcome, ResolutionExecutionResult, ResolutionEngineSummary, DbMarketStatus } from "@/types";
 
 export type { ResolutionExecutionResult, ResolutionEngineSummary };
@@ -41,7 +41,16 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
   const asset = config.asset || config.assetA || "ETH";
   const targetPrice = Number(config.targetPrice || 0);
   const resolutionType = market.resolution_type || "PRICE_ABOVE";
-  const chainId = Number(market.chain_id) || 11155111;
+  const rawChainId = Number(market.chain_id);
+  if (!rawChainId || isNaN(rawChainId)) {
+    return {
+      success: false,
+      marketId,
+      outcome: "VOID",
+      error: `Market ${marketId} does not have a valid chain_id`,
+    };
+  }
+  const chainId = rawChainId;
 
   let outcome: ResolvedOutcome = "VOID";
   let startPrice: number | undefined;

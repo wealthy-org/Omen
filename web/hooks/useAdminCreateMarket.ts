@@ -6,7 +6,7 @@ import {
   useConnection,
   usePublicClient,
 } from "wagmi";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI, getPredictionMarketAddress } from "@/lib/contracts";
+import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI, getOmenFactoryAddress } from "@/lib/contracts";
 import type { CreateMarketParams, CreateMarketResult } from "@/types";
 
 export type { CreateMarketParams, CreateMarketResult };
@@ -42,7 +42,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
     if (!mutateAsync) {
       throw new Error("Wallet not connected or contract write unavailable.");
     }
-    const targetAddress = getPredictionMarketAddress() || PREDICTION_MARKET_ADDRESS;
+    const targetAddress = getOmenFactoryAddress() || OMEN_FACTORY_ADDRESS;
     const hash = await mutateAsync({
       address: targetAddress as `0x${string}`,
       abi: PREDICTION_MARKET_ABI,

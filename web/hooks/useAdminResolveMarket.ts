@@ -4,7 +4,7 @@ import {
   useWaitForTransactionReceipt,
   useConnection,
 } from "wagmi";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI, getPredictionMarketAddress } from "@/lib/contracts";
+import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI, getOmenFactoryAddress } from "@/lib/contracts";
 import type { ResolveMarketParams, ResolveMarketResult } from "@/types";
 
 export type { ResolveMarketParams, ResolveMarketResult };
@@ -38,7 +38,7 @@ export function useAdminResolveMarket(): ResolveMarketResult {
     if (!mutateAsync) {
       throw new Error("Wallet not connected or contract write unavailable.");
     }
-    const targetAddress = (getPredictionMarketAddress() || PREDICTION_MARKET_ADDRESS) as `0x${string}`;
+    const targetAddress = (getOmenFactoryAddress() || OMEN_FACTORY_ADDRESS) as `0x${string}`;
 
     let hash: `0x${string}`;
     if (outcome === "CANCEL" || outcome === "VOID") {

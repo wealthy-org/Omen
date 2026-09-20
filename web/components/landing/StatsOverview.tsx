@@ -8,11 +8,12 @@ export type { StatsOverviewProps };
 
 export default function StatsOverview({}: StatsOverviewProps) {
   const [stats, setStats] = useState({
-    totalVolume: "3,960.50 ETH",
-    activeMarkets: "412",
-    totalBeliefs: "1,284",
-    verifiedCreators: "89",
+    totalVolume: "0.00 ETH",
+    activeMarkets: "0",
+    totalBeliefs: "0",
+    verifiedCreators: "0",
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,7 +29,12 @@ export default function StatsOverview({}: StatsOverviewProps) {
           });
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
     return () => {
       isMounted = false;
     };
@@ -53,7 +59,11 @@ export default function StatsOverview({}: StatsOverviewProps) {
 
             <div className="my-1.5 sm:my-2">
               <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] break-words">
-                {stats.totalVolume}
+                {isLoading ? (
+                  <span className="inline-block w-28 h-7 bg-emerald-500/10 dark:bg-white/10 rounded animate-pulse" />
+                ) : (
+                  stats.totalVolume
+                )}
               </div>
             </div>
           </div>
@@ -80,7 +90,12 @@ export default function StatsOverview({}: StatsOverviewProps) {
 
             <div className="my-1.5 sm:my-2">
               <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] break-words">
-                {stats.activeMarkets} <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Markets</span>
+                {isLoading ? (
+                  <span className="inline-block w-12 h-7 bg-emerald-500/10 dark:bg-white/10 rounded animate-pulse" />
+                ) : (
+                  stats.activeMarkets
+                )}{" "}
+                <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Markets</span>
               </div>
             </div>
           </div>
@@ -111,7 +126,12 @@ export default function StatsOverview({}: StatsOverviewProps) {
 
             <div className="my-1.5 sm:my-2">
               <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 break-words">
-                {stats.totalBeliefs} <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Beliefs</span>
+                {isLoading ? (
+                  <span className="inline-block w-12 h-7 bg-blue-500/10 dark:bg-white/10 rounded animate-pulse" />
+                ) : (
+                  stats.totalBeliefs
+                )}{" "}
+                <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Beliefs</span>
               </div>
             </div>
           </div>
@@ -138,7 +158,12 @@ export default function StatsOverview({}: StatsOverviewProps) {
 
             <div className="my-1.5 sm:my-2">
               <div className="text-xl sm:text-2xl lg:text-3xl font-black font-mono tracking-tight transition-colors text-[#0B1F16] dark:text-white group-hover:text-[#0E7A4E] dark:group-hover:text-[#34D399] break-words">
-                {stats.verifiedCreators} <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Creators</span>
+                {isLoading ? (
+                  <span className="inline-block w-12 h-7 bg-emerald-500/10 dark:bg-white/10 rounded animate-pulse" />
+                ) : (
+                  stats.verifiedCreators
+                )}{" "}
+                <span className="text-xs sm:text-base font-bold font-sans text-zinc-500">Creators</span>
               </div>
             </div>
           </div>

@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Zap, AlertTriangle } from "lucide-react";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  CHAINLINK_ETH_USD_FEED,
+  CHAINLINK_BTC_USD_FEED,
+  CHAINLINK_SOL_USD_FEED,
+} from "@/lib/constants";
 import { OracleFeedState, OracleSnapshotRecord } from "@/types";
 
 export type { OracleFeedState, OracleSnapshotRecord };
@@ -15,8 +21,8 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
     roundId: "0",
     updatedAt: new Date(0).toISOString(),
     heartbeatSec: 3600,
-    contractAddress: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
-    chainId: 11155111,
+    contractAddress: CHAINLINK_ETH_USD_FEED,
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
     status: "HEALTHY",
   },
   {
@@ -27,8 +33,8 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
     roundId: "0",
     updatedAt: new Date(0).toISOString(),
     heartbeatSec: 3600,
-    contractAddress: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
-    chainId: 11155111,
+    contractAddress: CHAINLINK_BTC_USD_FEED,
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
     status: "HEALTHY",
   },
   {
@@ -39,8 +45,8 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
     roundId: "0",
     updatedAt: new Date(0).toISOString(),
     heartbeatSec: 3600,
-    contractAddress: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
-    chainId: 11155111,
+    contractAddress: CHAINLINK_SOL_USD_FEED,
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
     status: "HEALTHY",
   },
 ];

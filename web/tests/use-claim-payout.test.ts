@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useClaimPayout } from "@/hooks/useClaimPayout";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 const { mockWagmiContext, mockWriteContractAsync, mockUseConnection, mockUseWaitForTransactionReceipt } = vi.hoisted(() => {
   const React = require("react");
@@ -52,7 +52,7 @@ describe("useClaimPayout Hook", () => {
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: OMEN_FACTORY_ADDRESS,
       abi: PREDICTION_MARKET_ABI,
       functionName: "claim",
       args: [BigInt(7)],
@@ -71,7 +71,7 @@ describe("useClaimPayout Hook", () => {
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: OMEN_FACTORY_ADDRESS,
       abi: PREDICTION_MARKET_ABI,
       functionName: "claim",
       args: [BigInt(12)],

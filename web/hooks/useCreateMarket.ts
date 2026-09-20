@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useConnection, useWriteContract, usePublicClient } from "wagmi";
 import { Address, Hash, parseUnits, decodeEventLog } from "viem";
-import { getOmenFactoryAddress, OMEN_FACTORY_ABI } from "@/lib/contracts";
+import { getOmenFactoryAddress, OMEN_FACTORY_ABI, CHAINLINK_ETH_USD_FEED } from "@/lib/contracts";
 import type { CreateMarketParams, UseCreateMarketResult } from "@/types";
 
 export type { CreateMarketParams, UseCreateMarketResult };
@@ -37,7 +37,7 @@ export function useCreateMarket(): UseCreateMarketResult {
       if (!creatorAddress) {
         throw new Error("Creator wallet address is required to create a market.");
       }
-      const oracleFeedAddress = (params.oracleFeed || "0x694AA1769357215DE4FAC081bf1f309aDC325306") as Address;
+      const oracleFeedAddress = (params.oracleFeed || CHAINLINK_ETH_USD_FEED) as Address;
       const targetPriceBigInt = typeof params.targetPrice === "bigint"
         ? params.targetPrice
         : parseUnits((params.targetPrice ?? 0).toString(), 8);

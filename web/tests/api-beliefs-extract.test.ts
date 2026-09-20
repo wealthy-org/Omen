@@ -25,7 +25,6 @@ describe("TICKET-84: POST /api/beliefs/extract", () => {
     const filesToCheck = [
       path.resolve(process.cwd(), "app/api/beliefs/extract/route.ts"),
       path.resolve(process.cwd(), "lib/ai/openrouter.ts"),
-      path.resolve(process.cwd(), "lib/ai/mockOpenRouter.ts"),
       path.resolve(process.cwd(), "types/belief.ts"),
     ];
 

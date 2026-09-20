@@ -34,6 +34,10 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
         throw new Error("Wallet not connected or signTypedData unavailable.");
       }
 
+      if (!chainId) {
+        throw new Error("Connected network / chain ID is required to confirm belief.");
+      }
+
       const creatorAddress = address as Address;
       const timestampSec = Math.floor(Date.now() / 1000);
       const timestamp = BigInt(timestampSec);
@@ -43,7 +47,7 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
       const domain = {
         name: "Omen Belief Protocol",
         version: "1",
-        chainId: chainId || 11155111,
+        chainId,
         verifyingContract,
       } as const;
 
@@ -79,7 +83,7 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
             creator_address: creatorAddress,
             signature: signedSig,
             timestamp: timestampSec,
-            chain_id: chainId || 11155111,
+            chain_id: chainId,
           }),
         });
 

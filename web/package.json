@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "seed:markets": "ts-node scripts/sync-testnet-markets.ts",
+    "seed:activity": "ts-node scripts/seed-testnet-activity.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

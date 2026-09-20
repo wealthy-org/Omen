@@ -10,8 +10,12 @@ import {
   ROBINHOOD_TESTNET_EXPLORER_URL,
   OMEN_FACTORY_ADDRESS_SEPOLIA,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
-  PREDICTION_MARKET_ADDRESS,
   OMEN_FACTORY_ADDRESS,
+  CHAINLINK_ETH_USD_FEED,
+  CHAINLINK_BTC_USD_FEED,
+  CHAINLINK_SOL_USD_FEED,
+  CHAINLINK_LINK_USD_FEED,
+  CHAINLINK_PRICE_FEEDS,
   robinhoodChain,
 } from "./constants";
 
@@ -24,8 +28,12 @@ export {
   ROBINHOOD_TESTNET_EXPLORER_URL,
   OMEN_FACTORY_ADDRESS_SEPOLIA,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
-  PREDICTION_MARKET_ADDRESS,
   OMEN_FACTORY_ADDRESS,
+  CHAINLINK_ETH_USD_FEED,
+  CHAINLINK_BTC_USD_FEED,
+  CHAINLINK_SOL_USD_FEED,
+  CHAINLINK_LINK_USD_FEED,
+  CHAINLINK_PRICE_FEEDS,
   robinhoodChain,
 };
 
@@ -46,10 +54,6 @@ export const getOmenFactoryAddress = (chainId?: number): `0x${string}` => {
     return OMEN_FACTORY_ADDRESS_ROBINHOOD;
   }
   return OMEN_FACTORY_ADDRESS_SEPOLIA;
-};
-
-export const getPredictionMarketAddress = (chainId?: number): `0x${string}` => {
-  return getOmenFactoryAddress(chainId);
 };
 
 export const OMEN_FACTORY_ABI = OmenFactoryJson;

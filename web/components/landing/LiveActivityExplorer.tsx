@@ -125,9 +125,9 @@ export default function LiveActivityExplorer({}: LiveActivityExplorerProps) {
           if (isMounted && data.activities && Array.isArray(data.activities)) {
             const mapped: OnChainTx[] = data.activities.map((item: any, idx: number) => {
               const { method, label } = parseMethod(item.event_type);
-              const chainId = item.market_chain_id || ETHEREUM_SEPOLIA_CHAIN_ID;
+              const chainId = item.market_chain_id ? Number(item.market_chain_id) : undefined;
               const isRobinhood = chainId === ROBINHOOD_TESTNET_CHAIN_ID;
-              const chainName = isRobinhood ? "Robinhood Chain" : "Ethereum Sepolia";
+              const chainName = isRobinhood ? "Robinhood Chain" : (chainId === ETHEREUM_SEPOLIA_CHAIN_ID ? "Ethereum Sepolia" : "EVM Network");
               const toContractName = isRobinhood ? "RobinhoodStakingEngine" : "OmenSepoliaCore";
               const toContract = item.market_contract_address || (isRobinhood ? OMEN_FACTORY_ADDRESS_ROBINHOOD : OMEN_FACTORY_ADDRESS_SEPOLIA);
               const amountVal = item.amount !== null && item.amount !== undefined ? Number(item.amount) : undefined;

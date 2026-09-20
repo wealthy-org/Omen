@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
 
 const {
   mockWagmiContext,
@@ -79,7 +79,7 @@ describe("useAdminCreateMarket Hook", () => {
     });
 
     expect(mockWriteContractAsync).toHaveBeenCalledWith({
-      address: PREDICTION_MARKET_ADDRESS,
+      address: OMEN_FACTORY_ADDRESS,
       abi: PREDICTION_MARKET_ABI,
       functionName: "createMarket",
       args: ["Will ETH reach $10,000?", expectedDeadline],

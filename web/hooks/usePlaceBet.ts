@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt, useConnection } from "wagmi";
 import { parseEther, Address } from "viem";
-import { getPredictionMarketAddress, PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI, OMEN_MARKET_ABI } from "@/lib/contracts";
+import { getOmenFactoryAddress, OMEN_FACTORY_ADDRESS, PREDICTION_MARKET_ABI, OMEN_MARKET_ABI } from "@/lib/contracts";
 import type { PlaceBetParams } from "@/types";
 
 export type { PlaceBetParams };
@@ -35,7 +35,7 @@ export function usePlaceBet() {
 
     let hash: string;
 
-    if (contractAddress && contractAddress.startsWith("0x") && contractAddress.length === 42 && contractAddress !== PREDICTION_MARKET_ADDRESS) {
+    if (contractAddress && contractAddress.startsWith("0x") && contractAddress.length === 42 && contractAddress !== OMEN_FACTORY_ADDRESS) {
       const functionName = side ? "depositAgree" : "depositDisagree";
       hash = await mutateAsync({
         address: contractAddress as Address,
@@ -45,7 +45,7 @@ export function usePlaceBet() {
       });
     } else {
       const numericMarketId = BigInt(String(marketId).replace(/\D/g, "") || "1");
-      const targetAddress = getPredictionMarketAddress(chainId) || PREDICTION_MARKET_ADDRESS;
+      const targetAddress = getOmenFactoryAddress(chainId) || OMEN_FACTORY_ADDRESS;
       hash = await mutateAsync({
         address: targetAddress,
         abi: PREDICTION_MARKET_ABI,

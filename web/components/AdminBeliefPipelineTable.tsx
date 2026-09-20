@@ -7,65 +7,6 @@ import { BeliefPipelineItem } from "@/types";
 
 export type { BeliefPipelineItem };
 
-const MOCK_PIPELINE_ITEMS: BeliefPipelineItem[] = [
-  {
-    id: "belief-v1-001",
-    statement: "ETH will outperform SOL in Q4 2026",
-    author: "0x71c...99a1",
-    author_handle: "@vitalik_fan",
-    status: "OPEN",
-    ai_confidence: 94,
-    agree_pool: 12500,
-    disagree_pool: 7500,
-    total_pool: 20000,
-    consensus_percentage: 62.5,
-    has_eip712_signature: true,
-    created_at: "2026-09-18T05:00:00.000Z",
-  },
-  {
-    id: "belief-v1-002",
-    statement: "Bitcoin price will breach $100k prior to year-end options expiry",
-    author: "0x892...11b2",
-    author_handle: "@satoshi_macro",
-    status: "CONFIRMED",
-    ai_confidence: 88,
-    agree_pool: 35000,
-    disagree_pool: 15000,
-    total_pool: 50000,
-    consensus_percentage: 70.0,
-    has_eip712_signature: true,
-    created_at: "2026-09-18T02:00:00.000Z",
-  },
-  {
-    id: "belief-v1-003",
-    statement: "Arbitrum TVL will surpass $15B following Nitro upgrade",
-    author: "0x44a...66e8",
-    author_handle: "@l2_analyst",
-    status: "DETECTED",
-    ai_confidence: 82,
-    agree_pool: 0,
-    disagree_pool: 0,
-    total_pool: 0,
-    consensus_percentage: 50.0,
-    has_eip712_signature: false,
-    created_at: "2026-09-17T23:00:00.000Z",
-  },
-  {
-    id: "belief-v1-004",
-    statement: "Federal Reserve will reduce interest rate by 50bps in next FOMC",
-    author: "0x123...4567",
-    author_handle: "@macro_alpha",
-    status: "RESOLVED",
-    ai_confidence: 91,
-    agree_pool: 18000,
-    disagree_pool: 22000,
-    total_pool: 40000,
-    consensus_percentage: 45.0,
-    has_eip712_signature: true,
-    created_at: "2026-09-17T07:00:00.000Z",
-  },
-];
-
 function mapBeliefToPipelineItem(b: any): BeliefPipelineItem {
   const market = b.markets?.[0];
   const agree = Number(b.agree_pool ?? market?.agree_pool ?? 0);
@@ -110,7 +51,7 @@ function mapBeliefToPipelineItem(b: any): BeliefPipelineItem {
 }
 
 export default function AdminBeliefPipelineTable({
-  initialItems = MOCK_PIPELINE_ITEMS,
+  initialItems = [],
 }: {
   initialItems?: BeliefPipelineItem[];
 } = {}) {

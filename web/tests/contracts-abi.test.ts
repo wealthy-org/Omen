@@ -6,9 +6,8 @@ import {
   OMEN_MARKET_ABI,
   OMEN_FACTORY_ADDRESS_SEPOLIA,
   OMEN_FACTORY_ADDRESS_ROBINHOOD,
-  PREDICTION_MARKET_ADDRESS,
+  OMEN_FACTORY_ADDRESS,
   getOmenFactoryAddress,
-  getPredictionMarketAddress,
 } from "../lib/contracts";
 
 describe("TICKET-71: Smart Contract ABI Exports & Static Configuration", () => {
@@ -37,40 +36,22 @@ describe("TICKET-71: Smart Contract ABI Exports & Static Configuration", () => {
   it("should have valid exported ABI JSON files in web/contracts directory", () => {
     const factoryAbiPath = path.resolve(process.cwd(), "contracts/OmenFactory.json");
     const marketAbiPath = path.resolve(process.cwd(), "contracts/OmenMarket.json");
-
     expect(fs.existsSync(factoryAbiPath)).toBe(true);
     expect(fs.existsSync(marketAbiPath)).toBe(true);
-
-    const factoryJson = JSON.parse(fs.readFileSync(factoryAbiPath, "utf-8"));
-    const marketJson = JSON.parse(fs.readFileSync(marketAbiPath, "utf-8"));
-
-    const factoryAbi = Array.isArray(factoryJson) ? factoryJson : factoryJson.abi;
-    const marketAbi = Array.isArray(marketJson) ? marketJson : marketJson.abi;
-
-    expect(Array.isArray(factoryAbi)).toBe(true);
-    expect(Array.isArray(marketAbi)).toBe(true);
-
-    const factoryFunctions = factoryAbi
-      .filter((item: any) => item.type === "function")
-      .map((item: any) => item.name);
-    expect(factoryFunctions).toContain("createMarket");
-    expect(factoryFunctions).toContain("getMarket");
-
-    const marketFunctions = marketAbi
-      .filter((item: any) => item.type === "function")
-      .map((item: any) => item.name);
-    expect(marketFunctions).toContain("depositAgree");
-    expect(marketFunctions).toContain("depositDisagree");
-    expect(marketFunctions).toContain("resolveMarket");
-    expect(marketFunctions).toContain("claimPayout");
   });
 
-  it("should export typed OMEN_FACTORY_ABI and OMEN_MARKET_ABI with required functions", () => {
+  it("should export valid OmenFactory and OmenMarket ABIs", () => {
+    expect(OMEN_FACTORY_ABI).toBeDefined();
     expect(Array.isArray(OMEN_FACTORY_ABI)).toBe(true);
-    expect(Array.isArray(OMEN_MARKET_ABI)).toBe(true);
+    expect(OMEN_FACTORY_ABI.length).toBeGreaterThan(0);
 
     const factoryNames = OMEN_FACTORY_ABI.map((item: any) => item.name).filter(Boolean);
     expect(factoryNames).toContain("createMarket");
+    expect(factoryNames).toContain("getMarket");
+
+    expect(OMEN_MARKET_ABI).toBeDefined();
+    expect(Array.isArray(OMEN_MARKET_ABI)).toBe(true);
+    expect(OMEN_MARKET_ABI.length).toBeGreaterThan(0);
 
     const marketNames = OMEN_MARKET_ABI.map((item: any) => item.name).filter(Boolean);
     expect(marketNames).toContain("depositAgree");
@@ -82,18 +63,18 @@ describe("TICKET-71: Smart Contract ABI Exports & Static Configuration", () => {
     expect(OMEN_FACTORY_ADDRESS_SEPOLIA).toMatch(/^0x[a-fA-F0-9]{40}$/);
     expect(OMEN_FACTORY_ADDRESS_ROBINHOOD).toBeDefined();
     expect(OMEN_FACTORY_ADDRESS_ROBINHOOD).toMatch(/^0x[a-fA-F0-9]{40}$/);
-    expect(PREDICTION_MARKET_ADDRESS).toBeDefined();
-    expect(PREDICTION_MARKET_ADDRESS).toMatch(/^0x[a-fA-F0-9]{40}$/);
+    expect(OMEN_FACTORY_ADDRESS).toBeDefined();
+    expect(OMEN_FACTORY_ADDRESS).toMatch(/^0x[a-fA-F0-9]{40}$/);
   });
 
-  it("should resolve static factory address and prediction market address for supported chains", () => {
+  it("should resolve static factory address for supported chains", () => {
     const sepoliaAddr = getOmenFactoryAddress(11155111);
     expect(sepoliaAddr).toBe(OMEN_FACTORY_ADDRESS_SEPOLIA);
 
     const robinhoodAddr = getOmenFactoryAddress(46630);
     expect(robinhoodAddr).toBe(OMEN_FACTORY_ADDRESS_ROBINHOOD);
 
-    const predictionAddr = getPredictionMarketAddress();
-    expect(predictionAddr).toBe(OMEN_FACTORY_ADDRESS_SEPOLIA);
+    const defaultAddr = getOmenFactoryAddress();
+    expect(defaultAddr).toBe(OMEN_FACTORY_ADDRESS_SEPOLIA);
   });
 });
