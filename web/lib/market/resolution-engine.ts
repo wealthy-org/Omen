@@ -1,11 +1,11 @@
 import { createWalletClient, createPublicClient, http, Hex, Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { sepolia, arbitrumSepolia } from "viem/chains";
+import { sepolia } from "viem/chains";
 import { getSupabaseAdminClient } from "../supabase";
 import { fetchChainlinkPrice } from "../oracle/chainlink";
 import { evaluateOracleCondition, calculateSettlementPool } from "./resolution-helper";
-import { OMEN_MARKET_ABI } from "../contracts";
-import type { ResolvedOutcome, ResolutionExecutionResult, ResolutionEngineSummary } from "@/types";
+import { OMEN_MARKET_ABI, ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain } from "../contracts";
+import type { ResolvedOutcome, ResolutionExecutionResult, ResolutionEngineSummary, DbMarketStatus } from "@/types";
 
 export type { ResolutionExecutionResult, ResolutionEngineSummary };
 
@@ -84,33 +84,34 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
     outcome = "VOID";
   }
 
-  let txHash = "0xmock_res_" + Date.now().toString(16);
+  let txHash: string | null = null;
   const privateKey = (process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY) as Hex | undefined;
 
-  if (privateKey && process.env.NEXT_PUBLIC_USE_MOCK_CONTRACT !== "true" && market.contract_address) {
+  if (privateKey && market.contract_address) {
     try {
       const account = privateKeyToAccount(privateKey);
-      const chain = chainId === 421614 ? arbitrumSepolia : sepolia;
+      const chain = chainId === ROBINHOOD_TESTNET_CHAIN_ID ? robinhoodChain : sepolia;
 
       const publicClient = createPublicClient({ chain, transport: http() });
       const walletClient = createWalletClient({ account, chain, transport: http() });
 
       const outcomeUint = outcome === "AGREE" ? 1 : outcome === "DISAGREE" ? 2 : 3;
 
-      txHash = await walletClient.writeContract({
+      const hash = await walletClient.writeContract({
         address: market.contract_address as Address,
         abi: OMEN_MARKET_ABI as any,
         functionName: "resolveMarket",
         args: [outcomeUint],
       });
 
-      await publicClient.waitForTransactionReceipt({ hash: txHash as Hex });
+      await publicClient.waitForTransactionReceipt({ hash });
+      txHash = hash;
     } catch (contractErr: any) {
       void contractErr;
     }
   }
 
-  const marketStatus = outcome === "VOID" ? "VOID" : "RESOLVED";
+  const marketStatus: DbMarketStatus = "RESOLVED";
 
   await supabase
     .from("markets")
@@ -171,8 +172,8 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
     .select()
     .single();
 
-  const agreePool = Number(market.agree_pool ?? market.yes_pool ?? 0);
-  const disagreePool = Number(market.disagree_pool ?? market.no_pool ?? 0);
+  const agreePool = Number(market.agree_pool ?? 0);
+  const disagreePool = Number(market.disagree_pool ?? 0);
   const settlement = calculateSettlementPool(agreePool, disagreePool, outcome);
 
   await supabase
@@ -191,7 +192,7 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
     success: true,
     marketId: market.id,
     outcome,
-    txHash,
+    txHash: txHash ?? undefined,
   };
 }
 

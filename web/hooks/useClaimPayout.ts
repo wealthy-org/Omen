@@ -1,6 +1,7 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI, OMEN_MARKET_ABI } from "@/lib/contracts";
 import type { ClaimPayoutResult } from "@/types";
+import { Address } from "viem";
 
 export type { ClaimPayoutResult };
 
@@ -16,15 +17,27 @@ export function useClaimPayout(): ClaimPayoutResult {
     hash: txHash,
   });
 
-  const claimPayout = async (marketId: string | number): Promise<string> => {
-    const numericMarketId = BigInt(marketId);
+  const claimPayout = async (marketIdOrAddress: string | number, chainId?: number): Promise<string> => {
+    const isAddress = typeof marketIdOrAddress === "string" && marketIdOrAddress.startsWith("0x") && marketIdOrAddress.length === 42 && marketIdOrAddress !== PREDICTION_MARKET_ADDRESS;
 
-    const hash = await mutateAsync({
-      address: getPredictionMarketAddress(),
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "claim",
-      args: [numericMarketId],
-    });
+    let hash: string;
+
+    if (isAddress) {
+      hash = await mutateAsync({
+        address: marketIdOrAddress as Address,
+        abi: OMEN_MARKET_ABI,
+        functionName: "claimPayout",
+      });
+    } else {
+      const numericMarketId = BigInt(String(marketIdOrAddress).replace(/\D/g, "") || "1");
+      const targetAddress = getPredictionMarketAddress(chainId) || PREDICTION_MARKET_ADDRESS;
+      hash = await mutateAsync({
+        address: targetAddress,
+        abi: PREDICTION_MARKET_ABI,
+        functionName: "claim",
+        args: [numericMarketId],
+      });
+    }
 
     return hash;
   };

@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import { Address } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
+import { useConnection, useWriteContract } from "wagmi";
 import { OMEN_MARKET_ABI } from "@/lib/contracts";
-import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
 import type { ClaimPayoutParams } from "@/types";
 
 export type { ClaimPayoutParams };
 
-export function useClaim(defaultMarketAddress?: string) {
-  const { address } = useAccount();
+export function useClaim() {
+  const { address } = useConnection();
   const { mutateAsync } = useWriteContract();
 
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -24,20 +23,26 @@ export function useClaim(defaultMarketAddress?: string) {
     setError(null);
 
     try {
-      let hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
-
-      if (!USE_MOCK_CONTRACT && mutateAsync) {
-        hash = await mutateAsync({
-          address: marketAddress as Address,
-          abi: OMEN_MARKET_ABI,
-          functionName: "claimPayout",
-        });
+      if (!address) {
+        throw new Error("Wallet not connected");
       }
+      if (!marketAddress || !marketAddress.trim()) {
+        throw new Error("Market contract address is required to claim payout");
+      }
+      if (!mutateAsync) {
+        throw new Error("Wallet not connected or contract write unavailable.");
+      }
+
+      const hash = await mutateAsync({
+        address: marketAddress as Address,
+        abi: OMEN_MARKET_ABI,
+        functionName: "claimPayout",
+      });
 
       setTxHash(hash);
 
       const syncId = marketId || marketAddress;
-      const userAddr = address || "0x1111111111111111111111111111111111111111";
+      const userAddr = address;
       try {
         const res = await fetch(`/api/markets/${syncId}/claim`, {
           method: "POST",
@@ -65,9 +70,11 @@ export function useClaim(defaultMarketAddress?: string) {
     }
   };
 
-  const claim = async (targetAddress?: string) => {
-    const target = targetAddress || defaultMarketAddress || "0x0000000000000000000000000000000000000000";
-    return claimPayout({ marketAddress: target });
+  const claim = async (marketAddress: string) => {
+    if (!marketAddress || !marketAddress.trim()) {
+      throw new Error("Market contract address is required to claim payout");
+    }
+    return claimPayout({ marketAddress });
   };
 
   return {

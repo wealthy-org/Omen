@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { useAccount, useSignTypedData, useChainId } from "wagmi";
+import { useConnection, useSignTypedData, useChainId } from "wagmi";
 import { Address } from "viem";
 import { getOmenFactoryAddress } from "@/lib/contracts";
-import { USE_MOCK_CONTRACT, getMockOmenFactoryAddress } from "@/lib/mockContracts";
 import type { ConfirmBeliefPayload, UseCreatorConfirmResult } from "@/types";
 
 export type { ConfirmBeliefPayload, UseCreatorConfirmResult };
 
 export function useCreatorConfirm(): UseCreatorConfirmResult {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const chainId = useChainId();
   const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 
@@ -31,47 +30,43 @@ export function useCreatorConfirm(): UseCreatorConfirmResult {
     setError(null);
 
     try {
-      const creatorAddress = (address || "0x1111111111111111111111111111111111111111") as Address;
+      if (!address || !signTypedDataAsync) {
+        throw new Error("Wallet not connected or signTypedData unavailable.");
+      }
+
+      const creatorAddress = address as Address;
       const timestampSec = Math.floor(Date.now() / 1000);
       const timestamp = BigInt(timestampSec);
-      let signedSig = "";
 
-      if (USE_MOCK_CONTRACT || !signTypedDataAsync) {
-        signedSig = `0xMockSignatureEIP712${Math.random().toString(16).substring(2, 10)}${"0".repeat(40)}`;
-      } else {
-        const verifyingContract = (payload.marketAddress ||
-          (USE_MOCK_CONTRACT
-            ? getMockOmenFactoryAddress(chainId)
-            : getOmenFactoryAddress(chainId))) as Address;
+      const verifyingContract = (payload.marketAddress || getOmenFactoryAddress(chainId)) as Address;
 
-        const domain = {
-          name: "Omen Belief Protocol",
-          version: "1",
-          chainId: chainId || 11155111,
-          verifyingContract,
-        } as const;
+      const domain = {
+        name: "Omen Belief Protocol",
+        version: "1",
+        chainId: chainId || 11155111,
+        verifyingContract,
+      } as const;
 
-        const types = {
-          ConfirmBelief: [
-            { name: "beliefId", type: "string" },
-            { name: "creator", type: "address" },
-            { name: "statement", type: "string" },
-            { name: "timestamp", type: "uint256" },
-          ],
-        } as const;
+      const types = {
+        ConfirmBelief: [
+          { name: "beliefId", type: "string" },
+          { name: "creator", type: "address" },
+          { name: "statement", type: "string" },
+          { name: "timestamp", type: "uint256" },
+        ],
+      } as const;
 
-        signedSig = await signTypedDataAsync({
-          domain,
-          types,
-          primaryType: "ConfirmBelief",
-          message: {
-            beliefId: payload.beliefId,
-            creator: creatorAddress,
-            statement: payload.statement,
-            timestamp,
-          },
-        });
-      }
+      const signedSig = await signTypedDataAsync({
+        domain,
+        types,
+        primaryType: "ConfirmBelief",
+        message: {
+          beliefId: payload.beliefId,
+          creator: creatorAddress,
+          statement: payload.statement,
+          timestamp,
+        },
+      });
 
       setIsSigning(false);
       setIsConfirming(true);

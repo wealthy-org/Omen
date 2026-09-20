@@ -1,49 +1,55 @@
+import { defineChain } from "viem";
 import OmenFactoryJson from "@/contracts/OmenFactory.json";
 import OmenMarketJson from "@/contracts/OmenMarket.json";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+  ETHEREUM_SEPOLIA_RPC_URL,
+  ROBINHOOD_TESTNET_RPC_URL,
+  ETHEREUM_SEPOLIA_EXPLORER_URL,
+  ROBINHOOD_TESTNET_EXPLORER_URL,
+  OMEN_FACTORY_ADDRESS_SEPOLIA,
+  OMEN_FACTORY_ADDRESS_ROBINHOOD,
+  PREDICTION_MARKET_ADDRESS,
+  OMEN_FACTORY_ADDRESS,
+  robinhoodChain,
+} from "./constants";
 
-export const ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
-export const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
-export const ROBINHOOD_TESTNET_CHAIN_ID = 46630;
+export {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+  ETHEREUM_SEPOLIA_RPC_URL,
+  ROBINHOOD_TESTNET_RPC_URL,
+  ETHEREUM_SEPOLIA_EXPLORER_URL,
+  ROBINHOOD_TESTNET_EXPLORER_URL,
+  OMEN_FACTORY_ADDRESS_SEPOLIA,
+  OMEN_FACTORY_ADDRESS_ROBINHOOD,
+  PREDICTION_MARKET_ADDRESS,
+  OMEN_FACTORY_ADDRESS,
+  robinhoodChain,
+};
 
-export const PREDICTION_MARKET_ADDRESS =
-  process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS as `0x${string}` | undefined;
+export const getExplorerBaseUrl = (chainId?: number): string => {
+  if (chainId === ROBINHOOD_TESTNET_CHAIN_ID) {
+    return ROBINHOOD_TESTNET_EXPLORER_URL;
+  }
+  return ETHEREUM_SEPOLIA_EXPLORER_URL;
+};
 
-export const OMEN_FACTORY_ADDRESS_SEPOLIA =
-  process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA as `0x${string}` | undefined;
-
-export const OMEN_FACTORY_ADDRESS_ROBINHOOD =
-  process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD as `0x${string}` | undefined;
-
-export const OMEN_FACTORY_ADDRESS =
-  (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS as `0x${string}` | undefined) ||
-  OMEN_FACTORY_ADDRESS_SEPOLIA;
+export const getExplorerTxUrl = (chainId: number | undefined, txHash: string): string => {
+  const base = getExplorerBaseUrl(chainId);
+  return `${base}/tx/${txHash}`;
+};
 
 export const getOmenFactoryAddress = (chainId?: number): `0x${string}` => {
   if (chainId === ROBINHOOD_TESTNET_CHAIN_ID) {
-    const address = process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_ROBINHOOD as `0x${string}` | undefined;
-    if (!address) {
-      throw new Error("OMEN_FACTORY_ADDRESS_ROBINHOOD is not configured.");
-    }
-    return address;
+    return OMEN_FACTORY_ADDRESS_ROBINHOOD;
   }
-
-  const address =
-    (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS_SEPOLIA as `0x${string}` | undefined) ||
-    (process.env.NEXT_PUBLIC_OMEN_FACTORY_ADDRESS as `0x${string}` | undefined);
-
-  if (!address) {
-    throw new Error(`OmenFactory address is not configured for chain ${chainId || ETHEREUM_SEPOLIA_CHAIN_ID}.`);
-  }
-
-  return address;
+  return OMEN_FACTORY_ADDRESS_SEPOLIA;
 };
 
-export const getPredictionMarketAddress = (): `0x${string}` => {
-  const address = process.env.NEXT_PUBLIC_PREDICTION_MARKET_ADDRESS as `0x${string}` | undefined;
-  if (!address) {
-    throw new Error("PREDICTION_MARKET_ADDRESS is not configured.");
-  }
-  return address;
+export const getPredictionMarketAddress = (chainId?: number): `0x${string}` => {
+  return getOmenFactoryAddress(chainId);
 };
 
 export const OMEN_FACTORY_ABI = OmenFactoryJson;

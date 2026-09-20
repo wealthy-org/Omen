@@ -1,5 +1,6 @@
 import { createPublicClient, http, type Address } from "viem";
-import { sepolia, arbitrumSepolia } from "viem/chains";
+import { sepolia } from "viem/chains";
+import { ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain } from "../contracts";
 
 export const CHAINLINK_SEPOLIA_FEEDS = {
   ETH_USD: "0x694AA1769357215DE4FAC081bf1f309aDC325306" as Address,
@@ -46,10 +47,11 @@ export const CHAINLINK_PRICE_FEEDS: Record<number, Record<string, Address>> = {
     LINK: "0xc59E3633BAAC79493d908e636ee6716c2D0ca80b",
     SOL: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
   },
-  421614: {
-    ETH: "0xd30e2101a74d88b72e6e05f01f49f8b049d79ff4",
-    BTC: "0x0c9973e7a27d00e656b9f153348da46ca95e8542",
-    LINK: "0x5227E044516daa801A2538C17F407922Ed3dd756",
+  46630: {
+    ETH: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    BTC: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+    LINK: "0xc59E3633BAAC79493d908e636ee6716c2D0ca80b",
+    SOL: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
   },
 };
 
@@ -125,7 +127,7 @@ export function calculateResolutionResult(
 }
 
 export function getPublicClientForChain(chainId: number) {
-  const chain = chainId === 421614 ? arbitrumSepolia : sepolia;
+  const chain = chainId === ROBINHOOD_TESTNET_CHAIN_ID ? robinhoodChain : sepolia;
   return createPublicClient({
     chain,
     transport: http(),

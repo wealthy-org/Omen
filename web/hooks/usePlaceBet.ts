@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
-import { parseEther } from "viem";
-import { getPredictionMarketAddress, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { useWriteContract, useWaitForTransactionReceipt, useConnection } from "wagmi";
+import { parseEther, Address } from "viem";
+import { getPredictionMarketAddress, PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI, OMEN_MARKET_ABI } from "@/lib/contracts";
 import type { PlaceBetParams } from "@/types";
 
 export type { PlaceBetParams };
 
 export function usePlaceBet() {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const {
     mutateAsync,
     data: txHash,
@@ -22,19 +22,38 @@ export function usePlaceBet() {
     hash: txHash,
   });
 
-  const placeBet = async ({ marketId, outcome = "YES", amount = "0" }: PlaceBetParams) => {
+  const placeBet = async ({
+    marketId,
+    outcome = "AGREE",
+    amount = "0",
+    contractAddress,
+    chainId,
+  }: PlaceBetParams & { contractAddress?: string; chainId?: number }) => {
     setIndexerError(null);
-    const side = outcome === "YES";
-    const numericMarketId = BigInt(marketId);
+    const side = outcome === "AGREE";
     const value = parseEther(amount);
 
-    const hash = await mutateAsync({
-      address: getPredictionMarketAddress(),
-      abi: PREDICTION_MARKET_ABI,
-      functionName: "placeBet",
-      args: [numericMarketId, side],
-      value,
-    });
+    let hash: string;
+
+    if (contractAddress && contractAddress.startsWith("0x") && contractAddress.length === 42 && contractAddress !== PREDICTION_MARKET_ADDRESS) {
+      const functionName = side ? "depositAgree" : "depositDisagree";
+      hash = await mutateAsync({
+        address: contractAddress as Address,
+        abi: OMEN_MARKET_ABI,
+        functionName,
+        value,
+      });
+    } else {
+      const numericMarketId = BigInt(String(marketId).replace(/\D/g, "") || "1");
+      const targetAddress = getPredictionMarketAddress(chainId) || PREDICTION_MARKET_ADDRESS;
+      hash = await mutateAsync({
+        address: targetAddress,
+        abi: PREDICTION_MARKET_ABI,
+        functionName: "placeBet",
+        args: [numericMarketId, side],
+        value,
+      });
+    }
 
     try {
       setIsIndexing(true);
@@ -44,9 +63,9 @@ export function usePlaceBet() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          contract_market_id: Number(marketId),
+          contract_market_id: typeof marketId === "number" ? marketId : parseInt(String(marketId).replace(/\D/g, "") || "1", 10),
           wallet_address: address,
-          side: outcome.toLowerCase(),
+          side: outcome.toUpperCase(),
           amount: parseFloat(amount),
           tx_hash: hash,
         }),

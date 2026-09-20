@@ -1,7 +1,8 @@
-import { keccak256, toHex, Address, Hex, createWalletClient, createPublicClient, http } from "viem";
+import { keccak256, toHex, Address, Hex, createWalletClient, createPublicClient, http, decodeEventLog } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { sepolia, arbitrumSepolia } from "viem/chains";
-import { OMEN_FACTORY_ABI, getOmenFactoryAddress, ROBINHOOD_TESTNET_CHAIN_ID } from "../contracts";
+import { sepolia } from "viem/chains";
+import { OMEN_FACTORY_ABI, getOmenFactoryAddress } from "../contracts";
+import { ROBINHOOD_TESTNET_CHAIN_ID, robinhoodChain, CHAINLINK_ETH_USD_FEED } from "../constants";
 import type { BeliefHashes, CreateOnChainMarketParams, CreatedMarketResult } from "@/types";
 
 export type { BeliefHashes, CreateOnChainMarketParams, CreatedMarketResult };
@@ -28,18 +29,12 @@ export async function createOnChainMarket(
   const chainId = params.chainId || 11155111;
   const privateKey = (process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY) as Hex | undefined;
 
-  if (!privateKey || process.env.NEXT_PUBLIC_USE_MOCK_CONTRACT === "true") {
-    const rawHash = keccak256(toHex(params.beliefHash + Date.now().toString()));
-    const mockAddress = ("0x" + rawHash.slice(26)) as Address;
-    return {
-      contractAddress: mockAddress,
-      contractMarketId: Math.floor(Math.random() * 1000) + 1,
-      txHash: "0xmock" + rawHash.slice(6),
-    };
+  if (!privateKey) {
+    throw new Error("Missing ADMIN_PRIVATE_KEY or PRIVATE_KEY for on-chain market creation");
   }
 
   const account = privateKeyToAccount(privateKey);
-  const chain = chainId === 421614 ? arbitrumSepolia : sepolia;
+  const chain = chainId === ROBINHOOD_TESTNET_CHAIN_ID ? robinhoodChain : sepolia;
 
   const publicClient = createPublicClient({
     chain,
@@ -54,10 +49,12 @@ export async function createOnChainMarket(
 
   const factoryAddress = getOmenFactoryAddress(chainId);
 
+  const defaultFeed = CHAINLINK_ETH_USD_FEED;
+
   const resolutionConfig = {
     resType: params.config?.resType || 0,
-    assetAFeed: params.config?.assetAFeed || ("0x0000000000000000000000000000000000000000" as Address),
-    assetBFeed: params.config?.assetBFeed || ("0x0000000000000000000000000000000000000000" as Address),
+    assetAFeed: (params.config?.assetAFeed || defaultFeed) as Address,
+    assetBFeed: (params.config?.assetBFeed || defaultFeed) as Address,
     targetPrice: BigInt(params.config?.targetPrice || 0),
     startTimestamp: BigInt(params.config?.startTimestamp || params.openTime || 0),
     endTimestamp: BigInt(params.config?.endTimestamp || params.closeTime || 0),
@@ -79,19 +76,40 @@ export async function createOnChainMarket(
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
 
-  let deployedAddress = "0x0000000000000000000000000000000000000000";
+  let deployedAddress: Address | undefined;
   let marketId = 1;
 
   if (receipt.logs && receipt.logs.length > 0) {
     for (const log of receipt.logs) {
-      if (log.topics && log.topics.length >= 3) {
-        const potentialAddress = "0x" + log.topics[2]?.slice(26);
-        if (potentialAddress.length === 42) {
-          deployedAddress = potentialAddress;
+      try {
+        const decoded = decodeEventLog({
+          abi: OMEN_FACTORY_ABI,
+          data: log.data,
+          topics: log.topics,
+        });
+        if (decoded.eventName === "MarketCreated" && decoded.args) {
+          const args = decoded.args as { marketId?: bigint; marketAddress?: Address };
+          if (args.marketAddress) {
+            deployedAddress = args.marketAddress;
+          }
+          if (args.marketId !== undefined) {
+            marketId = Number(args.marketId);
+          }
           break;
+        }
+      } catch {
+        if (log.topics && log.topics.length >= 3) {
+          const potentialAddress = ("0x" + log.topics[2]?.slice(26)) as Address;
+          if (potentialAddress.length === 42) {
+            deployedAddress = potentialAddress;
+          }
         }
       }
     }
+  }
+
+  if (!deployedAddress) {
+    throw new Error("Failed to extract deployed market address from transaction receipt logs");
   }
 
   return {

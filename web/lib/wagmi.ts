@@ -2,9 +2,15 @@ import { http, createConfig } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
 import { defineChain } from "viem";
+import {
+  ROBINHOOD_TESTNET_CHAIN_ID,
+  ETHEREUM_SEPOLIA_RPC_URL,
+  ROBINHOOD_TESTNET_RPC_URL,
+  ROBINHOOD_TESTNET_EXPLORER_URL,
+} from "./contracts";
 
 export const robinhoodTestnet = defineChain({
-  id: 46630,
+  id: ROBINHOOD_TESTNET_CHAIN_ID,
   name: "Robinhood Chain Testnet",
   nativeCurrency: {
     decimals: 18,
@@ -13,18 +19,13 @@ export const robinhoodTestnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [
-        process.env.NEXT_PUBLIC_ROBINHOOD_TESTNET_RPC ||
-          "https://rpc.testnet.chain.robinhood.com",
-      ],
+      http: [ROBINHOOD_TESTNET_RPC_URL],
     },
   },
   blockExplorers: {
     default: {
       name: "Robinhood Explorer",
-      url:
-        process.env.NEXT_PUBLIC_ROBINHOOD_EXPLORER ||
-        "https://explorer.testnet.chain.robinhood.com",
+      url: ROBINHOOD_TESTNET_EXPLORER_URL,
     },
   },
   testnet: true,
@@ -51,15 +52,8 @@ export const config = createConfig({
     injected(),
   ],
   transports: {
-    [sepolia.id]: http(
-      process.env.NEXT_PUBLIC_ETH_SEPOLIA_RPC ||
-        process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL ||
-        "https://rpc.sepolia.org"
-    ),
-    [robinhoodTestnet.id]: http(
-      process.env.NEXT_PUBLIC_ROBINHOOD_TESTNET_RPC ||
-        "https://rpc.testnet.chain.robinhood.com"
-    ),
+    [sepolia.id]: http(ETHEREUM_SEPOLIA_RPC_URL),
+    [robinhoodTestnet.id]: http(ROBINHOOD_TESTNET_RPC_URL),
   },
   ssr: true,
 });

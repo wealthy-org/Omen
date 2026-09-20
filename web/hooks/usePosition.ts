@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import { parseEther, Address } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
+import { useConnection, useWriteContract } from "wagmi";
 import { OMEN_MARKET_ABI } from "@/lib/contracts";
-import { USE_MOCK_CONTRACT } from "@/lib/mockContracts";
 import type { PlacePositionParams } from "@/types";
 
 export type { PlacePositionParams };
 
 export function usePosition() {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const { mutateAsync } = useWriteContract();
 
   const [isPending, setIsPending] = useState<boolean>(false);
@@ -42,22 +41,26 @@ export function usePosition() {
 
     try {
       const parsedWei = parseEther(strAmount);
-      let hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
 
-      if (!USE_MOCK_CONTRACT && mutateAsync) {
-        const functionName = side === "AGREE" ? "depositAgree" : "depositDisagree";
-        hash = await mutateAsync({
-          address: marketAddress as Address,
-          abi: OMEN_MARKET_ABI,
-          functionName,
-          value: parsedWei,
-        });
+      if (!mutateAsync) {
+        throw new Error("Wallet not connected or contract write unavailable.");
+      }
+      const functionName = side === "AGREE" ? "depositAgree" : "depositDisagree";
+      const hash = await mutateAsync({
+        address: marketAddress as Address,
+        abi: OMEN_MARKET_ABI,
+        functionName,
+        value: parsedWei,
+      });
+
+      if (!address) {
+        throw new Error("Wallet not connected");
       }
 
       setTxHash(hash);
 
       const syncId = marketId || marketAddress;
-      const userAddr = address || "0x1111111111111111111111111111111111111111";
+      const userAddr = address;
       try {
         const res = await fetch(`/api/markets/${syncId}/position`, {
           method: "POST",

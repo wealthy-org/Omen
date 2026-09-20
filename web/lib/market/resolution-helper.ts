@@ -4,11 +4,11 @@ export function normalizeOutcome(outcomeOrStatus: string): ResolvedOutcome | nul
   if (!outcomeOrStatus || typeof outcomeOrStatus !== "string") return null;
   const normalized = outcomeOrStatus.trim().toUpperCase();
 
-  if (normalized === "AGREE" || normalized === "RESOLVED_YES" || normalized === "AGREE_WON" || normalized === "YES") {
+  if (normalized === "AGREE" || normalized === "AGREE_WON") {
     return "AGREE";
   }
 
-  if (normalized === "DISAGREE" || normalized === "RESOLVED_NO" || normalized === "DISAGREE_WON" || normalized === "NO") {
+  if (normalized === "DISAGREE" || normalized === "DISAGREE_WON") {
     return "DISAGREE";
   }
 
