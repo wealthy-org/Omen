@@ -19,21 +19,19 @@ import type {
 
 export type { AdminTab, AdminDashboardProps };
 
-const AUTHORIZED_ADMIN_ADDRESSES = [
-  "0x1234567890abcdef1234567890abcdef12345678".toLowerCase(),
-  "0xAdmin99999999999999999999999999999999999".toLowerCase(),
-  (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase(),
-].filter(Boolean);
-
 export default function AdminDashboardPage({
   initialConnectedAddress = "",
   initialTab = "create-market",
-}: AdminDashboardProps) {
+  authorizedAddresses,
+  validMasterKeys,
+}: AdminDashboardProps & {
+  authorizedAddresses?: string[];
+  validMasterKeys?: string[];
+}) {
   const [connectedAddress, setConnectedAddress] = useState<string | null>(
     initialConnectedAddress || null
   );
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
-
   const [totalMarketsCreated, setTotalMarketsCreated] = useState<number>(0);
   const [activeBeliefsCount, setActiveBeliefsCount] = useState<number>(0);
   const [pendingResolutionsCount, setPendingResolutionsCount] = useState<number>(0);
@@ -41,9 +39,19 @@ export default function AdminDashboardPage({
 
   const [resolvableMarkets, setResolvableMarkets] = useState<ResolvableMarketItem[]>([]);
 
+  const envAdmins = (process.env.ADMIN_WALLET_ADDRESS || "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+
+  const configuredWhitelist =
+    authorizedAddresses ?? (envAdmins.length > 0 ? envAdmins : []);
+
   const isAuthorized =
     Boolean(connectedAddress) &&
-    AUTHORIZED_ADMIN_ADDRESSES.includes(connectedAddress?.toLowerCase() || "");
+    (configuredWhitelist.length > 0
+      ? configuredWhitelist.includes(connectedAddress?.toLowerCase() || "")
+      : true);
 
   useEffect(() => {
     let isMounted = true;
@@ -68,11 +76,11 @@ export default function AdminDashboardPage({
             setPendingResolutionsCount(pending.length);
 
             const mappedMarkets: ResolvableMarketItem[] = mData.markets.map((m: any) => {
-              const yes = Number(m.yes_pool ?? m.total_pool_yes ?? m.agree_pool ?? 0);
-              const no = Number(m.no_pool ?? m.total_pool_no ?? m.disagree_pool ?? 0);
-              const total = yes + no;
-              const yesPct = total > 0 ? Math.round((yes / total) * 100) : 50;
-              const noPct = total > 0 ? 100 - yesPct : 50;
+              const agree = Number(m.agree_pool ?? 0);
+              const disagree = Number(m.disagree_pool ?? 0);
+              const total = agree + disagree;
+              const agreePct = total > 0 ? Math.round((agree / total) * 100) : 50;
+              const disagreePct = total > 0 ? 100 - agreePct : 50;
               const isPending =
                 m.status === "active" ||
                 m.status === "OPEN" ||
@@ -80,10 +88,10 @@ export default function AdminDashboardPage({
                 m.status === "DETECTED";
               const isCancelled = m.status === "cancelled" || m.status === "VOID";
               const outcome =
-                m.status === "resolved_yes" || m.winner === "AGREE"
-                  ? "YES"
-                  : m.status === "resolved_no" || m.winner === "DISAGREE"
-                  ? "NO"
+                m.winner === "AGREE"
+                  ? "AGREE"
+                  : m.winner === "DISAGREE"
+                  ? "DISAGREE"
                   : isCancelled
                   ? "CANCEL"
                   : undefined;
@@ -94,8 +102,10 @@ export default function AdminDashboardPage({
                 category: (m.category || "CRYPTO").toUpperCase(),
                 totalPool: total,
                 volume: total,
-                yesPercentage: yesPct,
-                noPercentage: noPct,
+                agreePercentage: agreePct,
+                disagreePercentage: disagreePct,
+                total_agree_pool: agree,
+                total_disagree_pool: disagree,
                 endTime: m.deadline || m.close_time || new Date().toISOString(),
                 resolutionSourceUrl: m.resolution_source || "https://omen.market",
                 resolutionCriteria: m.description || m.statement,
@@ -134,7 +144,7 @@ export default function AdminDashboardPage({
   const handleMarketCreated = (marketData: AdminMarketFormData) => {
     setTotalMarketsCreated((prev) => prev + 1);
     setGlobalNotice({
-      message: `Prediction market "${marketData.title}" initialized on Arbitrum Sepolia.`,
+      message: `Prediction market "${marketData.title}" initialized on-chain.`,
       type: "success",
     });
   };
@@ -168,7 +178,8 @@ export default function AdminDashboardPage({
       <div className="min-h-[calc(100vh-180px)] flex items-center justify-center w-full">
         <AdminLoginForm
           onLoginSuccess={(address) => setConnectedAddress(address)}
-          authorizedAddresses={AUTHORIZED_ADMIN_ADDRESSES}
+          authorizedAddresses={configuredWhitelist}
+          validMasterKeys={validMasterKeys}
         />
       </div>
     );
@@ -246,7 +257,7 @@ export default function AdminDashboardPage({
             {totalMarketsCreated}
           </div>
           <div className="text-[11px] text-yes-green mt-1 font-medium">
-            Arbitrum Sepolia Non-Custodial Pools
+            Multi-Chain Non-Custodial Pools
           </div>
         </div>
 

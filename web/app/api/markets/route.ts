@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     if (statusParam === "active") {
       query = query.eq("status", "active");
     } else if (statusParam === "resolved") {
-      query = query.in("status", ["resolved_yes", "resolved_no"]);
+      query = query.in("status", ["RESOLVED", "resolved"]);
     } else if (statusParam === "cancelled") {
       query = query.eq("status", "cancelled");
     } else if (statusParam === "open") {
@@ -41,10 +41,8 @@ export async function GET(req: NextRequest) {
       query = query.order("close_time", { ascending: true });
     } else if (sortParam === "ending_soon") {
       query = query.order("deadline", { ascending: true });
-    } else if (tabParam === "most_volume") {
+    } else if (tabParam === "most_volume" || sortParam === "highest_pool") {
       query = query.order("agree_pool", { ascending: false });
-    } else if (sortParam === "highest_pool") {
-      query = query.order("total_pool_yes", { ascending: false });
     } else {
       query = query.order("created_at", { ascending: false });
     }
@@ -60,13 +58,13 @@ export async function GET(req: NextRequest) {
     }
 
     const formattedMarkets = (markets || []).map((m: any) => {
-      const agreePool = Number(m.agree_pool ?? m.total_pool_yes ?? 0);
-      const disagreePool = Number(m.disagree_pool ?? m.total_pool_no ?? 0);
+      const agreePool = Number(m.agree_pool ?? 0);
+      const disagreePool = Number(m.disagree_pool ?? 0);
       const totalPool = agreePool + disagreePool;
       const capitalConsensus = totalPool > 0 ? (agreePool / totalPool) * 100 : 0;
       const positions = Array.isArray(m.market_positions) ? m.market_positions : [];
-      const agreeParticipants = positions.filter((p: any) => p.side === "AGREE" || p.side === "YES").length;
-      const disagreeParticipants = positions.filter((p: any) => p.side === "DISAGREE" || p.side === "NO").length;
+      const agreeParticipants = positions.filter((p: any) => p.side === "AGREE").length;
+      const disagreeParticipants = positions.filter((p: any) => p.side === "DISAGREE").length;
 
       return {
         id: m.id,
@@ -84,8 +82,6 @@ export async function GET(req: NextRequest) {
         winner: m.winner,
         agree_pool: agreePool,
         disagree_pool: disagreePool,
-        total_pool_yes: agreePool,
-        total_pool_no: disagreePool,
         total_pool: totalPool,
         capital_consensus: Math.round(capitalConsensus * 100) / 100,
         agree_participants: agreeParticipants,
@@ -121,13 +117,11 @@ function isAuthorizedAdmin(req: NextRequest): boolean {
 
   const validAdminKeys = [
     process.env.ADMIN_SECRET_KEY?.trim(),
-    process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY?.trim(),
     process.env.ADMIN_API_KEY?.trim(),
   ].filter(Boolean) as string[];
 
   const validAdminWallets = [
-    process.env.ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
-    process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
+    ...(process.env.ADMIN_WALLET_ADDRESS?.split(",").map((s) => s.trim().toLowerCase()) || []),
   ].filter(Boolean) as string[];
 
   if (adminKeyHeader && validAdminKeys.includes(adminKeyHeader)) {
@@ -246,8 +240,6 @@ export async function POST(req: NextRequest) {
         status: "active",
         agree_pool: 0,
         disagree_pool: 0,
-        total_pool_yes: 0,
-        total_pool_no: 0,
         resolution_source: sanitizedResolutionSource,
       })
       .select("*")
@@ -257,8 +249,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const yesPool = Number(createdMarket.total_pool_yes ?? 0);
-    const noPool = Number(createdMarket.total_pool_no ?? 0);
+    const agreePool = Number(createdMarket.agree_pool ?? 0);
+    const disagreePool = Number(createdMarket.disagree_pool ?? 0);
 
     return NextResponse.json(
       {
@@ -274,11 +266,9 @@ export async function POST(req: NextRequest) {
           category: createdMarket.category,
           deadline: createdMarket.deadline,
           status: createdMarket.status,
-          yes_pool: yesPool,
-          no_pool: noPool,
-          agree_pool: yesPool,
-          disagree_pool: noPool,
-          total_pool: yesPool + noPool,
+          agree_pool: agreePool,
+          disagree_pool: disagreePool,
+          total_pool: agreePool + disagreePool,
           resolution_source: createdMarket.resolution_source,
           created_at: createdMarket.created_at,
         },

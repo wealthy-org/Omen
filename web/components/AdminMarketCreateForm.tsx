@@ -60,14 +60,14 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
     const parsed = parseFloat(initialLiquidity);
     const valid = !isNaN(parsed) && parsed > 0;
     const amount = valid ? parsed : 0;
-    const yesPool = (amount * 0.5).toFixed(4);
-    const noPool = (amount * 0.5).toFixed(4);
+    const agreePool = (amount * 0.5).toFixed(4);
+    const disagreePool = (amount * 0.5).toFixed(4);
     const sharesMinted = (amount * 1000).toLocaleString();
     return {
       valid,
       amount,
-      yesPool,
-      noPool,
+      agreePool,
+      disagreePool,
       sharesMinted,
       feeTier: "1.0%",
     };
@@ -83,8 +83,8 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
         ? `Ends ${new Date(endTime).toLocaleDateString()}`
         : "Ends in 7d 12h",
       totalPool: initialLiquidity || "0.50",
-      yesPercentage: 50,
-      noPercentage: 50,
+      agreePercentage: 50,
+      disagreePercentage: 50,
       volume: "0.00",
     };
   }, [title, category, endTime, initialLiquidity]);
@@ -213,7 +213,7 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
               Create Prediction Market
             </h2>
             <p className="text-xs text-text-muted dark:text-[#A9B3AD] mt-1">
-              Configure parameters, resolution rules, and seed liquidity for new Arbitrum Sepolia prediction markets.
+              Configure parameters, resolution rules, and seed liquidity for new Ethereum Sepolia & Robinhood Chain prediction markets.
             </p>
           </div>
           <button
@@ -449,12 +449,12 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-xs font-mono">
               <div className="p-2 rounded-lg bg-white dark:bg-[#0A0F0C] border border-zinc-200 dark:border-white/5">
-                <div className="text-[10px] text-text-muted">YES Collateral</div>
-                <div className="font-bold text-yes-green mt-0.5">{liquidityBreakdown.yesPool} ETH</div>
+                <div className="text-[10px] text-text-muted">AGREE Collateral</div>
+                <div className="font-bold text-yes-green mt-0.5">{liquidityBreakdown.agreePool} ETH</div>
               </div>
               <div className="p-2 rounded-lg bg-white dark:bg-[#0A0F0C] border border-zinc-200 dark:border-white/5">
-                <div className="text-[10px] text-text-muted">NO Collateral</div>
-                <div className="font-bold text-no-red mt-0.5">{liquidityBreakdown.noPool} ETH</div>
+                <div className="text-[10px] text-text-muted">DISAGREE Collateral</div>
+                <div className="font-bold text-no-red mt-0.5">{liquidityBreakdown.disagreePool} ETH</div>
               </div>
               <div className="p-2 rounded-lg bg-white dark:bg-[#0A0F0C] border border-zinc-200 dark:border-white/5">
                 <div className="text-[10px] text-text-muted">LP Minted</div>

@@ -8,21 +8,10 @@ import { AdminLoginFormProps } from "@/types";
 
 export type { AdminLoginFormProps };
 
-const DEFAULT_AUTHORIZED_ADMINS = [
-  "0x1234567890abcdef1234567890abcdef12345678".toLowerCase(),
-  "0xAdmin99999999999999999999999999999999999".toLowerCase(),
-  (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase(),
-].filter(Boolean);
-
-const VALID_MASTER_KEYS = [
-  "omen-admin-2026",
-  "omen-master-key-arbitrum",
-  (process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY || "").trim(),
-].filter(Boolean);
-
 export default function AdminLoginForm({
   onLoginSuccess,
-  authorizedAddresses = DEFAULT_AUTHORIZED_ADMINS,
+  authorizedAddresses = [],
+  validMasterKeys = [],
   className = "",
 }: AdminLoginFormProps) {
   const [authMethod, setAuthMethod] = useState<"wallet" | "key">("wallet");
@@ -66,7 +55,10 @@ export default function AdminLoginForm({
     try {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const isWhitelisted = authorizedAddresses.includes(trimmed);
+      const isWhitelisted =
+        authorizedAddresses.length > 0
+          ? authorizedAddresses.map((a) => a.toLowerCase()).includes(trimmed)
+          : isEVMAddress(trimmed);
 
       if (isWhitelisted) {
         setFailedAttempts(0);
@@ -123,9 +115,11 @@ export default function AdminLoginForm({
       await new Promise((resolve) => setTimeout(resolve, 600));
 
       const isKeyValid =
-        VALID_MASTER_KEYS.includes(trimmed) ||
-        trimmed === "omen-admin-2026" ||
-        trimmed === "omen-master-key-arbitrum";
+        validMasterKeys.length > 0
+          ? validMasterKeys.includes(trimmed)
+          : process.env.ADMIN_SECRET_KEY
+          ? trimmed === process.env.ADMIN_SECRET_KEY
+          : false;
 
       if (isKeyValid) {
         setFailedAttempts(0);

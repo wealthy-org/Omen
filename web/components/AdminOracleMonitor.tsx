@@ -10,10 +10,10 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
   {
     symbol: "ETH/USD",
     name: "Ethereum / US Dollar",
-    price: 2454.54,
+    price: 0,
     decimals: 8,
-    roundId: "18446744073709587751",
-    updatedAt: "2026-09-18T00:00:00.000Z",
+    roundId: "0",
+    updatedAt: new Date(0).toISOString(),
     heartbeatSec: 3600,
     contractAddress: "0x694AA1769357215DE4FAC081bf1f309aDC325306",
     chainId: 11155111,
@@ -22,10 +22,10 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
   {
     symbol: "BTC/USD",
     name: "Bitcoin / US Dollar",
-    price: 76935.85,
+    price: 0,
     decimals: 8,
-    roundId: "18446744073709585500",
-    updatedAt: "2026-09-18T00:00:00.000Z",
+    roundId: "0",
+    updatedAt: new Date(0).toISOString(),
     heartbeatSec: 3600,
     contractAddress: "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
     chainId: 11155111,
@@ -34,33 +34,14 @@ const DEFAULT_FEEDS: OracleFeedState[] = [
   {
     symbol: "SOL/USD",
     name: "Solana / US Dollar",
-    price: 184.2,
+    price: 0,
     decimals: 8,
     roundId: "0",
-    updatedAt: "2026-09-18T00:00:00.000Z",
+    updatedAt: new Date(0).toISOString(),
     heartbeatSec: 3600,
     contractAddress: "0x0c9973e7a27d00e656B9f153348dA46CaD70d03d",
     chainId: 11155111,
-    status: "DEGRADED",
-  },
-];
-
-const INITIAL_SNAPSHOT_LOGS: OracleSnapshotRecord[] = [
-  {
-    id: "snap-101",
-    asset: "ETH",
-    price: 2454.54,
-    snapshot_type: "DISPLAY",
-    source: "chainlink_sepolia",
-    recorded_at: "2026-09-18T00:00:00.000Z",
-  },
-  {
-    id: "snap-102",
-    asset: "BTC",
-    price: 76935.85,
-    snapshot_type: "RESOLUTION",
-    source: "chainlink_sepolia",
-    recorded_at: "2026-09-18T00:00:00.000Z",
+    status: "HEALTHY",
   },
 ];
 
@@ -70,8 +51,8 @@ export default function AdminOracleMonitor() {
   const [snapshotType, setSnapshotType] = useState<string>("RESOLUTION");
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [adminKey, setAdminKey] = useState<string>(process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY || "dev-admin-secret");
-  const [snapshotLogs, setSnapshotLogs] = useState<OracleSnapshotRecord[]>(INITIAL_SNAPSHOT_LOGS);
+  const [adminKey, setAdminKey] = useState<string>("");
+  const [snapshotLogs, setSnapshotLogs] = useState<OracleSnapshotRecord[]>([]);
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const fetchLiveFeeds = useCallback(async () => {
@@ -144,37 +125,15 @@ export default function AdminOracleMonitor() {
         }
         fetchLiveFeeds();
       } else {
-        const selectedFeed = feeds.find((f) => f.symbol.startsWith(selectedAsset));
-        const currentPrice = selectedFeed ? selectedFeed.price : (selectedAsset === "ETH" ? 2454.54 : selectedAsset === "BTC" ? 76935.85 : 184.2);
-        const fallbackRecord: OracleSnapshotRecord = {
-          id: `snap-${Date.now()}`,
-          asset: selectedAsset,
-          price: currentPrice,
-          snapshot_type: snapshotType,
-          source: "chainlink_oracle_simulated",
-          recorded_at: new Date().toISOString(),
-        };
-        setSnapshotLogs((prev) => [fallbackRecord, ...prev]);
         setNotification({
-          message: `Local simulated snapshot recorded for ${selectedAsset} ($${currentPrice}). [API note: ${json.error || "Simulated"}]`,
-          type: "success",
+          message: json.error || "Failed to record oracle snapshot.",
+          type: "error",
         });
       }
     } catch {
-      const selectedFeed = feeds.find((f) => f.symbol.startsWith(selectedAsset));
-      const currentPrice = selectedFeed ? selectedFeed.price : (selectedAsset === "ETH" ? 2454.54 : selectedAsset === "BTC" ? 76935.85 : 184.2);
-      const fallbackRecord: OracleSnapshotRecord = {
-        id: `snap-${Date.now()}`,
-        asset: selectedAsset,
-        price: currentPrice,
-        snapshot_type: snapshotType,
-        source: "chainlink_oracle_client",
-        recorded_at: new Date().toISOString(),
-      };
-      setSnapshotLogs((prev) => [fallbackRecord, ...prev]);
       setNotification({
-        message: `Offline snapshot logged for ${selectedAsset} ($${currentPrice}).`,
-        type: "success",
+        message: "Network error occurred while attempting to record oracle snapshot.",
+        type: "error",
       });
     } finally {
       setIsRecording(false);
@@ -398,28 +357,36 @@ export default function AdminOracleMonitor() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle dark:divide-white/5">
-                {snapshotLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-emerald-500/5 transition-colors">
-                    <td className="py-2.5 font-bold text-accent-navy dark:text-white flex items-center gap-1.5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      {log.asset}
-                    </td>
-                    <td className="py-2.5 text-emerald-600 dark:text-emerald-400 font-bold">
-                      ${log.price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                    </td>
-                    <td className="py-2.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/10">
-                        {log.snapshot_type}
-                      </span>
-                    </td>
-                    <td className="py-2.5 text-text-muted dark:text-[#A9B3AD]">
-                      {log.source}
-                    </td>
-                    <td className="py-2.5 text-right text-text-muted dark:text-[#A9B3AD]">
-                      {new Date(log.recorded_at).toLocaleTimeString()}
+                {snapshotLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-text-muted dark:text-[#A9B3AD]">
+                      No recent oracle snapshots found.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  snapshotLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-emerald-500/5 transition-colors">
+                      <td className="py-2.5 font-bold text-accent-navy dark:text-white flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        {log.asset}
+                      </td>
+                      <td className="py-2.5 text-emerald-600 dark:text-emerald-400 font-bold">
+                        ${log.price.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-2.5">
+                        <span className="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/10">
+                          {log.snapshot_type}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-text-muted dark:text-[#A9B3AD]">
+                        {log.source}
+                      </td>
+                      <td className="py-2.5 text-right text-text-muted dark:text-[#A9B3AD]">
+                        {new Date(log.recorded_at).toLocaleTimeString()}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

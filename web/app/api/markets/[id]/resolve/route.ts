@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/lib/supabase";
 import { normalizeOutcome, calculateSettlementPool } from "@/lib/market/resolution-helper";
+import type { DbMarketStatus, Market } from "@/types/database";
 
 function isAuthorizedAdmin(req: NextRequest): boolean {
   const adminKeyHeader = req.headers.get("x-admin-key")?.trim();
@@ -12,13 +13,11 @@ function isAuthorizedAdmin(req: NextRequest): boolean {
 
   const validAdminKeys = [
     process.env.ADMIN_SECRET_KEY?.trim(),
-    process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY?.trim(),
     process.env.ADMIN_API_KEY?.trim(),
   ].filter(Boolean) as string[];
 
   const validAdminWallets = [
-    process.env.ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
-    process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS?.trim().toLowerCase(),
+    ...(process.env.ADMIN_WALLET_ADDRESS?.split(",").map((s) => s.trim().toLowerCase()) || []),
   ].filter(Boolean) as string[];
 
   if (adminKeyHeader && validAdminKeys.includes(adminKeyHeader)) {
@@ -66,7 +65,7 @@ export async function POST(
 
     if (!outcome) {
       return NextResponse.json(
-        { success: false, error: "Invalid status or outcome: must be one of 'AGREE', 'DISAGREE', 'VOID', 'resolved_yes', 'resolved_no', 'cancelled'" },
+        { success: false, error: "Invalid status or outcome: must be one of 'AGREE', 'DISAGREE', 'VOID', 'cancelled'" },
         { status: 400 }
       );
     }
@@ -101,11 +100,11 @@ export async function POST(
       );
     }
 
-    const marketStatus = body.status && ["resolved_yes", "resolved_no", "cancelled"].includes(body.status)
-      ? body.status
-      : (outcome === "VOID" ? "VOID" : "RESOLVED");
+    const marketStatus: DbMarketStatus = body.status && ["cancelled"].includes(body.status)
+      ? "cancelled"
+      : "RESOLVED";
 
-    const updatePayload: Record<string, unknown> = {
+    const updatePayload: Partial<Market> = {
       status: marketStatus,
       winner: outcome,
     };
@@ -188,9 +187,9 @@ export async function POST(
       void 0;
     }
 
-    const yesPool = Number(updatedMarket.total_pool_yes ?? updatedMarket.agree_pool ?? updatedMarket.yes_pool ?? 0);
-    const noPool = Number(updatedMarket.total_pool_no ?? updatedMarket.disagree_pool ?? updatedMarket.no_pool ?? 0);
-    const settlement = calculateSettlementPool(yesPool, noPool, outcome);
+    const agreePool = Number(updatedMarket.agree_pool ?? 0);
+    const disagreePool = Number(updatedMarket.disagree_pool ?? 0);
+    const settlement = calculateSettlementPool(agreePool, disagreePool, outcome);
 
     let settlementData = null;
     try {
@@ -221,12 +220,8 @@ export async function POST(
         deadline: updatedMarket.deadline,
         status: updatedMarket.status,
         winner: updatedMarket.winner,
-        yes_pool: yesPool,
-        no_pool: noPool,
-        agree_pool: yesPool,
-        disagree_pool: noPool,
-        total_pool_yes: yesPool,
-        total_pool_no: noPool,
+        agree_pool: agreePool,
+        disagree_pool: disagreePool,
         total_pool: settlement.totalPool,
         resolution_source: updatedMarket.resolution_source,
         created_at: updatedMarket.created_at,

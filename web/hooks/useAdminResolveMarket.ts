@@ -2,15 +2,15 @@ import { useState } from "react";
 import {
   useWriteContract,
   useWaitForTransactionReceipt,
-  useAccount,
+  useConnection,
 } from "wagmi";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI, getPredictionMarketAddress } from "@/lib/contracts";
 import type { ResolveMarketParams, ResolveMarketResult } from "@/types";
 
 export type { ResolveMarketParams, ResolveMarketResult };
 
 export function useAdminResolveMarket(): ResolveMarketResult {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const {
     mutateAsync,
     data: txHash,
@@ -35,37 +35,32 @@ export function useAdminResolveMarket(): ResolveMarketResult {
     const numericStr = String(marketId).replace(/\D/g, "");
     const numericMarketId = BigInt(numericStr.length > 0 ? numericStr : "1");
 
-    let hash: `0x${string}`;
+    if (!mutateAsync) {
+      throw new Error("Wallet not connected or contract write unavailable.");
+    }
+    const targetAddress = (getPredictionMarketAddress() || PREDICTION_MARKET_ADDRESS) as `0x${string}`;
 
-    try {
-      if (outcome === "CANCEL") {
-        hash = await mutateAsync({
-          address: PREDICTION_MARKET_ADDRESS as `0x${string}`,
-          abi: PREDICTION_MARKET_ABI,
-          functionName: "cancelMarket",
-          args: [numericMarketId],
-        });
-      } else {
-        const result = outcome === "YES";
-        hash = await mutateAsync({
-          address: PREDICTION_MARKET_ADDRESS as `0x${string}`,
-          abi: PREDICTION_MARKET_ABI,
-          functionName: "resolveMarket",
-          args: [numericMarketId, result],
-        });
-      }
-    } catch (err: any) {
-      if (err?.message?.includes("rejected") || err?.name === "UserRejectedRequestError") {
-        throw err;
-      }
-      hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}` as `0x${string}`;
+    let hash: `0x${string}`;
+    if (outcome === "CANCEL" || outcome === "VOID") {
+      hash = await mutateAsync({
+        address: targetAddress,
+        abi: PREDICTION_MARKET_ABI,
+        functionName: "cancelMarket",
+        args: [numericMarketId],
+      });
+    } else {
+      const result = outcome === "AGREE";
+      hash = await mutateAsync({
+        address: targetAddress,
+        abi: PREDICTION_MARKET_ABI,
+        functionName: "resolveMarket",
+        args: [numericMarketId, result],
+      });
     }
 
     try {
       setIsSyncing(true);
-      const adminWallet = address
-        ? address.toLowerCase()
-        : (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase();
+      const adminWallet = address ? address.toLowerCase() : "";
 
       const res = await fetch(`/api/markets/${marketId}/resolve`, {
         method: "POST",
@@ -75,11 +70,11 @@ export function useAdminResolveMarket(): ResolveMarketResult {
         },
         body: JSON.stringify({
           status:
-            outcome === "CANCEL"
+            outcome === "CANCEL" || outcome === "VOID"
               ? "cancelled"
-              : outcome === "YES"
-              ? "resolved_yes"
-              : "resolved_no",
+              : "RESOLVED",
+          outcome: outcome,
+          winner: outcome === "CANCEL" ? "VOID" : outcome,
           resolution_source: notes,
           cancellation_reason: cancellationReason,
           admin_wallet: address,

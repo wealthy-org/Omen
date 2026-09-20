@@ -1,18 +1,18 @@
 import { useState } from "react";
+import { decodeEventLog } from "viem";
 import {
   useWriteContract,
   useWaitForTransactionReceipt,
-  useAccount,
+  useConnection,
   usePublicClient,
 } from "wagmi";
-import { decodeEventLog } from "viem";
-import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI } from "@/lib/contracts";
+import { PREDICTION_MARKET_ADDRESS, PREDICTION_MARKET_ABI, getPredictionMarketAddress } from "@/lib/contracts";
 import type { CreateMarketParams, CreateMarketResult } from "@/types";
 
 export type { CreateMarketParams, CreateMarketResult };
 
 export function useAdminCreateMarket(): CreateMarketResult {
-  const { address } = useAccount();
+  const { address } = useConnection();
   const publicClient = usePublicClient();
   const {
     mutateAsync,
@@ -39,22 +39,18 @@ export function useAdminCreateMarket(): CreateMarketResult {
     setSyncError(null);
     const deadline = BigInt(Math.floor(new Date(endTime).getTime() / 1000));
 
-    let hash: `0x${string}`;
-    let contractMarketId = String(Date.now());
-
-    try {
-      hash = await mutateAsync({
-        address: PREDICTION_MARKET_ADDRESS as `0x${string}`,
-        abi: PREDICTION_MARKET_ABI,
-        functionName: "createMarket",
-        args: [title, deadline],
-      });
-    } catch (err: any) {
-      if (err?.message?.includes("rejected") || err?.name === "UserRejectedRequestError") {
-        throw err;
-      }
-      hash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}` as `0x${string}`;
+    if (!mutateAsync) {
+      throw new Error("Wallet not connected or contract write unavailable.");
     }
+    const targetAddress = getPredictionMarketAddress() || PREDICTION_MARKET_ADDRESS;
+    const hash = await mutateAsync({
+      address: targetAddress as `0x${string}`,
+      abi: PREDICTION_MARKET_ABI,
+      functionName: "createMarket",
+      args: [title, deadline],
+    });
+
+    let contractMarketId = String(Date.now());
 
     if (publicClient && hash) {
       try {
@@ -82,9 +78,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
 
     try {
       setIsSyncing(true);
-      const adminWallet = address
-        ? address.toLowerCase()
-        : (process.env.NEXT_PUBLIC_ADMIN_WALLET_ADDRESS || "").toLowerCase();
+      const adminWallet = address ? address.toLowerCase() : "";
 
       const res = await fetch("/api/markets", {
         method: "POST",

@@ -380,9 +380,9 @@ export default function AdminMarketResolutionTable({
                         ${(market.totalPool ?? market.volume ?? 0).toLocaleString()}
                       </div>
                       <div className="flex items-center gap-1.5 text-[10px] font-mono mt-0.5">
-                        <span className="text-yes-green font-bold">YES {market.yesPercentage}%</span>
+                        <span className="text-yes-green font-bold">AGREE {market.agreePercentage ?? 50}%</span>
                         <span className="text-text-muted dark:text-white/30">/</span>
-                        <span className="text-no-red font-bold">NO {market.noPercentage}%</span>
+                        <span className="text-no-red font-bold">DISAGREE {market.disagreePercentage ?? 50}%</span>
                       </div>
                     </td>
 
@@ -422,17 +422,17 @@ export default function AdminMarketResolutionTable({
                         <div className="flex items-center justify-center gap-2">
                           <button
                             type="button"
-                            onClick={() => handleOpenResolutionModal(market, "YES")}
+                            onClick={() => handleOpenResolutionModal(market, "AGREE")}
                             className="px-3 py-1.5 rounded-lg text-xs font-bold font-mono bg-yes-green-soft dark:bg-yes-green/15 text-yes-green hover:bg-yes-green hover:text-white border border-yes-green/30 transition-all cursor-pointer"
                           >
-                            Resolve YES
+                            Resolve AGREE
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleOpenResolutionModal(market, "NO")}
+                            onClick={() => handleOpenResolutionModal(market, "DISAGREE")}
                             className="px-3 py-1.5 rounded-lg text-xs font-bold font-mono bg-no-red-soft dark:bg-no-red/15 text-no-red hover:bg-no-red hover:text-white border border-no-red/30 transition-all cursor-pointer"
                           >
-                            Resolve NO
+                            Resolve DISAGREE
                           </button>
                           <button
                             type="button"
@@ -473,9 +473,9 @@ export default function AdminMarketResolutionTable({
               <div className="flex items-center gap-3">
                 <div
                   className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center font-bold ${
-                    activeModal.outcome === "YES"
+                    activeModal.outcome === "AGREE"
                       ? "bg-yes-green-soft text-yes-green dark:bg-yes-green/20"
-                      : activeModal.outcome === "NO"
+                      : activeModal.outcome === "DISAGREE"
                       ? "bg-no-red-soft text-no-red dark:bg-no-red/20"
                       : "bg-amber-500/15 text-warning-amber"
                   }`}
@@ -538,26 +538,26 @@ export default function AdminMarketResolutionTable({
                 </div>
               </div>
 
-              {activeModal.outcome === "YES" && (
+              {activeModal.outcome === "AGREE" && (
                 <div className="p-4 rounded-xl bg-yes-green-soft dark:bg-yes-green/10 border border-yes-green/30 space-y-2">
                   <div className="flex items-center justify-between text-xs font-mono font-bold text-yes-green">
-                    <span>Winning Outcome: YES</span>
-                    <span>YES Pool Share: {activeModal.market.yesPercentage}%</span>
+                    <span>Winning Outcome: AGREE</span>
+                    <span>AGREE Pool Share: {activeModal.market.agreePercentage ?? 50}%</span>
                   </div>
                   <p className="text-xs text-accent-navy dark:text-zinc-200 leading-relaxed font-sans">
-                    All YES share token holders will be eligible to claim 100% of the collateral pool. NO share tokens become expired and non-redeemable ($0.00).
+                    All AGREE share token holders will be eligible to claim 100% of the collateral pool. DISAGREE share tokens become expired and non-redeemable ($0.00).
                   </p>
                 </div>
               )}
 
-              {activeModal.outcome === "NO" && (
+              {activeModal.outcome === "DISAGREE" && (
                 <div className="p-4 rounded-xl bg-no-red-soft dark:bg-no-red/10 border border-no-red/30 space-y-2">
                   <div className="flex items-center justify-between text-xs font-mono font-bold text-no-red">
-                    <span>Winning Outcome: NO</span>
-                    <span>NO Pool Share: {activeModal.market.noPercentage}%</span>
+                    <span>Winning Outcome: DISAGREE</span>
+                    <span>DISAGREE Pool Share: {activeModal.market.disagreePercentage ?? 50}%</span>
                   </div>
                   <p className="text-xs text-accent-navy dark:text-zinc-200 leading-relaxed font-sans">
-                    All NO share token holders will be eligible to claim 100% of the collateral pool. YES share tokens become expired and non-redeemable ($0.00).
+                    All DISAGREE share token holders will be eligible to claim 100% of the collateral pool. AGREE share tokens become expired and non-redeemable ($0.00).
                   </p>
                 </div>
               )}
@@ -572,7 +572,7 @@ export default function AdminMarketResolutionTable({
                       <span>100% Capital Refund Policy</span>
                     </div>
                     <p className="leading-relaxed text-accent-navy dark:text-zinc-200 font-sans">
-                      All deposited capital will be returned to all YES and NO bettors in full. <strong>Zero protocol fees</strong> will be deducted from user refunds.
+                      All deposited capital will be returned to all AGREE and DISAGREE bettors in full. <strong>Zero protocol fees</strong> will be deducted from user refunds.
                     </p>
                   </div>
 
@@ -679,9 +679,9 @@ export default function AdminMarketResolutionTable({
                 onClick={handleConfirmResolution}
                 disabled={isResolving}
                 className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
-                  activeModal.outcome === "YES"
+                  activeModal.outcome === "AGREE"
                     ? "bg-yes-green hover:bg-emerald-600 text-white"
-                    : activeModal.outcome === "NO"
+                    : activeModal.outcome === "DISAGREE"
                     ? "bg-no-red hover:bg-red-600 text-white"
                     : "bg-warning-amber hover:bg-amber-600 text-white"
                 } ${isResolving ? "opacity-60 cursor-not-allowed" : "active:scale-[0.98]"}`}

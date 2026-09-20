@@ -8,25 +8,12 @@ import { EmergencyActionLog } from "@/types";
 
 export type { EmergencyActionLog };
 
-const INITIAL_LOGS: EmergencyActionLog[] = [
-  {
-    id: "log-gov-001",
-    actionType: "EMERGENCY_VOID",
-    targetId: "market-test-99",
-    reason: "Upstream API data disruption during final hour resolution window",
-    executor: "0x1234...5678",
-    timestamp: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-];
-
 export default function AdminEmergencyControls() {
   const [isProtocolPaused, setIsProtocolPaused] = useState<boolean>(false);
   const [targetMarketId, setTargetMarketId] = useState<string>("");
   const [emergencyReason, setEmergencyReason] = useState<string>("");
-  const [adminSecretKey, setAdminSecretKey] = useState<string>(
-    process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY || "dev-admin-secret"
-  );
-  const [logs, setLogs] = useState<EmergencyActionLog[]>(INITIAL_LOGS);
+  const [adminSecretKey, setAdminSecretKey] = useState<string>("");
+  const [logs, setLogs] = useState<EmergencyActionLog[]>([]);
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
@@ -92,7 +79,7 @@ export default function AdminEmergencyControls() {
             actionType: "EMERGENCY_VOID",
             targetId: targetMarketId,
             reason: emergencyReason,
-            executor: "0xAdminAuthorized",
+            executor: "Admin (Authorized)",
             timestamp: new Date().toISOString(),
           };
           setLogs((prev) => [newLog, ...prev]);
@@ -108,7 +95,7 @@ export default function AdminEmergencyControls() {
             actionType: "EMERGENCY_VOID",
             targetId: targetMarketId,
             reason: emergencyReason,
-            executor: "0xAdminAuthorized",
+            executor: "Admin (Authorized)",
             timestamp: new Date().toISOString(),
           };
           setLogs((prev) => [newLog, ...prev]);
@@ -126,7 +113,7 @@ export default function AdminEmergencyControls() {
           id: `log-${Date.now()}`,
           actionType: nextState ? "PAUSE_PROTOCOL" : "RESUME_PROTOCOL",
           reason: emergencyReason,
-          executor: "0xAdminAuthorized",
+          executor: "Admin (Authorized)",
           timestamp: new Date().toISOString(),
         };
         setLogs((prev) => [newLog, ...prev]);
