@@ -208,8 +208,16 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error: any) {
+    console.error("[API Error POST /api/beliefs/submit]:", error);
+    const rawMsg = (error?.message || "").toLowerCase();
+    let safeError = "Failed to deploy market to blockchain. Please try again.";
+    if (rawMsg.includes("insufficient funds") || rawMsg.includes("exceeds the balance")) {
+      safeError = "Insufficient wallet funds for on-chain gas fee. Please top up testnet ETH and try again.";
+    } else if (rawMsg.includes("revert")) {
+      safeError = "Smart contract execution reverted. Please verify market parameters.";
+    }
     return NextResponse.json(
-      { success: false, error: error?.message || "Internal server error" },
+      { success: false, error: safeError },
       { status: 500 }
     );
   }

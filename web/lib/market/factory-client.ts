@@ -79,6 +79,27 @@ export async function createOnChainMarket(
     endTimestamp: BigInt(params.config?.endTimestamp || params.closeTime || 0),
   };
 
+  let gasLimit = 1750000n;
+  try {
+    const estimated = await publicClient.estimateContractGas({
+      address: factoryAddress,
+      abi: OMEN_FACTORY_ABI as any,
+      functionName: "createMarket",
+      account,
+      args: [
+        params.beliefHash,
+        params.sourceHash,
+        params.resolutionHash,
+        BigInt(params.openTime || 0),
+        BigInt(params.closeTime || 0),
+        resolutionConfig,
+      ],
+    });
+    gasLimit = (estimated * 110n) / 100n;
+  } catch {
+    gasLimit = 1750000n;
+  }
+
   const txHash = await walletClient.writeContract({
     address: factoryAddress,
     abi: OMEN_FACTORY_ABI as any,
@@ -91,7 +112,7 @@ export async function createOnChainMarket(
       BigInt(params.closeTime || 0),
       resolutionConfig,
     ],
-    gas: 2000000n,
+    gas: gasLimit,
   });
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });

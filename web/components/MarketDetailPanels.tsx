@@ -9,6 +9,7 @@ import { useClaim } from "@/hooks/useClaim";
 import { MarketDetailData, MarketDetailPanelsProps } from "@/types";
 import { getExplorerBaseUrl } from "@/lib/contracts";
 import { ROBINHOOD_TESTNET_CHAIN_ID } from "@/lib/constants";
+import { formatUserErrorMessage } from "@/lib/format-error";
 
 export type { MarketDetailData, MarketDetailPanelsProps };
 
@@ -281,7 +282,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
               </button>
               {claimError && (
                 <div className="text-xs text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 rounded p-2">
-                  {claimError.message || "Failed to claim payout"}
+                  {formatUserErrorMessage(claimError, "Failed to claim payout. Please try again.")}
                 </div>
               )}
             </div>

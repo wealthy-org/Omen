@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Rocket } from "lucide-react";
 
 import { ExtractedBeliefData, BeliefSubmitFormProps } from "@/types";
+import { formatUserErrorMessage } from "@/lib/format-error";
 
 export type { ExtractedBeliefData, BeliefSubmitFormProps };
 
@@ -141,7 +142,7 @@ export const BeliefSubmitForm: React.FC<BeliefSubmitFormProps> = ({
         router.push(`/market/${marketId}`);
       }
     } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to deploy market. Please try again.");
+      setErrorMessage(formatUserErrorMessage(err, "Failed to deploy market. Please try again."));
     } finally {
       setIsSubmitting(false);
     }

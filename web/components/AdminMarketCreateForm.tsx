@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { MarketCard } from "./MarketCard";
 import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
 import { AdminMarketFormData, AdminMarketCreateFormProps, MarketData } from "@/types";
+import { formatUserErrorMessage } from "@/lib/format-error";
 
 export type { AdminMarketFormData, AdminMarketCreateFormProps };
 
@@ -186,7 +187,12 @@ export const AdminMarketCreateForm: React.FC<AdminMarketCreateFormProps> = ({
       setInitialLiquidity("0.50");
       setFieldErrors({});
     } catch (err: any) {
-      setErrorMessage(err?.message || "Failed to deploy market contract to blockchain. Please check network and wallet balance.");
+      setErrorMessage(
+        formatUserErrorMessage(
+          err,
+          "Failed to deploy market contract to blockchain. Please check network and wallet balance."
+        )
+      );
     } finally {
       setInternalLoading(false);
     }

@@ -6,6 +6,7 @@ import { Address } from "viem";
 import { useCreatorConfirm } from "@/hooks/useCreatorConfirm";
 
 import { CreatorConfirmationProps } from "@/types";
+import { formatUserErrorMessage } from "@/lib/format-error";
 
 export type { CreatorConfirmationProps };
 
@@ -126,7 +127,7 @@ export function CreatorConfirmation({
       </div>
       {error && (
         <div className="text-xs text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-500/30 rounded p-2">
-          {error.message || "Failed to sign creator confirmation"}
+          {formatUserErrorMessage(error, "Failed to sign creator confirmation. Please try again.")}
         </div>
       )}
     </div>
