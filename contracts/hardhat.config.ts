@@ -31,9 +31,14 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {},
-    arbitrumSepolia: {
-      url: process.env.ARBITRUM_SEPOLIA_RPC_URL || process.env.SEPOLIA_RPC_URL || "https://sepolia-rollup.arbitrum.io/rpc",
-      chainId: 421614,
+    sepolia: {
+      url: process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com",
+      chainId: 11155111,
+      accounts: getAccounts(),
+    },
+    robinhoodTestnet: {
+      url: process.env.ROBINHOOD_TESTNET_RPC_URL || "https://rpc.testnet.chain.robinhood.com",
+      chainId: 46630,
       accounts: getAccounts(),
     },
   },
