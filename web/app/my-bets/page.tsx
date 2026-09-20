@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { UserBetsTable, UserBet, BetStatus } from "@/components/UserBetsTable";
-import { mockPredictionMarket } from "@/lib/mockPredictionMarket";
+import { useConnection } from "wagmi";
+import { UserBetsTable, UserBet, BetStatus, BetSide } from "@/components/UserBetsTable";
+import { useClaim } from "@/hooks/useClaim";
 
 export const FILTER_TABS: { id: "all" | BetStatus; label: string }[] = [
   { id: "all", label: "All Positions" },
@@ -12,19 +13,26 @@ export const FILTER_TABS: { id: "all" | BetStatus; label: string }[] = [
 ];
 
 export default function MyBetsPage() {
+  const { address } = useConnection();
+  const { claimPayout } = useClaim();
   const [bets, setBets] = useState<UserBet[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<"all" | BetStatus>("all");
   const [claimNotification, setClaimNotification] = useState<string | null>(null);
 
-  const demo = mockPredictionMarket.getDemoWallet();
-
   useEffect(() => {
     let isMounted = true;
     async function fetchUserBets() {
+      if (!address) {
+        if (isMounted) {
+          setBets([]);
+          setIsLoading(false);
+        }
+        return;
+      }
       try {
         setIsLoading(true);
-        const res = await fetch(`/api/bets?wallet_address=${demo.address}`);
+        const res = await fetch(`/api/bets?wallet_address=${address}`);
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.bets && Array.isArray(data.bets)) {
@@ -37,7 +45,7 @@ export default function MyBetsPage() {
                 marketId: b.market_id || b.markets?.contract_market_id || "1",
                 marketTitle: b.markets?.title || `Market #${b.market_id}`,
                 category: (b.markets?.category || "CRYPTO").toUpperCase(),
-                side: (b.side || "YES").toUpperCase() as "YES" | "NO",
+                side: (b.side || "AGREE").toUpperCase() as BetSide,
                 amount: amountNum.toFixed(2),
                 payout: payoutNum.toFixed(2),
                 roiPercent: roi,
@@ -67,7 +75,7 @@ export default function MyBetsPage() {
     return () => {
       isMounted = false;
     };
-  }, [demo.address]);
+  }, [address]);
 
   const totalStaked = useMemo(() => {
     return bets.reduce((sum, b) => sum + parseFloat(b.amount || "0"), 0).toFixed(2);
@@ -102,11 +110,14 @@ export default function MyBetsPage() {
   }, [bets, activeTab]);
 
   const handleClaimPayout = (targetBet: UserBet) => {
-    const numericMarketId =
-      typeof targetBet.marketId === "number"
-        ? targetBet.marketId
-        : parseInt(String(targetBet.marketId).replace(/\D/g, "") || "1", 10);
-    mockPredictionMarket.claimPayout({ marketId: numericMarketId }).catch(() => {});
+    if (!address) return;
+    claimPayout({ marketId: String(targetBet.marketId) }).catch(() => {
+      fetch(`/api/markets/${targetBet.marketId}/claim`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet_address: address }),
+      }).catch(() => {});
+    });
 
     setBets((prev) =>
       prev.map((b) => (b.id === targetBet.id ? { ...b, isClaimed: true } : b))

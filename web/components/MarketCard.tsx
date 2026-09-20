@@ -64,20 +64,20 @@ export const MarketCard: React.FC<MarketCardProps> = ({
       <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/10">
         <div className="flex items-center justify-between text-xs font-bold mb-1.5">
           <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-            <span>Yes</span>
-            <span className="font-mono">{market.yesPercentage}%</span>
+            <span>Agree</span>
+            <span className="font-mono">{market.agreePercentage ?? 50}%</span>
           </span>
           <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
-            <span>No</span>
-            <span className="font-mono">{market.noPercentage}%</span>
+            <span>Disagree</span>
+            <span className="font-mono">{market.disagreePercentage ?? 50}%</span>
           </span>
         </div>
 
         <div className="h-2 w-full bg-rose-500/15 rounded-full overflow-hidden flex">
           <div
             className="bg-emerald-500 transition-all duration-500"
-            style={{ width: `${market.yesPercentage}%` }}
-            aria-label={`Yes ${market.yesPercentage}%`}
+            style={{ width: `${market.agreePercentage ?? 50}%` }}
+            aria-label={`Agree ${market.agreePercentage ?? 50}%`}
           />
         </div>
 
@@ -102,21 +102,21 @@ export const MarketCard: React.FC<MarketCardProps> = ({
             <>
               <button
                 type="button"
-                onClick={() => onSelectOutcome?.(market, "YES")}
+                onClick={() => onSelectOutcome?.(market, "AGREE")}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white shadow-xs hover:shadow-emerald-500/20 active:scale-[0.98] py-2 px-3 rounded-xl font-mono font-bold text-xs transition-all flex items-center justify-between cursor-pointer"
-                aria-label={`Bet Yes on ${market.title}`}
+                aria-label={`Bet Agree on ${market.title}`}
               >
-                <span>Yes</span>
-                <span className="px-1.5 py-0.5 rounded bg-black/20 text-emerald-100 text-xs">{market.yesPercentage}%</span>
+                <span>Agree</span>
+                <span className="px-1.5 py-0.5 rounded bg-black/20 text-emerald-100 text-xs">{market.agreePercentage ?? 50}%</span>
               </button>
               <button
                 type="button"
-                onClick={() => onSelectOutcome?.(market, "NO")}
+                onClick={() => onSelectOutcome?.(market, "DISAGREE")}
                 className="flex-1 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white shadow-xs hover:shadow-rose-500/20 active:scale-[0.98] py-2 px-3 rounded-xl font-mono font-bold text-xs transition-all flex items-center justify-between cursor-pointer"
-                aria-label={`Bet No on ${market.title}`}
+                aria-label={`Bet Disagree on ${market.title}`}
               >
-                <span>No</span>
-                <span className="px-1.5 py-0.5 rounded bg-black/20 text-rose-100 text-xs">{market.noPercentage}%</span>
+                <span>Disagree</span>
+                <span className="px-1.5 py-0.5 rounded bg-black/20 text-rose-100 text-xs">{market.disagreePercentage ?? 50}%</span>
               </button>
             </>
           )}

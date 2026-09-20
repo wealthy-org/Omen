@@ -7,12 +7,13 @@ import { CreatorConfirmation } from "./CreatorConfirmation";
 import { useClaim } from "@/hooks/useClaim";
 
 import { MarketDetailData, MarketDetailPanelsProps } from "@/types";
+import { ROBINHOOD_TESTNET_CHAIN_ID, getExplorerBaseUrl } from "@/lib/contracts";
 
 export type { MarketDetailData, MarketDetailPanelsProps };
 
 export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPanelsProps) {
   const [activeMarket, setActiveMarket] = useState(market);
-  const { claim, isPending: isClaiming, isSuccess: isClaimSuccess, error: claimError } = useClaim(activeMarket.marketAddress ?? undefined);
+  const { claim, isPending: isClaiming, isSuccess: isClaimSuccess, error: claimError } = useClaim();
 
   const agreePoolEth = activeMarket.agreePoolEth ?? 0;
   const disagreePoolEth = activeMarket.disagreePoolEth ?? 0;
@@ -20,9 +21,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
   const agreePct = totalPool > 0 ? Math.round((agreePoolEth / totalPool) * 100) : 0;
   const disagreePct = totalPool > 0 ? 100 - agreePct : 0;
 
-  const explorerBase = activeMarket.chainId === 46630
-    ? "https://robinhood.blockscout.com"
-    : "https://sepolia.etherscan.io";
+  const explorerBase = getExplorerBaseUrl(activeMarket.chainId);
 
   const handlePositionSuccess = () => {
     if (onPositionUpdated) {
@@ -36,7 +35,10 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
 
   const handleClaim = async () => {
     try {
-      await claim();
+      if (!activeMarket.marketAddress) {
+        throw new Error("Market contract address is missing");
+      }
+      await claim(activeMarket.marketAddress);
     } catch {
     }
   };
@@ -65,7 +67,7 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
               </div>
 
               <span className="text-xs font-mono font-bold text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-white/5 px-2.5 py-0.5 rounded-lg border border-zinc-200 dark:border-white/10">
-                {activeMarket.chainId === 46630 ? "Robinhood Testnet" : "Sepolia"}
+                {activeMarket.chainId === ROBINHOOD_TESTNET_CHAIN_ID ? "Robinhood Testnet" : "Sepolia"}
               </span>
             </div>
 
@@ -136,8 +138,8 @@ export function MarketDetailPanels({ market, onPositionUpdated }: MarketDetailPa
           <div className="pt-3 border-t border-zinc-100 dark:border-white/10">
             <CreatorConfirmation
               beliefId={activeMarket.id}
-              statement={activeMarket.statement || activeMarket.title || ""}
-              authorHandle={activeMarket.authorHandle ?? ""}
+              statement={activeMarket.statement || activeMarket.title}
+              authorHandle={activeMarket.authorHandle ?? undefined}
               creatorAddress={activeMarket.creatorAddress ?? undefined}
               isConfirmed={activeMarket.isConfirmed}
               marketAddress={activeMarket.marketAddress ?? undefined}

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { mockPredictionMarket } from "../lib/mockPredictionMarket";
+import { useConnection, useConnect, useDisconnect, useBalance } from "wagmi";
 
 import { ConnectWalletButtonProps } from "@/types";
+import { getExplorerBaseUrl } from "@/lib/contracts";
 
 export type { ConnectWalletButtonProps };
 
@@ -12,12 +13,48 @@ export default function ConnectWalletButton({
   initialAddress,
   initialBalance,
   className = "",
+  showBalance = true,
   onConnect,
   onDisconnect,
 }: ConnectWalletButtonProps) {
-  const defaultDemo = mockPredictionMarket.getDemoWallet();
-  const activeAddress = initialAddress !== undefined ? initialAddress : defaultDemo.address;
-  const activeBalance = initialBalance !== undefined ? initialBalance : defaultDemo.formattedBalance;
+  let wagmiAddress: string | undefined;
+  let wagmiChainId: number | undefined;
+  let isConnected = false;
+  let isConnecting = false;
+  let connectAsync: any;
+  let connectors: any[] = [];
+  let disconnect: any;
+  let balanceData: any;
+
+  try {
+    const connection = useConnection();
+    wagmiAddress = connection?.address;
+    wagmiChainId = connection?.chainId;
+    isConnected = Boolean(connection?.isConnected);
+    isConnecting = Boolean(connection?.isConnecting);
+  } catch {
+  }
+
+  try {
+    const connect = useConnect();
+    connectAsync = connect?.connectAsync;
+    connectors = (connect?.connectors as any) || [];
+  } catch {
+  }
+
+  try {
+    const disc = useDisconnect();
+    disconnect = disc?.disconnect;
+  } catch {
+  }
+
+  try {
+    const bal = useBalance({
+      address: (initialAddress || wagmiAddress) as `0x${string}` | undefined,
+    });
+    balanceData = bal?.data;
+  } catch {
+  }
 
   const [statusOverride, setStatusOverride] = useState<"disconnected" | "connecting" | "connected" | null>(null);
   const [addressOverride, setAddressOverride] = useState<string | null>(null);
@@ -25,9 +62,24 @@ export default function ConnectWalletButton({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const status = statusOverride ?? initialStatus;
-  const address = addressOverride ?? activeAddress;
-  const balance = balanceOverride ?? activeBalance;
+  const status =
+    statusOverride ??
+    (initialStatus !== undefined
+      ? initialStatus
+      : isConnecting
+      ? "connecting"
+      : isConnected
+      ? "connected"
+      : "disconnected");
+
+  const address = addressOverride ?? (initialAddress !== undefined ? initialAddress : wagmiAddress ?? "");
+  const balance =
+    balanceOverride ??
+    (initialBalance !== undefined
+      ? initialBalance
+      : balanceData
+      ? `${parseFloat(balanceData.formatted).toFixed(4)} ${balanceData.symbol}`
+      : "0.0000 ETH");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -58,35 +110,59 @@ export default function ConnectWalletButton({
     }
   };
 
-  const handleConnect = () => {
+  const handleConnect = async () => {
     setStatusOverride("connecting");
     if (onConnect) {
       onConnect();
     }
 
-    const timer = setTimeout(() => {
-      const demo = mockPredictionMarket.getDemoWallet();
-      const finalAddr = initialAddress !== undefined ? initialAddress : demo.address;
-      const finalBal = initialBalance !== undefined ? initialBalance : demo.formattedBalance;
-      setAddressOverride(finalAddr);
-      setBalanceOverride(finalBal);
-      setStatusOverride("connected");
-      syncWalletToDatabase(finalAddr);
-    }, 600);
+    try {
+      if (connectors && connectors.length > 0 && connectAsync) {
+        const result = await connectAsync({ connector: connectors[0] });
+        if (result.accounts && result.accounts[0]) {
+          const connectedAddr = result.accounts[0];
+          setAddressOverride(connectedAddr);
+          setStatusOverride("connected");
+          await syncWalletToDatabase(connectedAddr);
+          return;
+        }
+      }
+    } catch {
+    }
 
-    return () => clearTimeout(timer);
+    if (initialAddress) {
+      const timer = setTimeout(() => {
+        setAddressOverride(initialAddress);
+        if (initialBalance) {
+          setBalanceOverride(initialBalance);
+        }
+        setStatusOverride("connected");
+        syncWalletToDatabase(initialAddress);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+
+    setStatusOverride("disconnected");
   };
 
   const handleDisconnect = () => {
     setIsDropdownOpen(false);
     setStatusOverride("disconnected");
+    setAddressOverride(null);
+    setBalanceOverride(null);
+    if (disconnect) {
+      try {
+        disconnect();
+      } catch {
+      }
+    }
     if (onDisconnect) {
       onDisconnect();
     }
   };
 
   const handleCopyAddress = async () => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
+    if (typeof navigator !== "undefined" && navigator.clipboard && address) {
       try {
         await navigator.clipboard.writeText(address);
       } catch {
@@ -136,15 +212,17 @@ export default function ConnectWalletButton({
     );
   }
 
-  if (status === "connected") {
+  if (status === "connected" && address) {
     return (
       <div
         ref={dropdownRef}
         className={`relative inline-flex items-center rounded-xl p-1 border transition-all bg-white/90 dark:bg-white/5 border-emerald-500/10 dark:border-white/10 hover:border-emerald-500/20 dark:hover:border-white/20 shadow-xs dark:shadow-none ${className}`}
       >
-        <span className="px-3 text-xs font-mono font-medium hidden sm:inline-block text-[#4B5D55] dark:text-[#DCE5DF]">
-          {balance}
-        </span>
+        {showBalance && (
+          <span className="px-3 text-xs font-mono font-medium hidden sm:inline-block text-[#4B5D55] dark:text-[#DCE5DF]">
+            {balance}
+          </span>
+        )}
 
         <button
           type="button"
@@ -176,7 +254,7 @@ export default function ConnectWalletButton({
           >
             <div className="px-3.5 py-1.5 mb-1 border-b border-black/5 dark:border-white/5">
               <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 dark:text-emerald-400">
-                Demo Wallet (Mock Mode)
+                Connected Wallet
               </span>
             </div>
 
@@ -203,7 +281,7 @@ export default function ConnectWalletButton({
 
             <a
               role="menuitem"
-              href={`https://sepolia.arbiscan.io/address/${address}`}
+              href={`${getExplorerBaseUrl(wagmiChainId)}/address/${address}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium rounded-lg transition-colors hover:bg-emerald-50/70 dark:hover:bg-white/10 text-[#17241D] dark:text-[#DCE5DF] hover:text-[#0B1F16] dark:hover:text-white"

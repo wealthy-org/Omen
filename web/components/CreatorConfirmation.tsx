@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useConnection } from "wagmi";
 import { Address } from "viem";
 import { useCreatorConfirm } from "@/hooks/useCreatorConfirm";
 
@@ -18,7 +18,7 @@ export function CreatorConfirmation({
   marketAddress,
   onConfirmed,
 }: CreatorConfirmationProps) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const [confirmedLocally, setConfirmedLocally] = useState(isConfirmed);
   const { confirmBelief, isSigning, isConfirming, error } = useCreatorConfirm();
 
@@ -29,6 +29,9 @@ export function CreatorConfirmation({
   );
 
   const handleConfirm = async () => {
+    if (!statement) {
+      return;
+    }
     try {
       const res = await confirmBelief({
         beliefId,

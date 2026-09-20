@@ -13,11 +13,11 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   isOpen,
   onClose,
   market,
-  initialOutcome = "YES",
+  initialOutcome = "AGREE",
   userBalance = "1.50",
   onConfirmBet,
 }) => {
-  const normalizedInitial: MarketOutcome = initialOutcome === "NO" || initialOutcome === "DISAGREE" ? "NO" : "YES";
+  const normalizedInitial: MarketOutcome = initialOutcome === "DISAGREE" ? "DISAGREE" : "AGREE";
   const { placeBet, isPending: isWeb3Pending } = usePlaceBet();
   const [selectedOutcome, setSelectedOutcome] = useState<MarketOutcome>(normalizedInitial);
   const [amount, setAmount] = useState<string>("0.05");
@@ -34,7 +34,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
   if (initialOutcome !== prevInitialOutcome) {
     setPrevInitialOutcome(initialOutcome);
     if (initialOutcome) {
-      const nextOutcome: MarketOutcome = initialOutcome === "NO" || initialOutcome === "DISAGREE" ? "NO" : "YES";
+      const nextOutcome: MarketOutcome = initialOutcome === "DISAGREE" ? "DISAGREE" : "AGREE";
       setSelectedOutcome(nextOutcome);
     }
   }
@@ -61,7 +61,7 @@ export const BettingModal: React.FC<BettingModalProps> = ({
 
   if (!isOpen || !market || !mounted) return null;
 
-  const odds = selectedOutcome === "YES" ? market.yesPercentage : market.noPercentage;
+  const odds = selectedOutcome === "AGREE" ? (market.agreePercentage ?? 50) : (market.disagreePercentage ?? 50);
   const numAmount = parseFloat(amount) || 0;
   const numBalance = parseFloat(userBalance) || 0;
 
@@ -174,31 +174,31 @@ export const BettingModal: React.FC<BettingModalProps> = ({
               <div className="grid grid-cols-2 gap-3 p-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl border border-zinc-200 dark:border-zinc-700/60">
                 <button
                   type="button"
-                  onClick={() => setSelectedOutcome("YES")}
-                  aria-label="Select YES outcome"
+                  onClick={() => setSelectedOutcome("AGREE")}
+                  aria-label="Select AGREE outcome"
                   className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-between cursor-pointer ${
-                    selectedOutcome === "YES"
+                    selectedOutcome === "AGREE"
                       ? "bg-emerald-600 dark:bg-emerald-500 text-white shadow-sm"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
                   }`}
-                  aria-pressed={selectedOutcome === "YES"}
+                  aria-pressed={selectedOutcome === "AGREE"}
                 >
-                  <span>YES</span>
-                  <span className="text-xs font-mono opacity-90">{market.yesPercentage}%</span>
+                  <span>AGREE</span>
+                  <span className="text-xs font-mono opacity-90">{market.agreePercentage ?? 50}%</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedOutcome("NO")}
-                  aria-label="Select NO outcome"
+                  onClick={() => setSelectedOutcome("DISAGREE")}
+                  aria-label="Select DISAGREE outcome"
                   className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-lg font-bold text-sm transition-all flex items-center justify-between cursor-pointer ${
-                    selectedOutcome === "NO"
+                    selectedOutcome === "DISAGREE"
                       ? "bg-rose-600 dark:bg-rose-500 text-white shadow-sm"
                       : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
                   }`}
-                  aria-pressed={selectedOutcome === "NO"}
+                  aria-pressed={selectedOutcome === "DISAGREE"}
                 >
-                  <span>NO</span>
-                  <span className="text-xs font-mono opacity-90">{market.noPercentage}%</span>
+                  <span>DISAGREE</span>
+                  <span className="text-xs font-mono opacity-90">{market.disagreePercentage ?? 50}%</span>
                 </button>
               </div>
             </div>

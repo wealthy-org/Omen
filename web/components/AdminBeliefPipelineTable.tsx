@@ -66,8 +66,55 @@ const MOCK_PIPELINE_ITEMS: BeliefPipelineItem[] = [
   },
 ];
 
-export default function AdminBeliefPipelineTable() {
-  const [items, setItems] = useState<BeliefPipelineItem[]>(MOCK_PIPELINE_ITEMS);
+function mapBeliefToPipelineItem(b: any): BeliefPipelineItem {
+  const market = b.markets?.[0];
+  const agree = Number(b.agree_pool ?? market?.agree_pool ?? 0);
+  const disagree = Number(b.disagree_pool ?? market?.disagree_pool ?? 0);
+  const total = agree + disagree;
+  const consensus = total > 0 ? Math.round((agree / total) * 100) : 50;
+  const rawConfidence = Number(b.ai_confidence ?? 0);
+  const aiConfidence =
+    rawConfidence > 0 && rawConfidence <= 1
+      ? Math.round(rawConfidence * 100)
+      : Math.round(rawConfidence);
+
+  const authorHandle = b.author_handle
+    ? b.author_handle
+    : b.author?.startsWith("@")
+    ? b.author
+    : b.author
+    ? `@${b.author}`
+    : "@anonymous";
+
+  return {
+    id: b.id,
+    statement: b.statement,
+    author: b.author || "Anonymous",
+    author_handle: authorHandle,
+    status: b.status || "OPEN",
+    ai_confidence: aiConfidence,
+    agree_pool: agree,
+    disagree_pool: disagree,
+    total_pool: total,
+    consensus_percentage: consensus,
+    has_eip712_signature: Boolean(
+      b.has_eip712_signature ??
+        b.creator_confirmed ??
+        (b.status === "CONFIRMED" ||
+          b.status === "RESOLVED" ||
+          b.status === "SETTLED" ||
+          (b.markets && b.markets.length > 0))
+    ),
+    created_at: b.created_at || new Date().toISOString(),
+  };
+}
+
+export default function AdminBeliefPipelineTable({
+  initialItems = MOCK_PIPELINE_ITEMS,
+}: {
+  initialItems?: BeliefPipelineItem[];
+} = {}) {
+  const [items, setItems] = useState<BeliefPipelineItem[]>(initialItems);
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -79,27 +126,7 @@ export default function AdminBeliefPipelineTable() {
       if (res.ok) {
         const json = await res.json();
         if (json.beliefs && Array.isArray(json.beliefs) && json.beliefs.length > 0) {
-          const mapped: BeliefPipelineItem[] = json.beliefs.map((b: any) => {
-            const agree = Number(b.agree_pool || (b.markets?.[0]?.agree_pool) || (b.markets?.[0]?.total_pool_yes) || 0);
-            const disagree = Number(b.disagree_pool || (b.markets?.[0]?.disagree_pool) || (b.markets?.[0]?.total_pool_no) || 0);
-            const total = agree + disagree;
-            const consensus = total > 0 ? Math.round((agree / total) * 100) : 50;
-            return {
-              id: b.id,
-              statement: b.statement || b.text || "Untitled Statement",
-              author: b.author || "0xAnonymous",
-              author_handle: b.author_handle || b.author,
-              status: b.status || "OPEN",
-              ai_confidence: Math.round(Number(b.ai_confidence || 85)),
-              agree_pool: agree,
-              disagree_pool: disagree,
-              total_pool: total,
-              consensus_percentage: consensus,
-              has_eip712_signature: Boolean(b.signature || b.creator_confirmed),
-              created_at: b.created_at || "2026-09-18T00:00:00.000Z",
-            };
-          });
-          setItems(mapped);
+          setItems(json.beliefs.map(mapBeliefToPipelineItem));
         }
       }
     } catch {
@@ -116,27 +143,7 @@ export default function AdminBeliefPipelineTable() {
         if (!ignore && res.ok) {
           const json = await res.json();
           if (json.beliefs && Array.isArray(json.beliefs) && json.beliefs.length > 0) {
-            const mapped: BeliefPipelineItem[] = json.beliefs.map((b: any) => {
-              const agree = Number(b.agree_pool || (b.markets?.[0]?.agree_pool) || (b.markets?.[0]?.total_pool_yes) || 0);
-              const disagree = Number(b.disagree_pool || (b.markets?.[0]?.disagree_pool) || (b.markets?.[0]?.total_pool_no) || 0);
-              const total = agree + disagree;
-              const consensus = total > 0 ? Math.round((agree / total) * 100) : 50;
-              return {
-                id: b.id,
-                statement: b.statement || b.text || "Untitled Statement",
-                author: b.author || "0xAnonymous",
-                author_handle: b.author_handle || b.author,
-                status: b.status || "OPEN",
-                ai_confidence: Math.round(Number(b.ai_confidence || 85)),
-                agree_pool: agree,
-                disagree_pool: disagree,
-                total_pool: total,
-                consensus_percentage: consensus,
-                has_eip712_signature: Boolean(b.signature || b.creator_confirmed),
-                created_at: b.created_at || "2026-09-18T00:00:00.000Z",
-              };
-            });
-            setItems(mapped);
+            setItems(json.beliefs.map(mapBeliefToPipelineItem));
           }
         }
       } catch {
@@ -161,8 +168,11 @@ export default function AdminBeliefPipelineTable() {
     return matchesStatus && matchesQuery;
   });
 
-  const getStatusBadge = (status: string) => {
-    const upper = (status || "").toUpperCase();
+  const getStatusBadge = (status?: string) => {
+    if (!status) {
+      return "bg-white/10 text-text-muted border-white/20";
+    }
+    const upper = status.toUpperCase();
     switch (upper) {
       case "OPEN":
         return "bg-emerald-500/10 text-emerald-500 border-emerald-500/30";

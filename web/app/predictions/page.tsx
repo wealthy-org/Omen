@@ -20,7 +20,7 @@ export default function PredictionsPage() {
   }>({
     isOpen: false,
     market: null,
-    outcome: "YES",
+    outcome: "AGREE",
   });
 
   useEffect(() => {
@@ -33,26 +33,26 @@ export default function PredictionsPage() {
           const data = await res.json();
           if (isMounted && data.markets && Array.isArray(data.markets)) {
             const mapped: MarketData[] = data.markets.map((m: any, index: number) => {
-              const yes = Number(m.yes_pool || 0);
-              const no = Number(m.no_pool || 0);
-              const total = yes + no;
-              const yesPct = total > 0 ? Math.round((yes / total) * 100) : 50;
-              const noPct = 100 - yesPct;
+              const agree = Number(m.agree_pool || 0);
+              const disagree = Number(m.disagree_pool || 0);
+              const total = agree + disagree;
+              const agreePct = total > 0 ? Math.round((agree / total) * 100) : 50;
+              const disagreePct = 100 - agreePct;
               return {
                 id: m.id || `mkt-${m.contract_market_id || index + 1}`,
                 title: m.title,
                 category: (m.category || "CRYPTO").toUpperCase(),
-                status: m.status === "active" ? "active" : "resolved",
+                status: m.status === "active" || m.status === "OPEN" ? "active" : "resolved",
                 endTime: m.deadline ? `Ends ${new Date(m.deadline).toLocaleDateString()}` : "Active",
                 totalPool: total.toFixed(2),
-                yesPercentage: yesPct,
-                noPercentage: noPct,
+                agreePercentage: agreePct,
+                disagreePercentage: disagreePct,
                 volume: total.toFixed(2),
                 resolvedOutcome:
-                  m.status === "resolved_yes"
-                    ? "YES"
-                    : m.status === "resolved_no"
-                    ? "NO"
+                  m.winner === "AGREE"
+                    ? "AGREE"
+                    : m.winner === "DISAGREE"
+                    ? "DISAGREE"
                     : undefined,
               };
             });
@@ -188,7 +188,7 @@ export default function PredictionsPage() {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 mb-3">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Live Arbitrum Sepolia Markets
+            Live Multi-Chain Markets
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">
             Prediction Markets

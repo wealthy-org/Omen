@@ -2,6 +2,11 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import {
+  ETHEREUM_SEPOLIA_EXPLORER_URL,
+  ROBINHOOD_TESTNET_EXPLORER_URL,
+} from "@/lib/contracts";
+
 const PLATFORM_LINKS = [
   { label: "Trending Markets", href: "/#markets" },
   { label: "Protocol Lifecycle", href: "/#how-it-works" },
@@ -12,8 +17,8 @@ const PLATFORM_LINKS = [
 ];
 
 const DEVELOPER_LINKS = [
-  { label: "Sepolia Explorer", href: "https://sepolia.etherscan.io", external: true },
-  { label: "Robinhood Explorer", href: "https://explorer.testnet.chain.robinhood.com", external: true },
+  { label: "Sepolia Explorer", href: ETHEREUM_SEPOLIA_EXPLORER_URL, external: true },
+  { label: "Robinhood Explorer", href: ROBINHOOD_TESTNET_EXPLORER_URL, external: true },
   { label: "GitHub Repository", href: "https://github.com/wealthy-org/Omen", external: true },
   { label: "Documentation", href: "#", external: false },
 ];

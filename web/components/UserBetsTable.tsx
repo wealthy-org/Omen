@@ -48,7 +48,7 @@ export const UserBetsTable: React.FC<UserBetsTableProps> = ({
   }
 
   const renderSideBadge = (side: BetSide) => {
-    const isAgree = side === "AGREE" || side === "YES";
+    const isAgree = side === "AGREE";
     if (isAgree) {
       return (
         <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">

@@ -7,7 +7,8 @@ import { BeliefStatus, BeliefMarket, BeliefMarketCardProps } from "@/types";
 
 export type { BeliefStatus, BeliefMarket, BeliefMarketCardProps };
 
-function formatCountdown(dateString: string): string {
+function formatCountdown(dateString?: string): string {
+  if (!dateString) return "Active";
   try {
     const diff = new Date(dateString).getTime() - new Date().getTime();
     if (diff <= 0) return "Closed";
@@ -73,7 +74,7 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
             <svg className="w-3 h-3 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>{formatCountdown(market.closeTime || market.deadline || "")}</span>
+            <span>{formatCountdown(market.closeTime || market.deadline)}</span>
           </div>
         </div>
 

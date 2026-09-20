@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import { NetworkSwitcherModalProps } from "@/types";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, ROBINHOOD_TESTNET_CHAIN_ID } from "@/lib/contracts";
 
 export type { NetworkSwitcherModalProps };
 
@@ -10,7 +11,7 @@ export default function NetworkSwitcherModal({
   isOpen,
   currentChainId = 1,
   currentNetworkName = "Ethereum Mainnet",
-  targetChainId = 11155111,
+  targetChainId = ETHEREUM_SEPOLIA_CHAIN_ID,
   targetNetworkName = "Ethereum Sepolia",
   onSwitchNetwork,
   onClose,
@@ -36,8 +37,8 @@ export default function NetworkSwitcherModal({
   if (!isOpen || !mounted) return null;
 
   const supportedNetworks = [
-    { id: 11155111, name: "Ethereum Sepolia" },
-    { id: 46630, name: "Robinhood Chain Testnet" },
+    { id: ETHEREUM_SEPOLIA_CHAIN_ID, name: "Ethereum Sepolia" },
+    { id: ROBINHOOD_TESTNET_CHAIN_ID, name: "Robinhood Chain Testnet" },
   ];
 
   const handleSwitch = async () => {

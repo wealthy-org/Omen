@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Zap,
@@ -14,25 +14,26 @@ import {
   ArrowUpRight,
   Copy,
   CheckCircle2,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 
 import { ActivityType, ActivityItem, ActivityFeedProps } from "@/types";
+import { fetchAndDecodeTransaction, DecodedTxResult } from "@/lib/rpc-decoder";
+import {
+  ETHEREUM_SEPOLIA_CHAIN_ID,
+  ROBINHOOD_TESTNET_CHAIN_ID,
+  getExplorerTxUrl,
+} from "@/lib/contracts";
 
 export type { ActivityType, ActivityItem, ActivityFeedProps };
 
-function getExplorerUrl(txHash: string, chainId?: number): string {
-  if (chainId === 46630) {
-    return `https://explorer.robinhood.com/tx/${txHash}`;
-  }
-  return `https://sepolia.etherscan.io/tx/${txHash}`;
-}
-
 function getChainInfo(chainId?: number) {
-  if (chainId === 46630) {
+  if (chainId === ROBINHOOD_TESTNET_CHAIN_ID) {
     return {
       name: "Robinhood Chain Testnet",
       shortName: "Robinhood Chain",
-      chainId: 46630,
+      chainId: ROBINHOOD_TESTNET_CHAIN_ID,
       currency: "ETH",
       explorerName: "Robinhood Explorer",
     };
@@ -40,7 +41,7 @@ function getChainInfo(chainId?: number) {
   return {
     name: "Ethereum Sepolia",
     shortName: "Ethereum Sepolia",
-    chainId: 11155111,
+    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
     currency: "ETH",
     explorerName: "Etherscan Sepolia",
   };
@@ -56,69 +57,37 @@ function formatRelativeTime(dateString: string): string {
   return `${days}d ago`;
 }
 
-function deriveDecodedCalldata(item: ActivityItem) {
-  switch (item.type) {
-    case "AGREE":
-      return {
-        functionName: "placeBet(bytes32 marketId, bool isAgree, uint256 amount)",
-        params: [
-          { name: "marketId", type: "bytes32", value: item.marketId },
-          { name: "isAgree", type: "bool", value: "true" },
-          { name: "amount", type: "uint256", value: `${item.amountEth ?? 0.05} ETH (${BigInt(Math.round((item.amountEth ?? 0.05) * 1e18)).toString()} wei)` },
-        ],
-      };
-    case "DISAGREE":
-      return {
-        functionName: "placeBet(bytes32 marketId, bool isAgree, uint256 amount)",
-        params: [
-          { name: "marketId", type: "bytes32", value: item.marketId },
-          { name: "isAgree", type: "bool", value: "false" },
-          { name: "amount", type: "uint256", value: `${item.amountEth ?? 0.05} ETH (${BigInt(Math.round((item.amountEth ?? 0.05) * 1e18)).toString()} wei)` },
-        ],
-      };
-    case "MARKET_CREATED":
-      return {
-        functionName: "createMarket(string statement, string authorHandle, uint256 closeTime, uint256 initialSeed)",
-        params: [
-          { name: "statement", type: "string", value: item.marketStatement },
-          { name: "authorHandle", type: "string", value: item.actorName ?? "@creator" },
-          { name: "closeTime", type: "uint256", value: `${Math.floor(Date.now() / 1000 + 86400 * 14)} (14 Days Duration)` },
-          { name: "initialSeed", type: "uint256", value: "0.10 ETH" },
-        ],
-      };
-    case "CONFIRM_EIP712":
-      return {
-        functionName: "confirmBeliefBySignature(bytes32 beliefHash, bytes signature)",
-        params: [
-          { name: "beliefHash", type: "bytes32", value: item.marketId },
-          { name: "authorPublicKey", type: "address", value: item.actorAddress },
-          { name: "signatureVerified", type: "bool", value: "true (EIP-712 / Secp256k1)" },
-        ],
-      };
-    case "CLAIM":
-      return {
-        functionName: "claimPayout(bytes32 marketId, address recipient)",
-        params: [
-          { name: "marketId", type: "bytes32", value: item.marketId },
-          { name: "recipient", type: "address", value: item.actorAddress },
-          { name: "grossPayout", type: "uint256", value: `${item.amountEth ?? 0.25} ETH` },
-        ],
-      };
-    case "RESOLVE":
-      return {
-        functionName: "resolveMarket(bytes32 marketId, uint8 winningOutcome)",
-        params: [
-          { name: "marketId", type: "bytes32", value: item.marketId },
-          { name: "winningOutcome", type: "uint8", value: item.outcomeWon ?? "1 (AGREE)" },
-          { name: "oracleSource", type: "string", value: "Chainlink Data Feed Consensus (0x694A...306)" },
-        ],
-      };
-  }
-}
-
 export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoading = false }) => {
   const [activeModalItem, setActiveModalItem] = useState<ActivityItem | null>(null);
   const [copiedHash, setCopiedHash] = useState(false);
+  const [decodedTx, setDecodedTx] = useState<DecodedTxResult | null>(null);
+  const [isLoadingTx, setIsLoadingTx] = useState(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    if (activeModalItem) {
+      setIsLoadingTx(true);
+      setDecodedTx(null);
+
+      fetchAndDecodeTransaction(activeModalItem.txHash, activeModalItem.chainId)
+        .then((result) => {
+          if (!isCancelled) {
+            setDecodedTx(result);
+            setIsLoadingTx(false);
+          }
+        })
+        .catch(() => {
+          if (!isCancelled) {
+            setIsLoadingTx(false);
+          }
+        });
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeModalItem]);
 
   const handleCopy = (hash: string) => {
     navigator.clipboard.writeText(hash);
@@ -206,18 +175,18 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
         };
 
         const renderChainBadge = () => {
-          if (item.chainId === 46630) {
+          if (item.chainId === ROBINHOOD_TESTNET_CHAIN_ID) {
             return (
               <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shrink-0">
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
-                <span>Robinhood Chain (46630)</span>
+                <span>Robinhood Chain ({ROBINHOOD_TESTNET_CHAIN_ID})</span>
               </span>
             );
           }
           return (
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-              <span>Ethereum Sepolia (11155111)</span>
+              <span>Ethereum Sepolia ({ETHEREUM_SEPOLIA_CHAIN_ID})</span>
             </span>
           );
         };
@@ -297,9 +266,19 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
                   <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 dark:text-zinc-400">
                     <span>{getChainInfo(activeModalItem.chainId).name} (Chain ID: {getChainInfo(activeModalItem.chainId).chainId})</span>
                     <span>•</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed
-                    </span>
+                    {isLoadingTx ? (
+                      <span className="text-zinc-400 font-bold flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Querying RPC...
+                      </span>
+                    ) : decodedTx?.foundOnRpc ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Confirmed (On-Chain)
+                      </span>
+                    ) : (
+                      <span className="text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+                        <AlertCircle className="w-3.5 h-3.5" /> Confirmed (Database Record)
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -338,105 +317,38 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
                 <div className="p-3 sm:p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-500/25">
                   <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
                     <span className="text-xs uppercase tracking-wider font-extrabold text-emerald-800 dark:text-emerald-400">
-                      Pari-Mutuel Staking Telemetry
+                      Transaction Position Details
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-600 text-white font-mono">
+                    <span
+                      className={`px-2.5 py-0.5 rounded-md text-[11px] font-bold font-mono text-white ${
+                        activeModalItem.type === "AGREE" ? "bg-emerald-600" : "bg-rose-600"
+                      }`}
+                    >
                       Position: {activeModalItem.type}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                    <div className="p-2 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-500/20">
-                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Staked Value</span>
-                      <span className="font-extrabold text-zinc-900 dark:text-white text-xs mt-0.5 block">{activeModalItem.amountEth ?? 0.05} ETH</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-center">
+                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-500/20">
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Staked Amount</span>
+                      <span className="font-extrabold text-zinc-900 dark:text-white text-xs mt-0.5 block">
+                        {activeModalItem.amountEth !== undefined
+                          ? `${activeModalItem.amountEth} ETH`
+                          : decodedTx?.valueEth
+                          ? `${decodedTx.valueEth} ETH`
+                          : "-"}
+                      </span>
                     </div>
-                    <div className="p-2 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-500/20">
-                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Pool Multiplier</span>
-                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs mt-0.5 block">1.85x</span>
-                    </div>
-                    <div className="p-2 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-500/20">
-                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Pool Share</span>
-                      <span className="font-extrabold text-zinc-900 dark:text-white text-xs mt-0.5 block">4.2%</span>
-                    </div>
-                    <div className="p-2 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-500/20">
-                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Consensus Shift</span>
-                      <span className="font-extrabold text-purple-600 dark:text-purple-400 text-xs mt-0.5 block">+1.4% {activeModalItem.type}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeModalItem.type === "CONFIRM_EIP712" && (
-                <div className="p-3 sm:p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-500/25">
-                  <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
-                    <span className="text-xs uppercase tracking-wider font-extrabold text-amber-800 dark:text-amber-400">
-                      EIP-712 Cryptographic Signature Verification
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-600 text-white font-mono">
-                      Signature Verified
-                    </span>
-                  </div>
-                  <div className="space-y-2 text-[11px]">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-lg bg-white/80 dark:bg-black/40 border border-amber-500/20">
-                      <span className="text-zinc-500 dark:text-zinc-400">Author Public Key:</span>
-                      <span className="font-bold text-zinc-900 dark:text-zinc-100">{activeModalItem.actorAddress}</span>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-lg bg-white/80 dark:bg-black/40 border border-amber-500/20">
-                      <span className="text-zinc-500 dark:text-zinc-400">Domain Separator:</span>
-                      <span className="font-mono text-zinc-800 dark:text-zinc-200">OmenProtocol(v1, chainId={getChainInfo(activeModalItem.chainId).chainId})</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeModalItem.type === "MARKET_CREATED" && (
-                <div className="p-3 sm:p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/20 border border-blue-500/25">
-                  <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
-                    <span className="text-xs uppercase tracking-wider font-extrabold text-blue-800 dark:text-blue-400">
-                      Market Deployment & Factory Specifications
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-600 text-white font-mono">
-                      Factory Init
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-                    <div className="p-2 rounded-lg bg-white/80 dark:bg-black/40 border border-blue-500/20">
-                      <span className="text-zinc-500 dark:text-zinc-400 block text-[10px]">Initial Seed:</span>
-                      <span className="font-bold text-zinc-900 dark:text-white">0.10 ETH</span>
-                    </div>
-                    <div className="p-2 rounded-lg bg-white/80 dark:bg-black/40 border border-blue-500/20">
-                      <span className="text-zinc-500 dark:text-zinc-400 block text-[10px]">Creator Royalty:</span>
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">1.5%</span>
-                    </div>
-                    <div className="p-2 rounded-lg bg-white/80 dark:bg-black/40 border border-blue-500/20">
-                      <span className="text-zinc-500 dark:text-zinc-400 block text-[10px]">Oracle Resolution:</span>
-                      <span className="font-bold text-purple-600 dark:text-purple-400">Dual-Chain Oracle</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeModalItem.type === "CLAIM" && (
-                <div className="p-3 sm:p-4 rounded-2xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-500/25">
-                  <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
-                    <span className="text-xs uppercase tracking-wider font-extrabold text-purple-800 dark:text-purple-400">
-                      Dual Payout Settlement Receipt
-                    </span>
-                    <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-600 text-white font-mono">
-                      Outcome Won
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
-                    <div className="p-2 sm:p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
-                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Gross Payout Transferred</span>
-                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs sm:text-sm mt-0.5 block">{activeModalItem.amountEth ?? 0.25} ETH</span>
-                    </div>
-                    <div className="p-2 sm:p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
-                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Initial Staked Capital</span>
-                      <span className="font-bold text-zinc-900 dark:text-white text-xs sm:text-sm mt-0.5 block">0.10 ETH</span>
-                    </div>
-                    <div className="p-2 sm:p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-purple-500/20">
-                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Calculated Yield</span>
-                      <span className="font-extrabold text-purple-600 dark:text-purple-400 text-xs sm:text-sm mt-0.5 block">+150.0% ROI</span>
+                    <div className="p-2.5 rounded-xl bg-white/80 dark:bg-black/40 border border-emerald-500/20">
+                      <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">Position Side</span>
+                      <span
+                        className={`font-extrabold text-xs mt-0.5 block ${
+                          activeModalItem.type === "AGREE"
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-rose-600 dark:text-rose-400"
+                        }`}
+                      >
+                        {activeModalItem.type}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -445,62 +357,84 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Block Number</span>
-                  <span className="font-bold text-zinc-900 dark:text-zinc-100">#6841920 (18 Confs)</span>
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                    {decodedTx?.blockNumber ? `#${decodedTx.blockNumber} (${decodedTx.confirmations ?? 1} Confs)` : "Indexed Block Record"}
+                  </span>
                 </div>
                 <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Execution Fee</span>
-                  <span className="font-bold text-zinc-900 dark:text-zinc-100">0.00042 ETH</span>
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                    {decodedTx?.executionFeeEth ? `${Number(decodedTx.executionFeeEth).toFixed(6)} ETH` : "Indexed Estimate"}
+                  </span>
                 </div>
                 <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Gas Price / Used</span>
-                  <span className="font-bold text-zinc-900 dark:text-zinc-100">12.4 Gwei • 34,200</span>
+                  <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                    {decodedTx?.gasPriceGwei ? `${Number(decodedTx.gasPriceGwei).toFixed(1)} Gwei` : "Network Gas"} • {decodedTx?.gasUsed ? Number(decodedTx.gasUsed).toLocaleString() : "Confirmed"}
+                  </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">From (Trader / Origin)</span>
-                  <span className="break-all font-mono text-zinc-800 dark:text-zinc-200">{activeModalItem.actorAddress}</span>
+                  <span className="break-all font-mono text-zinc-800 dark:text-zinc-200">
+                    {decodedTx?.from || activeModalItem.actorAddress}
+                  </span>
                 </div>
                 <div className="p-2.5 sm:p-3 rounded-xl bg-zinc-50 dark:bg-black/40 border border-zinc-200/80 dark:border-white/10">
                   <span className="text-zinc-500 dark:text-zinc-400 text-[10px] uppercase font-bold block mb-1">Interacted With (Contract)</span>
                   <div className="flex flex-col">
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400">OmenMarket (Dual-Chain Pari-Mutuel)</span>
-                    <span className="break-all text-[11px] text-zinc-600 dark:text-zinc-400">0x694AA1769357215DE4FAC081bf1f309aDC325306</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      {decodedTx?.toContractName || "OmenMarket (Dual-Chain Pari-Mutuel)"}
+                    </span>
+                    <span className="break-all text-[11px] text-zinc-600 dark:text-zinc-400">
+                      {decodedTx?.to || "—"}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {(() => {
-                const decoded = deriveDecodedCalldata(activeModalItem);
-                if (!decoded) return null;
-                return (
-                  <div className="p-3 sm:p-4 rounded-2xl bg-zinc-100/90 dark:bg-black/60 border border-zinc-300 dark:border-emerald-500/25">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-[11px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold">
-                        Decoded EVM Calldata & Event Logs
-                      </span>
-                      <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">ABI Decoded</span>
-                    </div>
-                    <div className="p-2.5 rounded-xl bg-white dark:bg-black/80 font-mono text-[11px] mb-2 text-zinc-900 dark:text-emerald-300 border border-zinc-200 dark:border-white/10 overflow-x-auto">
-                      {decoded.functionName}
-                    </div>
+              {decodedTx?.functionName ? (
+                <div className="p-3 sm:p-4 rounded-2xl bg-zinc-100/90 dark:bg-black/60 border border-zinc-300 dark:border-emerald-500/25">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[11px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold">
+                      Decoded EVM Calldata & Event Logs
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">Live ABI Decoded</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-black/80 font-mono text-[11px] mb-2 text-zinc-900 dark:text-emerald-300 border border-zinc-200 dark:border-white/10 overflow-x-auto">
+                    {decodedTx.functionName}
+                  </div>
+                  {decodedTx.params && decodedTx.params.length > 0 && (
                     <div className="space-y-1.5">
-                      {decoded.params.map((param, i) => (
+                      {decodedTx.params.map((param, i) => (
                         <div key={i} className="flex flex-col sm:flex-row sm:items-start justify-between gap-1 text-[11px] p-1.5 rounded bg-white/60 dark:bg-white/[0.03]">
                           <span className="text-zinc-500 dark:text-zinc-400 font-bold shrink-0">[{i}] {param.name} ({param.type}):</span>
                           <span className="text-right text-zinc-900 dark:text-zinc-200 break-all font-semibold">{param.value}</span>
                         </div>
                       ))}
                     </div>
+                  )}
+                </div>
+              ) : decodedTx?.rawInput && decodedTx.rawInput !== "0x" ? (
+                <div className="p-3 sm:p-4 rounded-2xl bg-zinc-100/90 dark:bg-black/60 border border-zinc-300 dark:border-emerald-500/25">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[11px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold">
+                      Raw Transaction Calldata
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400">EVM Input</span>
                   </div>
-                );
-              })()}
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-black/80 font-mono text-[10px] text-zinc-900 dark:text-emerald-300 border border-zinc-200 dark:border-white/10 break-all">
+                    {decodedTx.rawInput}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="mt-4 sm:mt-5 pt-3 border-t border-zinc-200 dark:border-white/10 flex items-center justify-between gap-3">
               <a
-                href={getExplorerUrl(activeModalItem.txHash, activeModalItem.chainId)}
+                href={getExplorerTxUrl(activeModalItem.chainId, activeModalItem.txHash)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 hover:underline"

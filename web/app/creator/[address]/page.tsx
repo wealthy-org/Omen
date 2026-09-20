@@ -24,13 +24,12 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
       try {
         const resolved = await Promise.resolve(params);
         if (!isMounted) return;
-        const addr = resolved?.address || "";
-        setTargetAddress(addr);
-
+        const addr = resolved?.address;
         if (!addr) {
           setIsLoading(false);
           return;
         }
+        setTargetAddress(addr);
 
         setIsLoading(true);
         const res = await fetch(`/api/creators/${addr}`);
