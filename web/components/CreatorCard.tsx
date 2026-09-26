@@ -21,7 +21,7 @@ export const CreatorCard: React.FC<CreatorCardProps> = ({ creator, rank }) => {
             <div className="relative shrink-0">
               <div className="w-12 h-12 rounded-full overflow-hidden relative shadow-sm">
                 <img
-                  src={creator.avatarUrl || `https://unavatar.io/twitter/${(creator.handle || creator.name).replace('@', '')}`}
+                  src={creator.avatarUrl || `/api/avatar/${(creator.handle || creator.name).replace('@', '')}`}
                   alt={creator.name}
                   className="w-12 h-12 rounded-full object-cover relative z-10"
                   onError={(e) => {

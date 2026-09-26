@@ -29,7 +29,8 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
   const totalPool = market.agreePool + market.disagreePool;
   const totalParticipants = market.agreeParticipants + market.disagreeParticipants;
   
-  const agreePoolPercent = totalPool > 0 ? Math.round((market.agreePool / totalPool) * 100) : 0;
+  const hasStakes = totalPool > 0;
+  const agreePoolPercent = hasStakes ? Math.round((market.agreePool / totalPool) * 100) : 0;
   const disagreePoolPercent = totalPool > 0 ? 100 - agreePoolPercent : 0;
 
   const agreeParticipantPercent = totalParticipants > 0 ? Math.round((market.agreeParticipants / totalParticipants) * 100) : 0;
@@ -53,7 +54,7 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
             <div className="relative w-6 h-6 rounded-full overflow-hidden bg-zinc-800 text-white font-mono font-bold text-[10px] flex items-center justify-center border border-white/10 shrink-0">
               <span>{initials}</span>
               <img
-                src={`https://unavatar.io/twitter/${(market.authorHandle || market.author).replace('@', '')}`}
+                src={`/api/avatar/${(market.authorHandle || market.author).replace('@', '')}`}
                 alt={market.author}
                 className="absolute inset-0 w-full h-full object-cover"
                 onError={(e) => {
@@ -105,44 +106,45 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
       </div>
 
       <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-white/10 space-y-3">
-        <div>
-          <div className="flex items-center justify-between text-xs font-semibold mb-1 text-zinc-500 dark:text-zinc-400">
-            <span>Consensus (People)</span>
-            <div className="flex gap-2">
-              <span className="text-emerald-600 dark:text-emerald-400 font-mono">{agreeParticipantPercent}% AGREE</span>
-              <span className="text-rose-600 dark:text-rose-400 font-mono">{disagreeParticipantPercent}% DISAGREE</span>
+        {totalParticipants > 0 && (
+          <div>
+            <div className="flex items-center justify-between text-xs font-semibold mb-1 text-zinc-500 dark:text-zinc-400">
+              <span>Traders by side</span>
+              <div className="flex gap-2">
+                <span className="text-emerald-600 dark:text-emerald-400 font-mono">{agreeParticipantPercent}% agree</span>
+                <span className="text-rose-600 dark:text-rose-400 font-mono">{disagreeParticipantPercent}% disagree</span>
+              </div>
+            </div>
+            <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden flex">
+              <div className="bg-emerald-500 transition-all duration-500" style={{ width: `${agreeParticipantPercent}%` }} />
+              <div className="bg-rose-500 transition-all duration-500" style={{ width: `${disagreeParticipantPercent}%` }} />
             </div>
           </div>
-          <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden flex">
-            <div
-              className="bg-emerald-500 transition-all duration-500"
-              style={{ width: `${agreeParticipantPercent}%` }}
-            />
-            <div
-              className="bg-rose-500 transition-all duration-500"
-              style={{ width: `${disagreeParticipantPercent}%` }}
-            />
-          </div>
-        </div>
+        )}
 
         <div>
           <div className="flex items-center justify-between text-xs font-semibold mb-1 text-zinc-500 dark:text-zinc-400">
-            <span>Money (Pool: {totalPool} ETH)</span>
-            <div className="flex gap-2">
-              <span className="text-emerald-600 dark:text-emerald-400 font-mono">{agreePoolPercent}% AGREE</span>
-              <span className="text-rose-600 dark:text-rose-400 font-mono">{disagreePoolPercent}% DISAGREE</span>
-            </div>
+            <span>Pool: {totalPool > 0 ? `${Number(totalPool.toFixed(4))} ETH` : "empty"}</span>
+            {hasStakes ? (
+              <div className="flex gap-2">
+                <span className="text-emerald-600 dark:text-emerald-400 font-mono">{agreePoolPercent}% agree</span>
+                <span className="text-rose-600 dark:text-rose-400 font-mono">{disagreePoolPercent}% disagree</span>
+              </div>
+            ) : (
+              <span className="font-normal">No stakes yet</span>
+            )}
           </div>
           <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden flex">
-            <div
-              className="bg-emerald-500 transition-all duration-500"
-              style={{ width: `${agreePoolPercent}%` }}
-            />
-            <div
-              className="bg-rose-500 transition-all duration-500"
-              style={{ width: `${disagreePoolPercent}%` }}
-            />
+            {hasStakes && (
+              <>
+                <div className="bg-emerald-500 transition-all duration-500" style={{ width: `${agreePoolPercent}%` }} />
+                <div className="bg-rose-500 transition-all duration-500" style={{ width: `${disagreePoolPercent}%` }} />
+              </>
+            )}
           </div>
+          {!hasStakes && (
+            <p className="mt-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">The first position sets the odds.</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-2 pt-1">
@@ -152,7 +154,7 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
             className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-mono font-bold text-xs shadow-xs hover:shadow-emerald-500/20 active:scale-[0.98] transition-all cursor-pointer group/btn"
           >
             <span className="font-sans font-bold text-xs">Agree</span>
-            <span className="px-1.5 py-0.5 rounded bg-black/20 text-emerald-100 font-mono text-xs">{agreePoolPercent}%</span>
+            {hasStakes && <span className="px-1.5 py-0.5 rounded bg-black/20 text-emerald-100 font-mono text-xs">{agreePoolPercent}%</span>}
           </Link>
 
           <Link
@@ -161,7 +163,7 @@ export const BeliefMarketCard: React.FC<BeliefMarketCardProps> = ({
             className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white font-mono font-bold text-xs shadow-xs hover:shadow-rose-500/20 active:scale-[0.98] transition-all cursor-pointer group/btn"
           >
             <span className="font-sans font-bold text-xs">Disagree</span>
-            <span className="px-1.5 py-0.5 rounded bg-black/20 text-rose-100 font-mono text-xs">{disagreePoolPercent}%</span>
+            {hasStakes && <span className="px-1.5 py-0.5 rounded bg-black/20 text-rose-100 font-mono text-xs">{disagreePoolPercent}%</span>}
           </Link>
         </div>
 

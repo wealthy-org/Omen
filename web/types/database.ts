@@ -19,7 +19,8 @@ export type DbBeliefStatus =
 export type MarketResolutionType =
   | "PRICE_ABOVE"
   | "PRICE_BELOW"
-  | "RELATIVE_PERFORMANCE";
+  | "RELATIVE_PERFORMANCE"
+  | "MANUAL";
 
 export type MarketWinner = "AGREE" | "DISAGREE" | "VOID";
 
@@ -162,6 +163,10 @@ export type DbCreatorProfile = {
   id: string;
   wallet_address: string;
   handle: string | null;
+  display_name?: string | null;
+  avatar_url?: string | null;
+  bio?: string | null;
+  farcaster_fid?: number | null;
   confirmed_beliefs_count: number;
   resolved_count: number;
   correct_count: number;

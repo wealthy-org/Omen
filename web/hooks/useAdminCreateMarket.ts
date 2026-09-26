@@ -8,7 +8,7 @@ import {
   useChainId,
 } from "wagmi";
 import { OMEN_FACTORY_ABI, getOmenFactoryAddress } from "@/lib/contracts";
-import { CHAINLINK_ETH_USD_FEED, ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
+import { CHAINLINK_BTC_USD_FEED, CHAINLINK_ETH_USD_FEED, ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 import type { CreateMarketParams, CreateMarketResult } from "@/types";
 
 export type { CreateMarketParams, CreateMarketResult };
@@ -39,6 +39,9 @@ export function useAdminCreateMarket(): CreateMarketResult {
     resolutionCriteria = "",
     initialLiquidity = "0.50",
     beliefId,
+    resolutionType,
+    assetSymbol,
+    targetPrice,
   }: CreateMarketParams): Promise<{ hash: string; contractMarketId: string; contractAddress?: string }> => {
     setSyncError(null);
 
@@ -53,11 +56,12 @@ export function useAdminCreateMarket(): CreateMarketResult {
     const sourceHash = keccak256(toHex(resolutionSourceUrl.trim() || "OMEN_SOURCE"));
     const resolutionHash = keccak256(toHex(resolutionCriteria.trim() || JSON.stringify({ category })));
 
+    const priceFeed = assetSymbol?.toUpperCase() === "BTC" ? CHAINLINK_BTC_USD_FEED : CHAINLINK_ETH_USD_FEED;
     const resolutionConfig = {
-      resType: 0,
-      assetAFeed: CHAINLINK_ETH_USD_FEED,
-      assetBFeed: CHAINLINK_ETH_USD_FEED,
-      targetPrice: BigInt(0),
+      resType: resolutionType === 1 ? 1 : 0,
+      assetAFeed: priceFeed,
+      assetBFeed: priceFeed,
+      targetPrice: BigInt(Math.round(Number(targetPrice ?? 0))),
       startTimestamp: openTime,
       endTimestamp: closeTime,
     };
@@ -71,7 +75,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
       args: [beliefHash, sourceHash, resolutionHash, openTime, closeTime, resolutionConfig],
     });
 
-    let contractMarketId = String(Date.now());
+    let contractMarketId = String(Math.floor(Date.now() / 1000));
     let deployedMarketAddress: string | undefined;
 
     if (publicClient && hash) {
@@ -112,7 +116,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
           ...(adminWallet ? { "x-admin-wallet": adminWallet } : {}),
         },
         body: JSON.stringify({
-          contract_market_id: parseInt(contractMarketId, 10) || Date.now(),
+          contract_market_id: parseInt(contractMarketId, 10) || Math.floor(Date.now() / 1000),
           contract_address: deployedMarketAddress,
           chain_id: chainId || ETHEREUM_SEPOLIA_CHAIN_ID,
           belief_id: beliefId,
@@ -124,6 +128,9 @@ export function useAdminCreateMarket(): CreateMarketResult {
           initial_liquidity: parseFloat(initialLiquidity) || 0,
           creator_wallet: address,
           tx_hash: hash,
+          open_time: new Date(Number(openTime) * 1000).toISOString(),
+          resolution_type: assetSymbol ? (resolutionType === 1 ? "PRICE_BELOW" : "PRICE_ABOVE") : undefined,
+          resolution_config: assetSymbol ? { asset: assetSymbol.toUpperCase(), targetPrice: Number(targetPrice ?? 0) } : undefined,
         }),
       });
 
@@ -132,6 +139,7 @@ export function useAdminCreateMarket(): CreateMarketResult {
       }
     } catch {
       setSyncError("Failed to sync market with database");
+      throw new Error("Market deployed on-chain but failed to sync with database");
     } finally {
       setIsSyncing(false);
     }

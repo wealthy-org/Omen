@@ -14,7 +14,7 @@ export const CreatorProfileHeader: React.FC<CreatorProfileHeaderProps> = ({ crea
         <div className="flex items-center gap-4 sm:gap-6">
           <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden shadow-md shrink-0">
             <img
-              src={`https://unavatar.io/twitter/${(creator.handle || creator.name).replace('@', '')}`}
+              src={creator.avatarUrl || `/api/avatar/${(creator.handle || creator.name).replace('@', '')}`}
               alt={creator.name}
               className="w-full h-full object-cover relative z-10"
               onError={(e) => {

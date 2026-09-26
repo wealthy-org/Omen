@@ -10,6 +10,7 @@ export interface ActivityItem {
   id: string;
   type: ActivityType;
   actorName?: string;
+  actorNote?: string;
   actorAddress: string;
   marketId: string;
   marketTitle?: string;

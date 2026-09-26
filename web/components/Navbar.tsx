@@ -2,16 +2,22 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "./ThemeProvider";
 import ConnectWalletButton from "./ConnectWalletButton";
 import NetworkSwitcherModal from "./NetworkSwitcherModal";
+import NavTicker from "./NavTicker";
 
 const NAV_ITEMS = [
-  { label: "Markets", href: "/#markets" },
-  { label: "Creators", href: "/#creators" },
-  { label: "Activity", href: "/#activity" },
+  { label: "Markets", href: "/markets" },
+  { label: "Beliefs", href: "/beliefs" },
+  { label: "Creators", href: "/creators" },
+  { label: "Activity", href: "/activity" },
+  { label: "My Bets", href: "/my-bets" },
 ];
+
+const isNavActive = (pathname: string | null, href: string) =>
+  pathname === href || Boolean(pathname?.startsWith(`${href}/`)) || (href === "/markets" && Boolean(pathname?.startsWith("/market/")));
 
 import { NavbarProps } from "@/types";
 
@@ -28,6 +34,18 @@ export default function Navbar({ onToggleTheme, isWrongNetwork = false }: Navbar
   const [isNetworkModalOpen, setIsNetworkModalOpen] = useState(isWrongNetwork);
 
   const [prevIsWrongNetwork, setPrevIsWrongNetwork] = useState(isWrongNetwork);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
 
   if (isWrongNetwork !== prevIsWrongNetwork) {
     setPrevIsWrongNetwork(isWrongNetwork);
@@ -51,17 +69,15 @@ export default function Navbar({ onToggleTheme, isWrongNetwork = false }: Navbar
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full pt-4 px-4 sm:px-6 lg:px-8 xl:px-10">
+    <header className="sticky top-0 z-50 w-full">
       <div
-        className={`max-w-[1400px] w-full mx-auto rounded-[20px] transition-all duration-300 relative ${
+        className={`w-full relative border-b transition-all duration-300 ${
           isScrolled
-            ? "bg-white/90 dark:bg-[#0A0F0C]/95 backdrop-blur-xl border border-emerald-500/10 dark:border-white/10 shadow-[0_8px_30px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.7)]"
-            : "bg-white/60 dark:bg-[#0A0F0C]/80 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.04),_inset_0_1px_0_rgba(255,255,255,0.9)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+            ? "bg-white/90 dark:bg-[#0A0F0C]/95 backdrop-blur-xl border-emerald-500/15 dark:border-white/10 shadow-[0_4px_20px_rgba(14,122,78,0.05)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+            : "bg-white/80 dark:bg-[#0A0F0C]/85 backdrop-blur-md border-emerald-500/10 dark:border-white/10"
         }`}
       >
-        <div className="absolute top-0 inset-x-8 h-[1px] pointer-events-none light-emerald-seam dark:dark-emerald-seam" />
-
-        <div className="flex items-center justify-between h-[64px] px-6 sm:px-8">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4 h-[60px] px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <Link
               href="/"
@@ -87,32 +103,48 @@ export default function Navbar({ onToggleTheme, isWrongNetwork = false }: Navbar
           </div>
 
           <nav
-            className="hidden md:flex items-center gap-8 lg:gap-10"
+            className="hidden lg:flex items-center gap-1"
             aria-label="Main Navigation"
           >
             {NAV_ITEMS.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/" && (pathname?.startsWith(item.href) || pathname === item.href.replace("/#", "/")));
+              const isActive = isNavActive(pathname, item.href);
 
               return (
                 <Link
                   key={item.label}
                   href={item.href}
-                  className={`text-[16px] transition-colors ${
+                  className={`px-3 py-1.5 rounded-md font-mono text-[12px] uppercase tracking-[0.12em] transition-colors ${
                     isActive
-                      ? "text-[#0B1F16] dark:text-white font-bold"
-                      : "text-[#17241D] dark:text-[#DCE5DF] font-medium hover:text-emerald-800 dark:hover:text-white"
+                      ? "bg-emerald-50 dark:bg-emerald-500/10 text-[#0E7A4E] dark:text-emerald-400 font-bold"
+                      : "text-[#4B5D55] dark:text-[#A9B3AD] font-medium hover:text-[#0B1F16] dark:hover:text-white"
                   }`}
                   aria-current={isActive ? "page" : undefined}
                 >
+                  {isActive && <span aria-hidden="true" className="mr-1">▸</span>}
                   {item.label}
                 </Link>
               );
             })}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3.5">
+          <form action="/markets" method="get" role="search" className="hidden xl:flex items-center flex-1 max-w-[260px]">
+            <label className="relative w-full">
+              <span className="sr-only">Search markets</span>
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+              </svg>
+              <input
+                ref={searchInputRef}
+                type="search"
+                name="q"
+                placeholder="Search markets..."
+                className="w-full h-9 pl-9 pr-12 rounded-lg border text-sm bg-white dark:bg-white/5 border-emerald-500/15 dark:border-white/10 text-[#0B1F16] dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+              />
+              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 px-1.5 py-0.5 rounded border text-[10px] font-mono text-zinc-500 border-zinc-200 dark:border-white/10">⌘K</kbd>
+            </label>
+          </form>
+
+          <div className="hidden lg:flex items-center gap-2.5 shrink-0">
             <button
               type="button"
               onClick={handleToggle}
@@ -155,7 +187,7 @@ export default function Navbar({ onToggleTheme, isWrongNetwork = false }: Navbar
             <ConnectWalletButton />
           </div>
 
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-2">
             <button
               type="button"
               onClick={handleToggle}
@@ -192,14 +224,21 @@ export default function Navbar({ onToggleTheme, isWrongNetwork = false }: Navbar
 
         {isMobileMenuOpen && (
           <div
-            className="md:hidden border-t px-6 pt-4 pb-6 space-y-3 rounded-b-[20px] border-emerald-500/10 dark:border-white/10 bg-white dark:bg-[#0A0F0C]"
+            className="lg:hidden border-t px-4 sm:px-6 pt-4 pb-6 space-y-3 border-emerald-500/10 dark:border-white/10 bg-white dark:bg-[#0A0F0C]"
             data-testid="mobile-menu"
           >
+            <form action="/markets" method="get" role="search">
+              <input
+                type="search"
+                name="q"
+                placeholder="Search markets..."
+                aria-label="Search markets"
+                className="w-full h-11 px-4 rounded-xl border text-base bg-white dark:bg-white/5 border-emerald-500/15 dark:border-white/10 text-[#0B1F16] dark:text-white placeholder:text-zinc-400"
+              />
+            </form>
             <nav className="flex flex-col gap-1" aria-label="Mobile Navigation">
               {NAV_ITEMS.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/" && (pathname?.startsWith(item.href) || pathname === item.href.replace("/#", "/")));
+                const isActive = isNavActive(pathname, item.href);
 
                 return (
                   <Link
@@ -248,6 +287,8 @@ export default function Navbar({ onToggleTheme, isWrongNetwork = false }: Navbar
           </div>
         )}
       </div>
+
+      <NavTicker />
 
       <NetworkSwitcherModal
         isOpen={isNetworkModalOpen}

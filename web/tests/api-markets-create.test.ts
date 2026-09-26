@@ -2,12 +2,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
+import { eq } from "drizzle-orm";
 import { POST } from "@/app/api/markets/route";
-import * as supabaseLib from "@/lib/supabase";
+import { useTestDb, failingDb, schema } from "./helpers/test-db";
 
 describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
-  beforeEach(() => {
+
+  const testDb = useTestDb();
+
+  beforeEach(async () => {
     vi.restoreAllMocks();
+    await testDb.reset();
   });
 
   function createMockPostRequest(
@@ -24,49 +29,34 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
     });
   }
 
+  it("should strictly adhere to Zero-Comment Policy", () => {
+    const targetFiles = [
+      path.resolve(process.cwd(), "app/api/markets/route.ts"),
+      path.resolve(process.cwd(), "tests/api-markets-create.test.ts"),
+    ];
+
+    for (const filePath of targetFiles) {
+      expect(fs.existsSync(filePath)).toBe(true);
+      const content = fs.readFileSync(filePath, "utf-8");
+      const lines = content.split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        expect(trimmed.startsWith("//")).toBe(false);
+        expect(trimmed.includes("/" + "*")).toBe(false);
+        expect(trimmed.includes("*" + "/")).toBe(false);
+      }
+    }
+  });
+
   it("should create a new market successfully when authorized via x-admin-key", async () => {
-    const mockCreatedMarket = {
-      id: "m-new-1",
-      contract_market_id: 10,
-      title: "Will Bitcoin hit 100k?",
-      description: "BTC prediction",
-      category: "crypto",
-      deadline: "2026-12-31T23:59:59.000Z",
-      status: "OPEN",
-      agree_pool: 0,
-      disagree_pool: 0,
-      resolution_source: "CoinGecko Oracle",
-      created_at: "2026-09-16T15:00:00.000Z",
-    };
-
-    const mockSingle = vi.fn().mockResolvedValue({ data: mockCreatedMarket, error: null });
-    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
-
-    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
-    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
-    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq });
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockImplementation((table: string) => {
-        if (table === "markets") {
-          return {
-            select: mockSelectCheck,
-            insert: mockInsert,
-          };
-        }
-        return {};
-      }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
     const req = createMockPostRequest(
       {
         contract_market_id: 10,
-        title: "Will Bitcoin hit 100k?",
-        description: "BTC prediction",
-        category: "crypto",
+        title: "  Will Bitcoin hit 100k?  ",
+        description: "BTC price prediction",
         deadline: "2026-12-31T23:59:59.000Z",
-        resolution_source: "CoinGecko Oracle",
+        category: "CRYPTO",
+        resolution_source: "Chainlink",
       },
       { "x-admin-key": "omen-admin-2026" }
     );
@@ -78,47 +68,16 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
     expect(data.success).toBe(true);
     expect(data.market.contract_market_id).toBe(10);
     expect(data.market.title).toBe("Will Bitcoin hit 100k?");
+    expect(data.market.category).toBe("crypto");
+    expect(data.market.status).toBe("OPEN");
     expect(data.market.total_pool).toBe(0);
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        contract_market_id: 10,
-        title: "Will Bitcoin hit 100k?",
-        category: "crypto",
-        status: "OPEN",
-      })
-    );
+
+    const stored = await testDb.db.query.markets.findFirst({ where: eq(schema.markets.contract_market_id, 10) });
+    expect(stored?.close_time).toBe("2026-12-31T23:59:59.000Z");
+    expect(stored?.resolution_source).toBe("Chainlink");
   });
 
   it("should create a new market successfully when authorized via Authorization Bearer token", async () => {
-    const mockCreatedMarket = {
-      id: "m-new-2",
-      contract_market_id: 11,
-      title: "Will Solana hit 500?",
-      description: null,
-      category: "crypto",
-      deadline: "2026-12-31T23:59:59.000Z",
-      status: "OPEN",
-      agree_pool: 0,
-      disagree_pool: 0,
-      resolution_source: null,
-      created_at: "2026-09-16T15:00:00.000Z",
-    };
-
-    const mockSingle = vi.fn().mockResolvedValue({ data: mockCreatedMarket, error: null });
-    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
-
-    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
-    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
-    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq });
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        select: mockSelectCheck,
-        insert: mockInsert,
-      }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
     const req = createMockPostRequest(
       {
         contract_market_id: 11,
@@ -130,46 +89,17 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
 
     const res = await POST(req);
     expect(res.status).toBe(201);
+
     const data = await res.json();
     expect(data.success).toBe(true);
     expect(data.market.category).toBe("crypto");
   });
 
   it("should create a new market successfully when authorized via whitelisted x-admin-wallet", async () => {
-    const mockCreatedMarket = {
-      id: "m-new-3",
-      contract_market_id: 12,
-      title: "Will Arbitrum flip Polygon?",
-      description: null,
-      category: "layer2",
-      deadline: "2026-12-31T23:59:59.000Z",
-      status: "OPEN",
-      agree_pool: 0,
-      disagree_pool: 0,
-      resolution_source: null,
-      created_at: "2026-09-16T15:00:00.000Z",
-    };
-
-    const mockSingle = vi.fn().mockResolvedValue({ data: mockCreatedMarket, error: null });
-    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
-
-    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
-    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
-    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq });
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        select: mockSelectCheck,
-        insert: mockInsert,
-      }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
     const req = createMockPostRequest(
       {
         contract_market_id: 12,
-        title: "Will Arbitrum flip Polygon?",
-        category: "layer2",
+        title: "Will ETH flip BTC?",
         deadline: "2026-12-31T23:59:59.000Z",
       },
       { "x-admin-wallet": "0xAdmin99999999999999999999999999999999999" }
@@ -177,6 +107,48 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
 
     const res = await POST(req);
     expect(res.status).toBe(201);
+  });
+
+  it("should link a deployed belief market, store resolution params, open the belief, and log MarketCreated", async () => {
+    const [belief] = await testDb.db
+      .insert(schema.beliefs)
+      .values({ statement: "Will BTC trade at or above $100,000 before Dec 21, 2026?", author: "@yes2crypto.eth" })
+      .returning();
+
+    const req = createMockPostRequest(
+      {
+        contract_market_id: 7,
+        contract_address: "0x1111111111111111111111111111111111111111",
+        chain_id: 46630,
+        belief_id: belief.id,
+        title: belief.statement,
+        deadline: "2026-12-21T23:59:59.000Z",
+        open_time: "2026-09-26T00:00:00.000Z",
+        resolution_type: "PRICE_ABOVE",
+        resolution_config: { asset: "BTC", targetPrice: 100000 },
+        tx_hash: "0xdeploytx",
+      },
+      { "x-admin-wallet": "0x1234567890abcdef1234567890abcdef12345678" }
+    );
+
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+
+    const market = await testDb.db.query.markets.findFirst({
+      where: eq(schema.markets.belief_id, belief.id),
+      with: { beliefs: true, market_events: true },
+    });
+    expect(market?.chain_id).toBe(46630);
+    expect(market?.resolution_type).toBe("PRICE_ABOVE");
+    expect(market?.resolution_config).toEqual({ asset: "BTC", targetPrice: 100000 });
+    expect(market?.open_time).toBe("2026-09-26T00:00:00.000Z");
+    expect(market?.beliefs?.status).toBe("OPEN");
+    expect(market?.market_events).toHaveLength(1);
+    expect(market?.market_events[0]).toMatchObject({
+      event_type: "MarketCreated",
+      tx_hash: "0xdeploytx",
+      wallet_address: "0x1234567890abcdef1234567890abcdef12345678",
+    });
   });
 
   it("should return 401 Unauthorized when credentials are missing or invalid", async () => {
@@ -234,23 +206,10 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
   });
 
   it("should return 409 Conflict when market with contract_market_id already exists", async () => {
-    const mockMaybeSingle = vi.fn().mockResolvedValue({
-      data: { id: "existing-uuid" },
-      error: null,
-    });
-    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
-    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq });
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: mockSelectCheck }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
+    await testDb.db.insert(schema.markets).values({ contract_market_id: 5, title: "Existing" });
 
     const req = createMockPostRequest(
-      {
-        contract_market_id: 42,
-        title: "Duplicate Market",
-        deadline: "2026-12-31T00:00:00.000Z",
-      },
+      { contract_market_id: 5, title: "Duplicate", deadline: "2026-12-31T00:00:00.000Z" },
       { "x-admin-key": "omen-admin-2026" }
     );
 
@@ -260,31 +219,11 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
     expect(data.error).toContain("already exists");
   });
 
-  it("should return 500 when Supabase insert operation fails", async () => {
-    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
-    const mockEq = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
-    const mockSelectCheck = vi.fn().mockReturnValue({ eq: mockEq });
-
-    const mockSingle = vi.fn().mockResolvedValue({
-      data: null,
-      error: { message: "Database insert failure" },
-    });
-    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle });
-    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect });
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        select: mockSelectCheck,
-        insert: mockInsert,
-      }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
+  it("should return 500 when the database insert operation fails", async () => {
+    failingDb("Database insert failure");
 
     const req = createMockPostRequest(
-      {
-        contract_market_id: 99,
-        title: "DB Error Test",
-        deadline: "2026-12-31T00:00:00.000Z",
-      },
+      { contract_market_id: 6, title: "Fails", deadline: "2026-12-31T00:00:00.000Z" },
       { "x-admin-key": "omen-admin-2026" }
     );
 
@@ -292,24 +231,5 @@ describe("TICKET-31: API Route Simpan Pasar Baru (POST /api/markets)", () => {
     expect(res.status).toBe(500);
     const data = await res.json();
     expect(data.error).toBe("Database insert failure");
-  });
-
-  it("should strictly adhere to Zero-Comment Policy", () => {
-    const targetFiles = [
-      path.resolve(process.cwd(), "app/api/markets/route.ts"),
-      path.resolve(process.cwd(), "tests/api-markets-create.test.ts"),
-    ];
-
-    for (const filePath of targetFiles) {
-      expect(fs.existsSync(filePath)).toBe(true);
-      const content = fs.readFileSync(filePath, "utf-8");
-      const lines = content.split("\n");
-      for (const line of lines) {
-        const trimmed = line.trim();
-        expect(trimmed.startsWith("//")).toBe(false);
-        expect(trimmed.includes("/" + "*")).toBe(false);
-        expect(trimmed.includes("*" + "/")).toBe(false);
-      }
-    }
   });
 });

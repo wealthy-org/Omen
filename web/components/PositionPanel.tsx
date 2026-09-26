@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 
 import { PositionSide, PositionPanelProps } from "@/types";
+import { formatUserErrorMessage } from "@/lib/format-error";
 
 export type { PositionSide, PositionPanelProps };
 
@@ -88,8 +89,8 @@ export const PositionPanel: React.FC<PositionPanelProps> = ({
         });
       }
       setSuccessMessage(`Successfully staked ${amount} ETH on ${selectedSide}!`);
-    } catch {
-      setErrorMessage("Transaction failed or was rejected. Please try again.");
+    } catch (err) {
+      setErrorMessage(formatUserErrorMessage(err, "Transaction failed or was rejected. Please try again."));
     } finally {
       setInternalLoading(false);
     }
@@ -98,7 +99,7 @@ export const PositionPanel: React.FC<PositionPanelProps> = ({
   const loading = isSubmitting || internalLoading;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
+    <div className="bg-white dark:bg-black/30 border border-emerald-500/20 dark:border-white/10 rounded-2xl p-5 sm:p-6">
       <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 mb-4 flex items-center justify-between">
         <span>Take a Position</span>
         <span className="text-xs font-mono font-normal text-zinc-500 dark:text-zinc-400">
@@ -127,7 +128,7 @@ export const PositionPanel: React.FC<PositionPanelProps> = ({
               aria-pressed={selectedSide === "AGREE"}
             >
               <span>AGREE</span>
-              <span className="text-xs font-mono opacity-90">({agreePool} ETH)</span>
+              <span className="text-xs font-mono opacity-90">({agreePool.toFixed(3)} ETH)</span>
             </button>
             <button
               type="button"
@@ -144,7 +145,7 @@ export const PositionPanel: React.FC<PositionPanelProps> = ({
               aria-pressed={selectedSide === "DISAGREE"}
             >
               <span>DISAGREE</span>
-              <span className="text-xs font-mono opacity-90">({disagreePool} ETH)</span>
+              <span className="text-xs font-mono opacity-90">({disagreePool.toFixed(3)} ETH)</span>
             </button>
           </div>
         </div>

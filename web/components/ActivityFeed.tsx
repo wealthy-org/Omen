@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import ActorAvatar from "./ActorAvatar";
 import {
   Zap,
   Check,
@@ -125,7 +126,6 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
           ? `${item.txHash.slice(0, 8)}...`
           : item.txHash;
         const displayName = item.actorName ?? shortActor;
-        const avatarInitial = (item.actorName ?? item.actorAddress).slice(0, 2).toUpperCase();
 
         const renderBadge = () => {
           switch (item.type) {
@@ -197,15 +197,22 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoadin
             className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-sm hover:border-emerald-500/30 transition-all hover-lift flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
           >
             <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs text-zinc-700 dark:text-zinc-300 shrink-0 border border-zinc-200 dark:border-zinc-700">
-                {avatarInitial}
-              </div>
+              <ActorAvatar
+                handle={item.actorNote ? null : item.actorName ?? null}
+                address={/^0x[0-9a-fA-F]{40}$/.test(item.actorAddress) ? item.actorAddress : null}
+                src={item.actorNote ? "/logo-omen 1.png" : undefined}
+              />
 
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
                   <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                     {displayName}
                   </span>
+                  {item.actorNote && (
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400" title={item.actorAddress}>
+                      {item.actorNote} · <span className="font-mono">{shortActor}</span>
+                    </span>
+                  )}
                   {renderBadge()}
                   {renderChainBadge()}
                   {item.amountEth !== undefined && (

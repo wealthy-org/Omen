@@ -1,6 +1,8 @@
 import { createPublicClient, createWalletClient, http, defineChain, Address, Hex, decodeEventLog } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { createClient } from "@supabase/supabase-js";
+import { config } from "dotenv";
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "../lib/db";
 import { OMEN_FACTORY_ABI, getOmenFactoryAddress } from "../lib/contracts";
 import {
   ETHEREUM_SEPOLIA_CHAIN_ID,
@@ -42,32 +44,21 @@ const robinhoodChain = defineChain({
 });
 
 async function main() {
-  const adminPrivateKey = (process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY) as Hex | undefined;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  config({ path: [".env.local", ".env"] });
 
-  if (!supabaseUrl || !serviceRoleKey) {
-    console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
+  const adminPrivateKey = (process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY) as Hex | undefined;
+  if (!process.env.DATABASE_URL) {
+    console.error("Missing DATABASE_URL.");
     process.exit(1);
   }
 
-  const supabase = createClient(
-    supabaseUrl.trim().replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, ""),
-    serviceRoleKey,
-    {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    }
-  );
+  const db = getDb();
+  const markets = await db.query.markets.findMany({
+    where: eq(schema.markets.status, "OPEN"),
+    with: { beliefs: true },
+  });
 
-  const { data: markets, error: marketsError } = await supabase
-    .from("markets")
-    .select("*, beliefs(*)")
-    .eq("status", "OPEN");
-
-  if (marketsError || !markets || markets.length === 0) {
+  if (markets.length === 0) {
     console.log("No OPEN markets found in database.");
     return;
   }
@@ -77,11 +68,11 @@ async function main() {
   if (!adminPrivateKey || !adminPrivateKey.startsWith("0x")) {
     console.log("\n[DRY RUN MODE] No ADMIN_PRIVATE_KEY provided.");
     console.log("To deploy and sync markets to testnet, run with:");
-    console.log("ADMIN_PRIVATE_KEY=0x... npx ts-node web/scripts/sync-testnet-markets.ts\n");
+    console.log("ADMIN_PRIVATE_KEY=0x... npm run seed:markets\n");
     for (const m of markets) {
       const belief = m.beliefs;
-      const statement = belief?.statement || m.title;
-      const hashes = computeBeliefHashes(statement, belief?.source_url || "https://omen.org", m.resolution_config);
+      const statement = belief?.statement || m.title || "";
+      const hashes = computeBeliefHashes(statement, belief?.source_url || "https://omen.org", m.resolution_config ?? undefined);
       console.log(`Market [${m.id}]: "${m.title}" -> Chain ${m.chain_id}`);
       console.log(`  beliefHash: ${hashes.beliefHash}`);
     }
@@ -108,14 +99,14 @@ async function main() {
 
     const factoryAddress = getOmenFactoryAddress(chainId);
     const belief = m.beliefs;
-    const statement = belief?.statement || m.title;
-    const hashes = computeBeliefHashes(statement, belief?.source_url || "https://omen.org", m.resolution_config);
+    const statement = belief?.statement || m.title || "";
+    const hashes = computeBeliefHashes(statement, belief?.source_url || "https://omen.org", m.resolution_config ?? undefined);
 
     const nowSec = Math.floor(Date.now() / 1000);
     const openTime = BigInt(m.open_time ? Math.floor(new Date(m.open_time).getTime() / 1000) : nowSec);
     const closeTime = BigInt(m.close_time ? Math.floor(new Date(m.close_time).getTime() / 1000) : nowSec + 86400 * 30);
 
-    const config = m.resolution_config || {};
+    const config = (m.resolution_config || {}) as Record<string, any>;
     const defaultFeed = CHAINLINK_ETH_USD_FEED;
 
     let resType = 0;
@@ -180,13 +171,13 @@ async function main() {
       if (deployedMarketAddress) {
         console.log(`Market deployed at ${deployedMarketAddress} (On-chain ID: ${onChainMarketId})`);
 
-        await supabase
-          .from("markets")
-          .update({
+        await db
+          .update(schema.markets)
+          .set({
             contract_address: deployedMarketAddress,
             contract_market_id: onChainMarketId ?? m.contract_market_id,
           })
-          .eq("id", m.id);
+          .where(eq(schema.markets.id, m.id));
 
         console.log(`Updated database record for market ${m.id}`);
       }

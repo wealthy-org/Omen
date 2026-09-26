@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseClient } from "@/lib/supabase";
+import { desc, ilike, or, sql } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,31 +10,34 @@ export async function GET(req: NextRequest) {
     const sort = searchParams.get("sort") || "confirmed_beliefs";
     const search = searchParams.get("search")?.trim();
 
-    const supabase = getSupabaseClient();
-    let query = supabase.from("creator_profiles").select("*", { count: "exact" });
+    const db = getDb();
+    const { creator_profiles } = schema;
+    const where = search
+      ? or(ilike(creator_profiles.handle, `%${search}%`), ilike(creator_profiles.wallet_address, `%${search}%`))
+      : undefined;
+    const orderBy = sort === "accuracy"
+      ? desc(creator_profiles.correct_count)
+      : sort === "resolved"
+        ? desc(creator_profiles.resolved_count)
+        : desc(creator_profiles.confirmed_beliefs_count);
 
-    if (search) {
-      query = query.or(`handle.ilike.%${search}%,wallet_address.ilike.%${search}%`);
-    }
+    const [profiles, count] = await Promise.all([
+      db.query.creator_profiles.findMany({
+        where,
+        orderBy,
+        limit,
+        offset,
+        extras: {
+          total_beliefs_count: sql<number>`(
+            select count(*)::int from beliefs b
+            where lower(b.author) in (lower(${creator_profiles.handle}), lower(ltrim(${creator_profiles.handle}, '@')), lower(${creator_profiles.wallet_address}))
+          )`.as("total_beliefs_count"),
+        },
+      }),
+      db.$count(creator_profiles, where),
+    ]);
 
-    if (sort === "accuracy") {
-      query = query.order("correct_count", { ascending: false });
-    } else if (sort === "resolved") {
-      query = query.order("resolved_count", { ascending: false });
-    } else {
-      query = query.order("confirmed_beliefs_count", { ascending: false });
-    }
-
-    const { data: profiles, error, count } = await query.range(offset, offset + limit - 1);
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
-
-    const formattedProfiles = (profiles ?? []).map((profile) => {
+    const formattedProfiles = profiles.map((profile) => {
       const resolved = Number(profile.resolved_count ?? 0);
       const correct = Number(profile.correct_count ?? 0);
       const accuracy = resolved > 0 ? Number(((correct / resolved) * 100).toFixed(2)) : 0;

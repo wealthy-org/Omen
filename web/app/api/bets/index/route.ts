@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { eq, sql } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { isValidEvmAddress, isValidTxHash } from "@/lib/validators";
 
 export async function POST(req: NextRequest) {
@@ -64,17 +65,13 @@ export async function POST(req: NextRequest) {
     const normalizedAddress = wallet_address.trim().toLowerCase();
     const normalizedSide = rawSide as "AGREE" | "DISAGREE";
 
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
+    const { market_positions, markets, users } = schema;
 
-    const { data: existingBet, error: checkError } = await supabase
-      .from("bets")
-      .select("id")
-      .eq("tx_hash", normalizedTxHash)
-      .maybeSingle();
-
-    if (checkError) {
-      return NextResponse.json({ error: checkError.message }, { status: 500 });
-    }
+    const existingBet = await db.query.market_positions.findFirst({
+      columns: { id: true },
+      where: eq(market_positions.tx_hash, normalizedTxHash),
+    });
 
     if (existingBet) {
       return NextResponse.json(
@@ -83,15 +80,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: market, error: marketError } = await supabase
-      .from("markets")
-      .select("*")
-      .eq("contract_market_id", parsedMarketId)
-      .maybeSingle();
-
-    if (marketError) {
-      return NextResponse.json({ error: marketError.message }, { status: 500 });
-    }
+    const market = parsedMarketId <= 2_147_483_647
+      ? await db.query.markets.findFirst({ where: eq(markets.contract_market_id, parsedMarketId) })
+      : undefined;
 
     if (!market) {
       return NextResponse.json(
@@ -100,9 +91,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: createdBet, error: insertBetError } = await supabase
-      .from("bets")
-      .insert({
+    const [createdBet] = await db
+      .insert(market_positions)
+      .values({
         market_id: market.id,
         wallet_address: normalizedAddress,
         side: normalizedSide,
@@ -110,38 +101,24 @@ export async function POST(req: NextRequest) {
         claimed: false,
         tx_hash: normalizedTxHash,
       })
-      .select("*")
-      .single();
+      .returning();
 
-    if (insertBetError) {
-      return NextResponse.json({ error: insertBetError.message }, { status: 500 });
-    }
+    const poolIncrement = normalizedSide === "AGREE"
+      ? { agree_pool: sql`${markets.agree_pool} + ${numericAmount}` }
+      : { disagree_pool: sql`${markets.disagree_pool} + ${numericAmount}` };
+    const [updatedMarket] = await db
+      .update(markets)
+      .set(poolIncrement)
+      .where(eq(markets.id, market.id))
+      .returning({ agree_pool: markets.agree_pool, disagree_pool: markets.disagree_pool });
 
-    const currentAgreePool = Number(market.agree_pool ?? 0);
-    const currentDisagreePool = Number(market.disagree_pool ?? 0);
-    const updatedAgreePool = normalizedSide === "AGREE" ? currentAgreePool + numericAmount : currentAgreePool;
-    const updatedDisagreePool = normalizedSide === "DISAGREE" ? currentDisagreePool + numericAmount : currentDisagreePool;
+    const updatedAgreePool = Number(updatedMarket.agree_pool ?? 0);
+    const updatedDisagreePool = Number(updatedMarket.disagree_pool ?? 0);
 
-    const { error: poolUpdateError } = await supabase
-      .from("markets")
-      .update({
-        agree_pool: updatedAgreePool,
-        disagree_pool: updatedDisagreePool,
-      })
-      .eq("id", market.id);
-
-    if (poolUpdateError) {
-      return NextResponse.json({ error: poolUpdateError.message }, { status: 500 });
-    }
-
-    await supabase
-      .from("users")
-      .upsert(
-        {
-          wallet_address: normalizedAddress,
-        },
-        { onConflict: "wallet_address" }
-      );
+    await db
+      .insert(users)
+      .values({ wallet_address: normalizedAddress })
+      .onConflictDoNothing({ target: users.wallet_address });
 
     return NextResponse.json(
       {

@@ -1,42 +1,17 @@
 import { NextResponse } from "next/server";
 import { fetchChainlinkPrice } from "@/lib/oracle/chainlink";
-import {
-  ETHEREUM_SEPOLIA_CHAIN_ID,
-  CHAINLINK_ETH_USD_FEED,
-  CHAINLINK_BTC_USD_FEED,
-  CHAINLINK_SOL_USD_FEED,
-} from "@/lib/constants";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, CHAINLINK_SEPOLIA_FEED_LIST } from "@/lib/constants";
 import { OracleFeedState } from "@/types/api";
 
-const CONFIG_FEEDS = [
-  {
-    symbol: "ETH/USD",
-    name: "Ethereum / US Dollar",
-    asset: "ETH",
-    decimals: 8,
-    heartbeatSec: 3600,
-    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-    contractAddress: CHAINLINK_ETH_USD_FEED,
-  },
-  {
-    symbol: "BTC/USD",
-    name: "Bitcoin / US Dollar",
-    asset: "BTC",
-    decimals: 8,
-    heartbeatSec: 3600,
-    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-    contractAddress: CHAINLINK_BTC_USD_FEED,
-  },
-  {
-    symbol: "SOL/USD",
-    name: "Solana / US Dollar",
-    asset: "SOL",
-    decimals: 8,
-    heartbeatSec: 3600,
-    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-    contractAddress: CHAINLINK_SOL_USD_FEED,
-  },
-];
+const CONFIG_FEEDS = CHAINLINK_SEPOLIA_FEED_LIST.map((f) => ({
+  symbol: f.symbol,
+  name: f.name,
+  asset: f.asset,
+  decimals: 8,
+  heartbeatSec: f.heartbeatSec,
+  chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
+  contractAddress: f.address,
+}));
 
 export async function GET() {
   try {

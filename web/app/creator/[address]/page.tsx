@@ -43,13 +43,14 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
                 address: addr,
                 name: creatorObj.name || creatorObj.display_name || creatorObj.handle?.replace("@", "") || "Creator",
                 handle: creatorObj.handle || creatorObj.username,
+                avatarUrl: creatorObj.avatarUrl || creatorObj.avatar_url || undefined,
                 bio: creatorObj.bio || "Social Belief Creator on Omen Protocol",
-                accuracyRate: Number(creatorObj.accuracyRate ?? creatorObj.accuracy_rate ?? creatorObj.accuracy_percentage ?? 85),
-                confirmationRate: Number(creatorObj.confirmationRate ?? creatorObj.confirmation_rate ?? 90),
-                totalBeliefs: Number(creatorObj.totalBeliefs ?? creatorObj.total_beliefs ?? creatorObj.total_beliefs_count ?? 1),
-                confirmedBeliefs: Number(creatorObj.confirmedBeliefs ?? creatorObj.confirmed_beliefs ?? creatorObj.confirmed_beliefs_count ?? 1),
+                accuracyRate: Number(creatorObj.accuracyRate ?? creatorObj.accuracy_rate ?? creatorObj.accuracy_percentage ?? 0),
+                confirmationRate: Number(creatorObj.confirmationRate ?? creatorObj.confirmation_rate ?? 0),
+                totalBeliefs: Number(creatorObj.totalBeliefs ?? creatorObj.total_beliefs ?? creatorObj.total_beliefs_count ?? (Array.isArray(data.beliefs) ? data.beliefs.length : 0)),
+                confirmedBeliefs: Number(creatorObj.confirmedBeliefs ?? creatorObj.confirmed_beliefs ?? creatorObj.confirmed_beliefs_count ?? 0),
                 volumeGeneratedEth: Number(creatorObj.volumeGeneratedEth ?? creatorObj.volume_eth ?? 0),
-                isVerified: Boolean(creatorObj.isVerified ?? creatorObj.is_verified ?? true),
+                isVerified: Boolean(creatorObj.isVerified ?? creatorObj.is_verified ?? Number(creatorObj.confirmed_beliefs_count ?? 0) > 0),
               });
             }
 
@@ -60,9 +61,9 @@ export default function CreatorProfilePage({ params }: CreatorPageProps) {
                 statement: b.statement || b.title || "Belief Statement",
                 author: b.author || creatorObj?.name || "Creator",
                 authorHandle: b.authorHandle || creatorObj?.handle,
-                isConfirmed: Boolean(b.isConfirmed ?? b.is_confirmed ?? true),
+                isConfirmed: Boolean(b.isConfirmed ?? b.is_confirmed ?? b.status === "CONFIRMED"),
                 status: (b.status as any) || "MARKET_OPEN",
-                confidenceScore: b.confidenceScore ?? b.confidence_score ?? 90,
+                confidenceScore: b.confidenceScore ?? b.confidence_score ?? b.ai_confidence ?? 0,
                 marketId: b.marketId || b.market_id,
                 sourceUrl: b.sourceUrl || b.source_url,
               }));

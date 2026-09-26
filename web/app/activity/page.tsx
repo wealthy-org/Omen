@@ -31,18 +31,23 @@ export default function ActivityPage() {
           if (isMounted && Array.isArray(data.activities)) {
             const mapped: ActivityItem[] = data.activities
               .filter((a): a is ApiActivityEvent & { statement: string } => Boolean(a.statement))
-              .map((a) => ({
+              .map((a) => {
+                const type = a.side ?? parseActivityType(a.event_type);
+                const isCreatorAction = type === "MARKET_CREATED" || type === "CONFIRM_EIP712";
+                return {
                 id: a.id,
-                type: parseActivityType(a.event_type),
+                type,
                 actorAddress: a.wallet_address,
-                actorName: a.belief_author ?? undefined,
+                actorName: isCreatorAction ? a.belief_author ?? undefined : a.actor_label ?? undefined,
+                actorNote: !isCreatorAction && a.actor_label ? "opening liquidity" : undefined,
                 marketId: a.market_id,
                 marketStatement: a.statement,
                 amountEth: a.amount !== null && a.amount !== undefined ? Number(a.amount) : undefined,
                 txHash: a.tx_hash,
                 chainId: a.market_chain_id ?? undefined,
                 timestamp: a.created_at,
-              }));
+                };
+              });
             setActivities(mapped);
           }
         }

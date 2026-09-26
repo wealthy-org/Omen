@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseClient } from "@/lib/supabase";
+import { and, desc, eq, inArray } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,29 +10,40 @@ export async function GET(req: NextRequest) {
     const marketId = searchParams.get("market_id")?.trim();
     const eventType = searchParams.get("event_type")?.trim();
 
-    const supabase = getSupabaseClient();
-    let query = supabase
-      .from("market_events")
-      .select("*, markets (id, title, contract_address, chain_id, status, belief_id, beliefs (id, statement, author))", { count: "exact" });
+    const db = getDb();
+    const { market_events } = schema;
+    const where = and(
+      marketId ? eq(market_events.market_id, marketId) : undefined,
+      eventType ? eq(market_events.event_type, eventType) : undefined
+    );
 
-    if (marketId) {
-      query = query.eq("market_id", marketId);
-    }
+    const [events, count] = await Promise.all([
+      db.query.market_events.findMany({
+        where,
+        orderBy: desc(market_events.created_at),
+        limit,
+        offset,
+        with: {
+          markets: {
+            columns: { id: true, title: true, contract_address: true, chain_id: true, status: true, belief_id: true },
+            with: { beliefs: { columns: { id: true, statement: true, author: true } } },
+          },
+        },
+      }),
+      db.$count(market_events, where),
+    ]);
 
-    if (eventType) {
-      query = query.eq("event_type", eventType);
-    }
-
-    query = query.order("created_at", { ascending: false });
-
-    const { data: events, error, count } = await query.range(offset, offset + limit - 1);
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
+    const txHashes = events.map((e) => e.tx_hash);
+    const positions = txHashes.length
+      ? await db.query.market_positions.findMany({
+          columns: { tx_hash: true, side: true },
+          where: inArray(schema.market_positions.tx_hash, txHashes),
+        })
+      : [];
+    const sideByTx = new Map(positions.map((p) => [p.tx_hash, p.side]));
+    const teamWallets = new Set(
+      (process.env.ADMIN_WALLET_ADDRESS ?? "").split(",").map((w) => w.trim().toLowerCase()).filter(Boolean)
+    );
 
     const formattedEvents = (events || []).map((event: any) => {
       const market = event.markets;
@@ -51,6 +63,8 @@ export async function GET(req: NextRequest) {
         belief_id: belief?.id || market?.belief_id || null,
         statement: belief?.statement || market?.title || null,
         belief_author: belief?.author || null,
+        side: sideByTx.get(event.tx_hash) ?? null,
+        actor_label: teamWallets.has(String(event.wallet_address ?? "").toLowerCase()) ? "Omen team" : null,
       };
     });
 

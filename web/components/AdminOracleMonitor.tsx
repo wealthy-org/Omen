@@ -2,54 +2,23 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Zap, AlertTriangle } from "lucide-react";
-import {
-  ETHEREUM_SEPOLIA_CHAIN_ID,
-  CHAINLINK_ETH_USD_FEED,
-  CHAINLINK_BTC_USD_FEED,
-  CHAINLINK_SOL_USD_FEED,
-} from "@/lib/constants";
+import { ETHEREUM_SEPOLIA_CHAIN_ID, CHAINLINK_SEPOLIA_FEED_LIST } from "@/lib/constants";
 import { OracleFeedState, OracleSnapshotRecord } from "@/types";
 
 export type { OracleFeedState, OracleSnapshotRecord };
 
-const DEFAULT_FEEDS: OracleFeedState[] = [
-  {
-    symbol: "ETH/USD",
-    name: "Ethereum / US Dollar",
-    price: 0,
-    decimals: 8,
-    roundId: "0",
-    updatedAt: new Date(0).toISOString(),
-    heartbeatSec: 3600,
-    contractAddress: CHAINLINK_ETH_USD_FEED,
-    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-    status: "HEALTHY",
-  },
-  {
-    symbol: "BTC/USD",
-    name: "Bitcoin / US Dollar",
-    price: 0,
-    decimals: 8,
-    roundId: "0",
-    updatedAt: new Date(0).toISOString(),
-    heartbeatSec: 3600,
-    contractAddress: CHAINLINK_BTC_USD_FEED,
-    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-    status: "HEALTHY",
-  },
-  {
-    symbol: "SOL/USD",
-    name: "Solana / US Dollar",
-    price: 0,
-    decimals: 8,
-    roundId: "0",
-    updatedAt: new Date(0).toISOString(),
-    heartbeatSec: 3600,
-    contractAddress: CHAINLINK_SOL_USD_FEED,
-    chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-    status: "HEALTHY",
-  },
-];
+const DEFAULT_FEEDS: OracleFeedState[] = CHAINLINK_SEPOLIA_FEED_LIST.map((f) => ({
+  symbol: f.symbol,
+  name: f.name,
+  price: 0,
+  decimals: 8,
+  roundId: "0",
+  updatedAt: new Date(0).toISOString(),
+  heartbeatSec: f.heartbeatSec,
+  contractAddress: f.address,
+  chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
+  status: "HEALTHY",
+}));
 
 export default function AdminOracleMonitor() {
   const [feeds, setFeeds] = useState<OracleFeedState[]>(DEFAULT_FEEDS);

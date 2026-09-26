@@ -122,6 +122,7 @@ export interface BeliefPipelineItem {
   has_eip712_signature?: boolean;
   sourceUrl?: string;
   source_url?: string;
+  has_market?: boolean;
   created_at: string;
 }
 

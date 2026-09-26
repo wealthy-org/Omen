@@ -77,8 +77,13 @@ describe("Market Detail Page (/market/[id])", () => {
     });
 
     expect(screen.getAllByText(/aeyakovenko/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Contract & Verification Details/i)).toBeInTheDocument();
-    expect(screen.getByText(/Consensus & Pool Metrics/i)).toBeInTheDocument();
+    expect(screen.getByText(/Verified onchain/i)).toBeInTheDocument();
+    expect(screen.getAllByText("67%").length).toBeGreaterThan(0);
+    expect(screen.getByText("33%")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /prediction/i })).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(screen.getByRole("tab", { name: /rules/i }));
+    expect(screen.getByText("$100,000")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Select AGREE side/i })).toBeInTheDocument();
   });
 
   it("renders resolved market state and handles claim button", async () => {

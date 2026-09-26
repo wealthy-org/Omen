@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { desc, eq, inArray } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { isValidEvmAddress } from "@/lib/validators";
 
 export async function GET(req: NextRequest) {
@@ -15,19 +16,15 @@ export async function GET(req: NextRequest) {
     }
 
     const normalizedAddress = walletAddress!.toLowerCase();
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
+    const { market_positions, markets: marketsTable } = schema;
 
-    const { data: bets, error: betsError } = await supabase
-      .from("bets")
-      .select("*")
-      .eq("wallet_address", normalizedAddress)
-      .order("created_at", { ascending: false });
+    const bets = await db.query.market_positions.findMany({
+      where: eq(market_positions.wallet_address, normalizedAddress),
+      orderBy: desc(market_positions.created_at),
+    });
 
-    if (betsError) {
-      return NextResponse.json({ error: betsError.message }, { status: 500 });
-    }
-
-    if (!bets || bets.length === 0) {
+    if (bets.length === 0) {
       return NextResponse.json({
         success: true,
         count: 0,
@@ -37,14 +34,9 @@ export async function GET(req: NextRequest) {
 
     const marketIds = Array.from(new Set(bets.map((b) => b.market_id)));
 
-    const { data: markets, error: marketsError } = await supabase
-      .from("markets")
-      .select("*")
-      .in("id", marketIds);
-
-    if (marketsError) {
-      return NextResponse.json({ error: marketsError.message }, { status: 500 });
-    }
+    const markets = await db.query.markets.findMany({
+      where: inArray(marketsTable.id, marketIds),
+    });
 
     const marketMap = new Map((markets || []).map((m) => [m.id, m]));
 

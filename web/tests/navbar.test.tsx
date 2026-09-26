@@ -25,10 +25,12 @@ describe("Navbar Component", () => {
   it("renders all V1 desktop navigation links", () => {
     render(<Navbar />);
 
-    expect(screen.getByRole("link", { name: /markets/i })).toHaveAttribute("href", "/#markets");
-    expect(screen.getByRole("link", { name: /creators/i })).toHaveAttribute("href", "/#creators");
-    expect(screen.getByRole("link", { name: /activity/i })).toHaveAttribute("href", "/#activity");
-    expect(screen.queryByRole("link", { name: /^beliefs$/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^markets$/i })).toHaveAttribute("href", "/markets");
+    expect(screen.getByRole("link", { name: /^beliefs$/i })).toHaveAttribute("href", "/beliefs");
+    expect(screen.getByRole("link", { name: /^creators$/i })).toHaveAttribute("href", "/creators");
+    expect(screen.getByRole("link", { name: /^activity$/i })).toHaveAttribute("href", "/activity");
+    expect(screen.getByRole("link", { name: /^my bets$/i })).toHaveAttribute("href", "/my-bets");
+    expect(screen.getByRole("search")).toBeInTheDocument();
   });
 
   it("highlights the active link based on current pathname", () => {
@@ -38,8 +40,9 @@ describe("Navbar Component", () => {
 
     const marketsLink = screen.getByRole("link", { name: /markets/i });
     expect(marketsLink).toHaveAttribute("aria-current", "page");
-    expect(marketsLink.className).toContain("text-white");
     expect(marketsLink.className).toContain("font-bold");
+    expect(marketsLink.textContent).toContain("▸");
+    expect(screen.getByRole("link", { name: /^creators$/i })).not.toHaveAttribute("aria-current");
   });
 
   it("renders the Submit Belief CTA button and Connect Wallet button", () => {

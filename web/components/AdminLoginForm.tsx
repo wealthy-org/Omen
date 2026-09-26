@@ -155,7 +155,7 @@ export default function AdminLoginForm({
 
   return (
     <div className={`w-full max-w-[440px] mx-auto ${className}`}>
-      <div className="relative overflow-hidden rounded-[22px] p-6 sm:p-7 transition-all duration-300 border bg-gradient-to-b from-white via-[#FAFCFA] to-[#E2F7ED] dark:bg-[#030906] border-emerald-500/15 dark:border-white/10 shadow-[0_16px_40px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+      <div className="relative overflow-hidden rounded-[22px] p-6 sm:p-7 transition-all duration-300 border bg-gradient-to-b from-white via-[#FAFCFA] to-[#E2F7ED] dark:bg-none dark:bg-[#0A0F0C] border-emerald-500/15 dark:border-white/10 shadow-[0_16px_40px_rgba(14,122,78,0.06),_inset_0_1px_0_rgba(255,255,255,1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
         <div className="absolute top-0 inset-x-0 h-[1.5px] pointer-events-none light-emerald-seam dark:dark-emerald-seam" />
 
         <div className="text-center mb-5">
@@ -234,7 +234,7 @@ export default function AdminLoginForm({
                 onChange={(e) => setWalletInput(e.target.value)}
                 placeholder="0x1234...5678"
                 aria-label="Admin Whitelist Wallet Address"
-                className="w-full px-3.5 py-2.5 rounded-xl border font-mono text-xs sm:text-sm font-medium transition-all outline-none bg-white dark:bg-[#0A0F0C] border-emerald-500/20 dark:border-white/10 text-[#0B1F16] dark:text-white placeholder:text-[#0B1F16]/40 dark:placeholder:text-white/30 focus:border-emerald-500 dark:focus:border-emerald-500/60"
+                className="w-full px-3.5 py-2.5 rounded-xl border font-mono text-xs sm:text-sm font-medium transition-all outline-none bg-white dark:bg-[#030906] border-emerald-500/20 dark:border-white/15 text-[#0B1F16] dark:text-white placeholder:text-[#0B1F16]/40 dark:placeholder:text-white/30 focus:border-emerald-500 dark:focus:border-emerald-500/60"
               />
             </div>
 
@@ -281,7 +281,7 @@ export default function AdminLoginForm({
                   onChange={(e) => setAccessKey(e.target.value)}
                   placeholder="Enter administrator key..."
                   aria-label="Master Secret Passphrase"
-                  className="w-full px-3.5 pr-10 py-2.5 rounded-xl border font-mono text-xs sm:text-sm font-medium transition-all outline-none bg-white dark:bg-[#0A0F0C] border-emerald-500/20 dark:border-white/10 text-[#0B1F16] dark:text-white placeholder:text-[#0B1F16]/40 dark:placeholder:text-white/30 focus:border-emerald-500 dark:focus:border-emerald-500/60"
+                  className="w-full px-3.5 pr-10 py-2.5 rounded-xl border font-mono text-xs sm:text-sm font-medium transition-all outline-none bg-white dark:bg-[#030906] border-emerald-500/20 dark:border-white/15 text-[#0B1F16] dark:text-white placeholder:text-[#0B1F16]/40 dark:placeholder:text-white/30 focus:border-emerald-500 dark:focus:border-emerald-500/60"
                 />
                 <button
                   type="button"

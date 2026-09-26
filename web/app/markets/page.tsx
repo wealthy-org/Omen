@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import BeliefMarketCard, { BeliefMarket } from "@/components/BeliefMarketCard";
-import DiscoveryFilter, { DiscoveryTab, MarketCategoryFilter } from "@/components/DiscoveryFilter";
+import DiscoveryFilter, { CATEGORY_MEMBERS, DiscoveryTab, MarketCategoryFilter } from "@/components/DiscoveryFilter";
 
 const PAGE_SIZE = 9;
 
@@ -17,6 +17,8 @@ export default function MarketsPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const initialQuery = new URLSearchParams(window.location.search).get("q");
+    if (initialQuery) setSearchQuery(initialQuery);
   }, []);
 
   useEffect(() => {
@@ -30,7 +32,6 @@ export default function MarketsPage() {
         setIsLoading(true);
         const queryParams = new URLSearchParams();
         if (activeTab) queryParams.set("tab", activeTab);
-        if (activeCategory !== "all") queryParams.set("category", activeCategory);
         if (searchQuery) queryParams.set("search", searchQuery);
         queryParams.set("limit", "100");
 
@@ -81,44 +82,7 @@ export default function MarketsPage() {
       if (activeTab === "confirmed" && !m.isConfirmed) return false;
       if (activeCategory !== "all") {
         const categoryLower = (m.category || "").toLowerCase();
-        const statementLower = (m.statement || "").toLowerCase();
-        if (activeCategory === "eth") {
-          return (
-            categoryLower === "eth" ||
-            categoryLower === "crypto" ||
-            statementLower.includes("eth") ||
-            statementLower.includes("ethereum") ||
-            statementLower.includes("sol")
-          );
-        }
-        if (activeCategory === "btc") {
-          return (
-            categoryLower === "btc" ||
-            categoryLower === "bitcoin" ||
-            statementLower.includes("btc") ||
-            statementLower.includes("bitcoin")
-          );
-        }
-        if (activeCategory === "arb") {
-          return (
-            categoryLower === "arb" ||
-            categoryLower === "arbitrum" ||
-            statementLower.includes("arb") ||
-            statementLower.includes("arbitrum") ||
-            statementLower.includes("rollup")
-          );
-        }
-        if (activeCategory === "macro") {
-          return (
-            categoryLower === "macro" ||
-            categoryLower === "economics" ||
-            statementLower.includes("fed") ||
-            statementLower.includes("rate") ||
-            statementLower.includes("inflation") ||
-            statementLower.includes("cpi")
-          );
-        }
-        return categoryLower === String(activeCategory).toLowerCase();
+        if (!CATEGORY_MEMBERS[activeCategory].includes(categoryLower)) return false;
       }
       if (searchQuery.trim() !== "") {
         const q = searchQuery.toLowerCase();

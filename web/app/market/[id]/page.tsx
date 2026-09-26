@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { MarketDetailPanels } from "@/components/MarketDetailPanels";
 import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
-import { MarketDetailData, MarketDetailPageProps } from "@/types";
+import { MarketDetailData, MarketDetailPageProps, MarketDetailPosition } from "@/types";
 
 export type { MarketDetailPageProps };
 
@@ -20,8 +20,24 @@ function mapToMarketDetailData(raw: Record<string, unknown>, idFallback: string)
     ? raw.totalVolumeEth
     : (agreePool + disagreePool);
 
+  const belief = (raw.beliefs && typeof raw.beliefs === "object" ? raw.beliefs : null) as
+    | { belief_sources?: Array<{ raw_text?: string }> }
+    | null;
+  const positions = Array.isArray(raw.market_positions)
+    ? (raw.market_positions as MarketDetailPosition[])
+        .map((p) => ({ ...p, amount: Number(p.amount) }))
+        .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    : [];
+
   return {
     id: typeof raw.id === "string" ? raw.id : idFallback,
+    positions,
+    sourceText: belief?.belief_sources?.[0]?.raw_text ?? null,
+    resolutionCriteria:
+      raw.resolution_config && typeof (raw.resolution_config as Record<string, unknown>).criteria === "string"
+        ? ((raw.resolution_config as Record<string, unknown>).criteria as string)
+        : null,
+    category: typeof raw.category === "string" ? raw.category : undefined,
     statement: typeof raw.statement === "string" ? raw.statement : "",
     authorHandle: typeof raw.authorHandle === "string" ? raw.authorHandle : (typeof raw.author === "string" ? raw.author : null),
     creatorAddress: typeof raw.creatorAddress === "string" ? raw.creatorAddress : (typeof raw.creator_wallet === "string" ? raw.creator_wallet : null),
@@ -151,14 +167,6 @@ function MarketDetailContent({ params }: MarketDetailPageProps) {
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 animate-slide-right">
-          <Link href="/markets" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-            Markets
-          </Link>
-          <span>/</span>
-          <span className="text-zinc-800 dark:text-zinc-200 font-mono">{market.id}</span>
-        </div>
-
         <MarketDetailPanels market={market} />
       </div>
     </div>

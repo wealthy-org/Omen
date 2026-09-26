@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { and, eq, inArray } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
+import { marketIdentifierFilter } from "@/lib/db/filters";
 import { normalizeOutcome } from "@/lib/market/resolution-helper";
 import { updateCreatorProfile, insertResolutionRecord, insertSettlementRecord } from "@/lib/market/resolution-service";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
-import type { DbMarketStatus, Market } from "@/types/database";
+import type { DbMarketStatus } from "@/types/database";
 
 export async function POST(
   req: NextRequest,
@@ -41,22 +43,9 @@ export async function POST(
     }
 
     const { oracle_source, start_price, end_price, resolution_tx_hash, resolution_source } = body;
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
 
-    let query = supabase.from("markets").select("*");
-    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      query = query.eq("id", id);
-    } else if (!isNaN(Number(id))) {
-      query = query.eq("contract_market_id", Number(id));
-    } else {
-      query = query.eq("id", id);
-    }
-
-    const { data: market, error: fetchError } = await query.maybeSingle();
-
-    if (fetchError) {
-      return NextResponse.json({ success: false, error: fetchError.message }, { status: 500 });
-    }
+    const market = await db.query.markets.findFirst({ where: marketIdentifierFilter(id) });
 
     if (!market) {
       return NextResponse.json({ success: false, error: "Market not found" }, { status: 404 });
@@ -74,7 +63,7 @@ export async function POST(
       ? "cancelled"
       : "RESOLVED";
 
-    const updatePayload: Partial<Market> = {
+    const updatePayload: Partial<typeof schema.markets.$inferInsert> = {
       status: marketStatus,
       winner: outcome,
     };
@@ -87,22 +76,24 @@ export async function POST(
       updatePayload.resolution_source = effectiveSource;
     }
 
-    const { data: updatedMarket, error: updateError } = await supabase
-      .from("markets")
-      .update(updatePayload)
-      .eq("id", market.id)
-      .select("*")
-      .single();
+    const [updatedMarket] = await db
+      .update(schema.markets)
+      .set(updatePayload)
+      .where(and(eq(schema.markets.id, market.id), inArray(schema.markets.status, activeStatuses)))
+      .returning();
 
-    if (updateError) {
-      return NextResponse.json({ success: false, error: updateError.message }, { status: 500 });
+    if (!updatedMarket) {
+      return NextResponse.json(
+        { success: false, error: "Market was resolved by another request" },
+        { status: 409 }
+      );
     }
 
     if (market.belief_id) {
-      await updateCreatorProfile(supabase, market.belief_id, outcome);
+      await updateCreatorProfile(db, market.belief_id, outcome);
     }
 
-    const resolution = await insertResolutionRecord(supabase, {
+    const resolution = await insertResolutionRecord(db, {
       marketId: market.id,
       oracleSource: effectiveSource || "manual_admin",
       startPrice: start_price,
@@ -114,7 +105,7 @@ export async function POST(
     const agreePool = Number(updatedMarket.agree_pool ?? 0);
     const disagreePool = Number(updatedMarket.disagree_pool ?? 0);
 
-    const { settlementData, settlement } = await insertSettlementRecord(supabase, {
+    const { settlementData, settlement } = await insertSettlementRecord(db, {
       marketId: market.id,
       agreePool,
       disagreePool,

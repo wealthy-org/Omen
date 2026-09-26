@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { desc, eq } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { fetchChainlinkPrice } from "@/lib/oracle/chainlink";
 import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 import type { SnapshotType, OracleSnapshotSource } from "@/types/database";
@@ -54,11 +55,9 @@ export async function POST(req: NextRequest) {
       resolvedPrice = oracleData.price;
     }
 
-    const supabase = getSupabaseAdminClient();
-
-    const { data: snapshot, error: insertError } = await supabase
-      .from("oracle_snapshots")
-      .insert({
+    const [snapshot] = await getDb()
+      .insert(schema.oracle_snapshots)
+      .values({
         market_id: market_id || null,
         asset: asset.toUpperCase().trim(),
         price: Number(resolvedPrice),
@@ -66,15 +65,7 @@ export async function POST(req: NextRequest) {
         source: (typeof source === "string" ? source : "chainlink") as OracleSnapshotSource,
         recorded_at: new Date().toISOString(),
       })
-      .select()
-      .single();
-
-    if (insertError) {
-      return NextResponse.json(
-        { success: false, error: insertError.message },
-        { status: 500 }
-      );
-    }
+      .returning();
 
     return NextResponse.json({
       success: true,
@@ -96,31 +87,18 @@ export async function GET(req: NextRequest) {
     const limitParam = parseInt(searchParams.get("limit") || "20", 10);
     const limit = isNaN(limitParam) ? 20 : Math.min(Math.max(limitParam, 1), 100);
 
-    const supabase = getSupabaseAdminClient();
-    let query = supabase
-      .from("oracle_snapshots")
-      .select("*")
-      .order("recorded_at", { ascending: false })
-      .limit(limit);
-
-    if (asset) {
-      query = query.eq("asset", asset);
-    }
-
-    const { data: snapshots, error } = await query;
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
+    const { oracle_snapshots } = schema;
+    const snapshots = await getDb().query.oracle_snapshots.findMany({
+      where: asset ? eq(oracle_snapshots.asset, asset) : undefined,
+      orderBy: desc(oracle_snapshots.recorded_at),
+      limit,
+    });
 
     return NextResponse.json({
       success: true,
-      snapshots: snapshots || [],
-      data: snapshots || [],
-      total: snapshots ? snapshots.length : 0,
+      snapshots,
+      data: snapshots,
+      total: snapshots.length,
     });
   } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : "Internal server error";

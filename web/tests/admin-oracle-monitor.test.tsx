@@ -13,7 +13,8 @@ describe("AdminOracleMonitor Component", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("ETH/USD")).toBeInTheDocument();
     expect(screen.getByText("BTC/USD")).toBeInTheDocument();
-    expect(screen.getByText("SOL/USD")).toBeInTheDocument();
+    expect(screen.getByText("LINK/USD")).toBeInTheDocument();
+    expect(screen.getByText("XAU/USD")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /trigger oracle snapshot/i })
     ).toBeInTheDocument();

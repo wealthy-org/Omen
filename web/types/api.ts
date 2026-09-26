@@ -140,6 +140,8 @@ export interface ApiActivityEvent {
   belief_id: string | null;
   statement: string | null;
   belief_author: string | null;
+  side?: "AGREE" | "DISAGREE" | null;
+  actor_label?: string | null;
 }
 
 export interface ActivityApiResponse {

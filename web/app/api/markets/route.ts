@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { and, asc, desc, eq, ilike, inArray, or } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = getSupabaseAdminClient();
     const { searchParams } = req.nextUrl;
 
     const tabParam = searchParams.get("tab")?.toLowerCase();
@@ -19,49 +19,44 @@ export async function GET(req: NextRequest) {
     const limit = rawLimit ? Math.min(Math.max(parseInt(rawLimit, 10) || 20, 1), 100) : 20;
     const offset = rawOffset ? Math.max(parseInt(rawOffset, 10) || 0, 0) : 0;
 
-    let query: any = supabase.from("markets").select("*, beliefs(*, belief_sources(*)), market_positions(id, side, wallet_address)");
+    const db = getDb();
+    const { markets } = schema;
 
-    if (statusParam === "active") {
-      query = query.eq("status", "active");
-    } else if (statusParam === "resolved") {
-      query = query.in("status", ["RESOLVED", "resolved"]);
-    } else if (statusParam === "cancelled") {
-      query = query.eq("status", "cancelled");
-    } else if (statusParam === "open") {
-      query = query.in("status", ["OPEN", "open", "active"]);
-    }
+    const statusFilter =
+      statusParam === "active" ? eq(markets.status, "active")
+      : statusParam === "resolved" ? inArray(markets.status, ["RESOLVED", "resolved"])
+      : statusParam === "cancelled" ? eq(markets.status, "cancelled")
+      : statusParam === "open" ? inArray(markets.status, ["OPEN", "open", "active"])
+      : undefined;
+    const search = searchParam.trim();
 
-    if (categoryParam && categoryParam !== "all") {
-      query = query.ilike("category", categoryParam);
-    }
+    const where = and(
+      statusFilter,
+      categoryParam && categoryParam !== "all" ? ilike(markets.category, categoryParam) : undefined,
+      search ? or(ilike(markets.title, `%${search}%`), ilike(markets.description, `%${search}%`)) : undefined
+    );
 
-    if (searchParam.trim()) {
-      query = query.or(`title.ilike.%${searchParam}%,description.ilike.%${searchParam}%`);
-    }
+    const orderBy =
+      tabParam === "ending_soon" ? asc(markets.close_time)
+      : sortParam === "ending_soon" ? asc(markets.deadline)
+      : tabParam === "most_volume" || sortParam === "highest_pool" ? desc(markets.agree_pool)
+      : desc(markets.created_at);
 
-    if (tabParam === "ending_soon") {
-      query = query.order("close_time", { ascending: true });
-    } else if (sortParam === "ending_soon") {
-      query = query.order("deadline", { ascending: true });
-    } else if (tabParam === "most_volume" || sortParam === "highest_pool") {
-      query = query.order("agree_pool", { ascending: false });
-    } else if (tabParam === "popular") {
-      query = query.order("created_at", { ascending: false });
-    } else {
-      query = query.order("created_at", { ascending: false });
-    }
+    const [marketRows, count] = await Promise.all([
+      db.query.markets.findMany({
+        where,
+        orderBy,
+        limit,
+        offset,
+        with: {
+          beliefs: { with: { belief_sources: true } },
+          market_positions: { columns: { id: true, side: true, wallet_address: true } },
+        },
+      }),
+      db.$count(markets, where),
+    ]);
 
-    const result = typeof query.range === "function"
-      ? await query.range(offset, offset + limit - 1)
-      : await query;
-
-    const { data: markets, error, count } = result;
-
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
-    const formattedMarkets = (markets || []).map((m: any) => {
+    const formattedMarkets = marketRows.map((m) => {
       const agreePool = Number(m.agree_pool ?? 0);
       const disagreePool = Number(m.disagree_pool ?? 0);
       const totalPool = agreePool + disagreePool;
@@ -155,6 +150,10 @@ export async function POST(req: NextRequest) {
       belief_id,
       contract_address,
       chain_id,
+      open_time,
+      resolution_type,
+      resolution_config,
+      tx_hash,
     } = body;
 
     const parsedMarketId = Number(contract_market_id);
@@ -199,13 +198,13 @@ export async function POST(req: NextRequest) {
         ? resolution_source.trim()
         : null;
 
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
+    const { markets, beliefs, market_events } = schema;
 
-    const { data: existingMarket } = await supabase
-      .from("markets")
-      .select("id")
-      .eq("contract_market_id", parsedMarketId)
-      .maybeSingle();
+    const existingMarket = await db.query.markets.findFirst({
+      columns: { id: true },
+      where: eq(markets.contract_market_id, parsedMarketId),
+    });
 
     if (existingMarket) {
       return NextResponse.json(
@@ -214,9 +213,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: createdMarket, error } = await supabase
-      .from("markets")
-      .insert({
+    const [createdMarket] = await db
+      .insert(markets)
+      .values({
         contract_market_id: parsedMarketId,
         belief_id: belief_id || null,
         contract_address: contract_address || null,
@@ -230,12 +229,26 @@ export async function POST(req: NextRequest) {
         agree_pool: 0,
         disagree_pool: 0,
         resolution_source: sanitizedResolutionSource,
+        open_time: typeof open_time === "string" && !isNaN(Date.parse(open_time)) ? new Date(open_time).toISOString() : undefined,
+        resolution_type: resolution_type === "PRICE_ABOVE" || resolution_type === "PRICE_BELOW" || resolution_type === "RELATIVE_PERFORMANCE" ? resolution_type : null,
+        resolution_config: resolution_config && typeof resolution_config === "object" ? resolution_config : null,
       })
-      .select("*")
-      .single();
+      .returning();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (belief_id) {
+      await db.update(beliefs).set({ status: "OPEN" }).where(eq(beliefs.id, belief_id));
+    }
+
+    if (typeof tx_hash === "string" && tx_hash.startsWith("0x")) {
+      await db
+        .insert(market_events)
+        .values({
+          market_id: createdMarket.id,
+          event_type: "MarketCreated",
+          wallet_address: req.headers.get("x-admin-wallet")?.toLowerCase() ?? null,
+          tx_hash,
+        })
+        .onConflictDoNothing();
     }
 
     const agreePool = Number(createdMarket.agree_pool ?? 0);

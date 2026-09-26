@@ -2,15 +2,20 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import fs from "node:fs";
 import path from "node:path";
+import { eq } from "drizzle-orm";
 import { POST as submitBelief } from "../app/api/beliefs/submit/route";
 import { computeBeliefHashes } from "../lib/market/factory-client";
 import * as factoryClientLib from "../lib/market/factory-client";
-import * as supabaseLib from "../lib/supabase";
 import { ETHEREUM_SEPOLIA_CHAIN_ID } from "../lib/constants";
+import { useTestDb, schema } from "./helpers/test-db";
 
 describe("TICKET-85: Submit Belief & On-Chain Market Creation API", () => {
-  beforeEach(() => {
+
+  const testDb = useTestDb();
+
+  beforeEach(async () => {
     vi.restoreAllMocks();
+    await testDb.reset();
   });
 
   function createMockPostRequest(url: string, body: unknown) {
@@ -18,6 +23,14 @@ describe("TICKET-85: Submit Belief & On-Chain Market Creation API", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
+    });
+  }
+
+  function mockOnChainMarket() {
+    vi.spyOn(factoryClientLib, "createOnChainMarket").mockResolvedValue({
+      contractAddress: "0xmarketContract123456789012345678901234",
+      contractMarketId: 1,
+      txHash: "0xtxhash123",
     });
   }
 
@@ -74,65 +87,7 @@ describe("TICKET-85: Submit Belief & On-Chain Market Creation API", () => {
   });
 
   it("should submit belief and create market on-chain successfully", async () => {
-    const mockBelief = {
-      id: "b-uuid-1",
-      statement: "Solana will reach 1M daily active wallets",
-      author: "0xauthor1",
-      status: "DETECTED",
-      created_at: "2026-09-17T08:00:00Z",
-    };
-
-    const mockSource = {
-      id: "src-uuid-1",
-      belief_id: "b-uuid-1",
-      raw_text: "https://x.com/solana/status/999",
-      submitted_by_wallet: "0xsubmitter",
-      created_at: "2026-09-17T08:00:00Z",
-    };
-
-    const mockMarket = {
-      id: "m-uuid-1",
-      belief_id: "b-uuid-1",
-      contract_address: "0xmarketContract123456789012345678901234",
-      chain_id: ETHEREUM_SEPOLIA_CHAIN_ID,
-      status: "OPEN",
-      agree_pool: 0,
-      disagree_pool: 0,
-      open_time: "2026-09-17T08:00:00Z",
-      close_time: "2026-09-24T08:00:00Z",
-    };
-
-    const mockBeliefInsert: any = {};
-    mockBeliefInsert.select = vi.fn().mockReturnValue(mockBeliefInsert);
-    mockBeliefInsert.single = vi.fn().mockResolvedValue({ data: mockBelief, error: null });
-
-    const mockSourceInsert: any = {};
-    mockSourceInsert.select = vi.fn().mockReturnValue(mockSourceInsert);
-    mockSourceInsert.single = vi.fn().mockResolvedValue({ data: mockSource, error: null });
-
-    const mockMarketInsert: any = {};
-    mockMarketInsert.select = vi.fn().mockReturnValue(mockMarketInsert);
-    mockMarketInsert.single = vi.fn().mockResolvedValue({ data: mockMarket, error: null });
-
-    const mockEventInsert: any = {};
-    mockEventInsert.select = vi.fn().mockReturnValue(mockEventInsert);
-    mockEventInsert.single = vi.fn().mockResolvedValue({ data: { id: "evt-1" }, error: null });
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn((table: string) => {
-        if (table === "beliefs") return { insert: vi.fn().mockReturnValue(mockBeliefInsert) };
-        if (table === "belief_sources") return { insert: vi.fn().mockReturnValue(mockSourceInsert) };
-        if (table === "markets") return { insert: vi.fn().mockReturnValue(mockMarketInsert) };
-        if (table === "market_events") return { insert: vi.fn().mockReturnValue(mockEventInsert) };
-        return {} as any;
-      }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
-    vi.spyOn(factoryClientLib, "createOnChainMarket").mockResolvedValue({
-      contractAddress: "0xmarketContract123456789012345678901234",
-      contractMarketId: 1,
-      txHash: "0xtxhash123",
-    });
+    mockOnChainMarket();
 
     const req = createMockPostRequest("http://localhost:3000/api/beliefs/submit", {
       statement: "Solana will reach 1M daily active wallets",
@@ -150,9 +105,49 @@ describe("TICKET-85: Submit Belief & On-Chain Market Creation API", () => {
 
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.data.belief_id).toBe("b-uuid-1");
-    expect(body.data.market_id).toBe("m-uuid-1");
     expect(body.data.contract_address).toBe("0xmarketContract123456789012345678901234");
     expect(body.data.tx_hash).toBe("0xtxhash123");
+
+    const { db } = testDb;
+    const belief = await db.query.beliefs.findFirst({ where: eq(schema.beliefs.id, body.data.belief_id) });
+    expect(belief?.statement).toBe("Solana will reach 1M daily active wallets");
+    expect(belief?.status).toBe("DETECTED");
+
+    const market = await db.query.markets.findFirst({
+      where: eq(schema.markets.id, body.data.market_id),
+      with: { market_events: true },
+    });
+    expect(market?.belief_id).toBe(body.data.belief_id);
+    expect(market?.status).toBe("OPEN");
+    expect(market?.close_time).toBe(new Date(1727164800 * 1000).toISOString());
+    expect(market?.resolution_config).toEqual({ targetPrice: 200 });
+    expect(market?.market_events[0].event_type).toBe("MarketCreated");
+    expect(market?.market_events[0].tx_hash).toBe("0xtxhash123");
+
+    const sources = await db.query.belief_sources.findMany();
+    expect(sources[0].raw_text).toBe("https://x.com/solana/status/999");
+  });
+
+  it("should register a creator profile once per author handle without marking beliefs as confirmed", async () => {
+    const submit = (txSuffix: string) => {
+      vi.spyOn(factoryClientLib, "createOnChainMarket").mockResolvedValue({
+        contractAddress: "0xmarketContract123456789012345678901234",
+        contractMarketId: 1,
+        txHash: `0xtx${txSuffix}`,
+      });
+      return submitBelief(createMockPostRequest("http://localhost:3000/api/beliefs/submit", {
+        statement: `Belief ${txSuffix}`,
+        author: "traderx",
+        raw_text: "raw text",
+      }));
+    };
+
+    expect((await submit("a")).status).toBe(200);
+    expect((await submit("b")).status).toBe(200);
+
+    const profiles = await testDb.db.query.creator_profiles.findMany();
+    expect(profiles).toHaveLength(1);
+    expect(profiles[0].handle).toBe("@traderx");
+    expect(profiles[0].confirmed_beliefs_count).toBe(0);
   });
 });

@@ -1,7 +1,8 @@
 import { createWalletClient, createPublicClient, http, Hex, Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { getSupabaseAdminClient } from "../supabase";
+import { and, eq, isNull, lte, ne, or } from "drizzle-orm";
+import { getDb, schema } from "../db";
 import { fetchChainlinkPrice } from "../oracle/chainlink";
 import { evaluateOracleCondition } from "./resolution-helper";
 import { updateCreatorProfile, insertResolutionRecord, insertSettlementRecord } from "./resolution-service";
@@ -12,20 +13,17 @@ import type { ResolvedOutcome, ResolutionExecutionResult, ResolutionEngineSummar
 export type { ResolutionExecutionResult, ResolutionEngineSummary };
 
 export async function resolveSingleMarket(marketId: string): Promise<ResolutionExecutionResult> {
-  const supabase = getSupabaseAdminClient();
+  const db = getDb();
+  const { markets, oracle_snapshots } = schema;
 
-  const { data: market, error: marketError } = await supabase
-    .from("markets")
-    .select("*")
-    .eq("id", marketId)
-    .maybeSingle();
+  const market = await db.query.markets.findFirst({ where: eq(markets.id, marketId) });
 
-  if (marketError || !market) {
+  if (!market) {
     return {
       success: false,
       marketId,
       outcome: "VOID",
-      error: marketError?.message || "Market not found",
+      error: "Market not found",
     };
   }
 
@@ -36,6 +34,15 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
       marketId,
       outcome: "VOID",
       error: `Market status is ${market.status}, not eligible for resolution`,
+    };
+  }
+
+  if (market.resolution_type === "MANUAL") {
+    return {
+      success: false,
+      marketId,
+      outcome: "VOID",
+      error: "Manual markets are resolved by an admin, not by the price oracle",
     };
   }
 
@@ -58,12 +65,9 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
   let startPrice: number | undefined;
   let endPrice: number | undefined;
 
-  const { data: startSnapshot } = await supabase
-    .from("oracle_snapshots")
-    .select("*")
-    .eq("market_id", market.id)
-    .eq("snapshot_type", "START")
-    .maybeSingle();
+  const startSnapshot = await db.query.oracle_snapshots.findFirst({
+    where: and(eq(oracle_snapshots.market_id, market.id), eq(oracle_snapshots.snapshot_type, "START")),
+  });
 
   if (startSnapshot) {
     startPrice = Number(startSnapshot.price);
@@ -73,18 +77,16 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
     const endPriceData = await fetchChainlinkPrice(asset, chainId);
     endPrice = endPriceData.price;
 
-    await supabase
-      .from("oracle_snapshots")
-      .insert({
+    await db
+      .insert(oracle_snapshots)
+      .values({
         market_id: market.id,
         asset: asset.toUpperCase().trim(),
         price: endPrice,
         snapshot_type: "END",
         source: "chainlink",
         recorded_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+      });
 
     outcome = evaluateOracleCondition(
       resolutionType as any,
@@ -125,21 +127,19 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
 
   const marketStatus: DbMarketStatus = "RESOLVED";
 
-  await supabase
-    .from("markets")
-    .update({
+  await db
+    .update(markets)
+    .set({
       status: marketStatus,
       winner: outcome,
     })
-    .eq("id", market.id)
-    .select()
-    .single();
+    .where(eq(markets.id, market.id));
 
   if (market.belief_id) {
-    await updateCreatorProfile(supabase, market.belief_id, outcome);
+    await updateCreatorProfile(db, market.belief_id, outcome);
   }
 
-  await insertResolutionRecord(supabase, {
+  await insertResolutionRecord(db, {
     marketId: market.id,
     oracleSource: "chainlink",
     startPrice: startPrice || null,
@@ -152,7 +152,7 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
   const agreePool = Number(market.agree_pool ?? 0);
   const disagreePool = Number(market.disagree_pool ?? 0);
 
-  await insertSettlementRecord(supabase, {
+  await insertSettlementRecord(db, {
     marketId: market.id,
     agreePool,
     disagreePool,
@@ -168,16 +168,20 @@ export async function resolveSingleMarket(marketId: string): Promise<ResolutionE
 }
 
 export async function processPendingResolutions(): Promise<ResolutionEngineSummary> {
-  const supabase = getSupabaseAdminClient();
+  const { markets } = schema;
   const nowIso = new Date().toISOString();
 
-  const { data: expiredMarkets, error } = await supabase
-    .from("markets")
-    .select("*")
-    .eq("status", "OPEN")
-    .lte("close_time", nowIso);
-
-  if (error || !expiredMarkets) {
+  let expiredMarkets: { id: string }[];
+  try {
+    expiredMarkets = await getDb().query.markets.findMany({
+      columns: { id: true },
+      where: and(
+        eq(markets.status, "OPEN"),
+        lte(markets.close_time, nowIso),
+        or(isNull(markets.resolution_type), ne(markets.resolution_type, "MANUAL"))
+      ),
+    });
+  } catch {
     return {
       success: false,
       processedCount: 0,

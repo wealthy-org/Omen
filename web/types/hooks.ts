@@ -43,6 +43,7 @@ export interface CreateMarketParams {
   resolutionCriteria?: string;
   authorHandle?: string;
   chainId?: number;
+  assetSymbol?: string;
   timeframeDays?: number;
   resolutionOracle?: "chainlink" | "robinhood_market_data";
   rulesText?: string;

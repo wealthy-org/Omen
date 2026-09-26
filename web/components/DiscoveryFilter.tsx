@@ -16,11 +16,20 @@ export const SORT_TABS: { id: DiscoveryTab; label: string }[] = [
 
 export const CATEGORY_FILTERS: { id: MarketCategoryFilter; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "eth", label: "ETH" },
   { id: "btc", label: "BTC" },
-  { id: "arb", label: "ARB" },
-  { id: "macro", label: "Macro" },
+  { id: "eth", label: "ETH" },
+  { id: "alts", label: "Alts" },
+  { id: "tradfi", label: "Gold, stocks & FX" },
+  { id: "events", label: "Events" },
 ];
+
+export const CATEGORY_MEMBERS: Record<Exclude<MarketCategoryFilter, "all">, string[]> = {
+  btc: ["btc"],
+  eth: ["eth", "wsteth"],
+  alts: ["link", "snx"],
+  tradfi: ["xau", "cspx", "eur", "gbp"],
+  events: ["crypto", "tech", "sports", "politics", "macro", "culture"],
+};
 
 export const DiscoveryFilter: React.FC<DiscoveryFilterProps> = ({
   activeTab,

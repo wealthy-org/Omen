@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { eq, sql } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
+import { marketIdentifierFilter } from "@/lib/db/filters";
 import { isValidEvmAddress } from "@/lib/validators";
 
 export async function POST(
@@ -63,20 +65,10 @@ export async function POST(
       );
     }
 
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
+    const { market_events, market_positions, markets } = schema;
 
-    const { data: market, error: marketError } = await supabase
-      .from("markets")
-      .select("*")
-      .or(`id.eq.${id},contract_address.eq.${id}`)
-      .maybeSingle();
-
-    if (marketError) {
-      return NextResponse.json(
-        { success: false, error: marketError.message },
-        { status: 500 }
-      );
-    }
+    const market = await db.query.markets.findFirst({ where: marketIdentifierFilter(id) });
 
     if (!market) {
       return NextResponse.json(
@@ -85,11 +77,10 @@ export async function POST(
       );
     }
 
-    const { data: existingPosition } = await supabase
-      .from("market_positions")
-      .select("id")
-      .eq("tx_hash", tx_hash)
-      .maybeSingle();
+    const existingPosition = await db.query.market_positions.findFirst({
+      columns: { id: true },
+      where: eq(market_positions.tx_hash, tx_hash),
+    });
 
     if (existingPosition) {
       return NextResponse.json(
@@ -98,48 +89,37 @@ export async function POST(
       );
     }
 
-    const { data: insertedPosition, error: posError } = await supabase
-      .from("market_positions")
-      .insert({
+    const normalizedWallet = wallet_address.trim().toLowerCase();
+
+    const [insertedPosition] = await db
+      .insert(market_positions)
+      .values({
         market_id: market.id,
-        wallet_address: wallet_address.trim().toLowerCase(),
+        wallet_address: normalizedWallet,
         side,
         amount: parsedAmount,
         tx_hash,
         claimed: false,
       })
-      .select("*")
-      .single();
+      .returning();
 
-    if (posError) {
-      return NextResponse.json(
-        { success: false, error: posError.message },
-        { status: 500 }
-      );
-    }
+    await db
+      .insert(market_events)
+      .values({
+        market_id: market.id,
+        event_type: "PositionTaken",
+        wallet_address: normalizedWallet,
+        amount: parsedAmount,
+        tx_hash,
+        block_number: block_number ? Number(block_number) : null,
+      })
+      .onConflictDoNothing();
 
-    await supabase.from("market_events").insert({
-      market_id: market.id,
-      event_type: "PositionTaken",
-      wallet_address: wallet_address.trim().toLowerCase(),
-      amount: parsedAmount,
-      tx_hash,
-      block_number: block_number ? Number(block_number) : null,
-    });
+    const poolIncrement = side === "AGREE"
+      ? { agree_pool: sql`${markets.agree_pool} + ${parsedAmount}` }
+      : { disagree_pool: sql`${markets.disagree_pool} + ${parsedAmount}` };
 
-    const currentAgree = Number(market.agree_pool ?? 0);
-    const currentDisagree = Number(market.disagree_pool ?? 0);
-
-    const updatePayload =
-      side === "AGREE"
-        ? {
-            agree_pool: currentAgree + parsedAmount,
-          }
-        : {
-            disagree_pool: currentDisagree + parsedAmount,
-          };
-
-    await supabase.from("markets").update(updatePayload).eq("id", market.id);
+    await db.update(markets).set(poolIncrement).where(eq(markets.id, market.id));
 
     return NextResponse.json(
       {

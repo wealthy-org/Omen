@@ -1,181 +1,111 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import HomePage from "@/app/page";
 
-const MOCK_LANDING_MARKETS = [
-  {
-    id: "market-1",
-    statement: "SOL will outperform ETH this month",
-    author: "TraderX",
-    authorHandle: "@TraderX",
-    isConfirmed: true,
-    status: "OPEN",
-    agreePool: 87.5,
-    disagreePool: 34.0,
-    agreeParticipants: 2046,
-    disagreeParticipants: 796,
-    closeTime: new Date(Date.now() + 86400000 * 12).toISOString(),
-    category: "ETH",
+const MARKET = {
+  id: "11111111-1111-1111-1111-111111111111",
+  title: "Will BTC trade at or above $100,000 before Dec 21, 2026?",
+  chain_id: 46630,
+  contract_address: "0x087E3564f2f2B3383ad051de40b274e615A51942",
+  agree_pool: 3,
+  disagree_pool: 1,
+  participants_count: 2,
+  open_time: "2026-09-26T00:00:00.000Z",
+  close_time: "2026-12-21T23:59:59.000Z",
+  created_at: "2026-09-26T00:00:00.000Z",
+  resolution_type: "PRICE_ABOVE",
+  resolution_config: { asset: "BTC", targetPrice: 100000 },
+  belief: {
+    author: "@yes2crypto.eth",
+    source_platform: "farcaster",
+    source_url: "https://farcaster.xyz/yes2crypto.eth/0xabc",
+    source_timestamp: "2026-09-20T00:00:00.000Z",
+    sources: [{ raw_text: "Next target is 100K - Can happen quite fast" }],
   },
-  {
-    id: "market-2",
-    statement: "BTC prints a new all-time high in Q4",
-    author: "OnchainWitch",
-    authorHandle: "@onchainwitch",
-    isConfirmed: false,
-    status: "DETECTED",
-    agreePool: 63.0,
-    disagreePool: 37.0,
-    agreeParticipants: 610,
-    disagreeParticipants: 350,
-    closeTime: new Date(Date.now() + 86400000 * 68).toISOString(),
-    category: "BTC",
-  },
-];
+};
 
-describe("Landing Page V1 Components", () => {
+const CREATOR = {
+  wallet_address: "0x1111111111111111111111111111111111111111",
+  handle: "@yes2crypto.eth",
+  display_name: "Yes2Crypto",
+  avatar_url: null,
+  total_beliefs_count: 2,
+  resolved_count: 0,
+  correct_count: 0,
+};
+
+function mockApi({ markets = [MARKET], creators = [CREATOR], fail = false } = {}) {
+  vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
+    if (fail) return Promise.resolve({ ok: false, status: 500, json: async () => ({}) } as Response);
+    const u = String(url);
+    const body = u.includes("/api/markets")
+      ? { markets }
+      : u.includes("/api/creators")
+        ? { data: creators }
+        : { stats: { active_markets: markets.length, total_beliefs: 5, verified_creators: creators.length, total_tvl_eth: "4.00" } };
+    return Promise.resolve({ ok: true, json: async () => body } as Response);
+  });
+}
+
+describe("Landing page", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(globalThis, "fetch").mockImplementation((url) => {
-      const urlString = String(url);
-      if (urlString.includes("/api/stats/overview")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({
-            success: true,
-            stats: {
-              total_volume_eth: "320.50",
-              active_markets: 18,
-              total_beliefs: 142,
-              verified_creators: 38,
-            },
-          }),
-        } as Response);
-      }
-      if (urlString.includes("/api/markets")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({
-            success: true,
-            markets: MOCK_LANDING_MARKETS,
-          }),
-        } as Response);
-      }
-      if (urlString.includes("/api/creators")) {
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({
-            success: true,
-            data: [
-              {
-                id: "creator-1",
-                wallet_address: "0x1111111111111111111111111111111111111111",
-                handle: "@TraderX",
-                display_name: "TraderX",
-                confirmed_beliefs_count: 47,
-                resolved_count: 31,
-                correct_count: 24,
-                created_at: new Date().toISOString(),
-                accuracy_percentage: 77,
-              },
-            ],
-          }),
-        } as Response);
-      }
-      return Promise.resolve({ ok: true, json: async () => ({ success: true }) } as Response);
-    });
   });
 
-  it("renders the hero headline, dual-testnet badge, and 2-column layout", () => {
+  it("renders the headline and CTAs pointing at real destinations", () => {
+    mockApi();
     render(<HomePage />);
-
-    expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: /turn opinions into markets\./i,
-      })
-    ).toBeInTheDocument();
-
-    expect(screen.getAllByText(/Dual-Testnet Active/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/SOL will outperform ETH this month/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { level: 1, name: /put a price on every public call/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /read today's calls/i })).toHaveAttribute("href", "#feed");
+    expect(screen.getAllByRole("link", { name: /submit a call/i })[0]).toHaveAttribute("href", "/create");
   });
 
-  it("renders CTA buttons linking to single-page anchor sections", () => {
+  it("shows stats from the API instead of hardcoded numbers", async () => {
+    mockApi();
     render(<HomePage />);
-
-    const exploreButton = screen.getAllByRole("link", { name: /explore markets/i })[0];
-    expect(exploreButton).toHaveAttribute("href", "#markets");
-
-    const resolutionButton = screen.getAllByRole("link", { name: /how resolution works/i })[0];
-    expect(resolutionButton).toHaveAttribute("href", "#how-it-works");
+    await waitFor(() => expect(screen.getByText("Calls tracked").nextSibling?.textContent).toBe("5"));
+    expect(screen.getByText("Live markets").nextSibling?.textContent).toBe("1");
   });
 
-  it("renders the infinite marquee tech stack items", () => {
+  it("pairs each scanned post with its market and links to it", async () => {
+    mockApi();
     render(<HomePage />);
-
-    expect(screen.getByText(/Protocol Infrastructure & Ecosystem Stack/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Ethereum Sepolia/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Robinhood Chain/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Chainlink/i).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/Next target is 100K/)).length).toBeGreaterThan(0);
+    const marketLinks = screen.getAllByRole("link").filter((a) => a.getAttribute("href") === `/market/${MARKET.id}`);
+    expect(marketLinks.length).toBeGreaterThan(1);
+    expect(screen.getAllByText("75%").length).toBeGreaterThan(0);
   });
 
-  it("renders the redesigned platform metrics cards in StatsOverview", async () => {
+  it("walks through one real market with its contract on the explorer", async () => {
+    mockApi();
     render(<HomePage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/320\.50 ETH/)).toBeInTheDocument();
-      expect(screen.getByText("18")).toBeInTheDocument();
-      expect(screen.getByText("142")).toBeInTheDocument();
-      expect(screen.getByText("38")).toBeInTheDocument();
-    });
+    expect(await screen.findByRole("heading", { name: /one call, start to finish/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /view the contract/i })).toHaveAttribute(
+      "href",
+      expect.stringContaining(`/address/${MARKET.contract_address}`)
+    );
   });
 
-  it("renders trending belief markets and category tab filters", async () => {
+  it("lists predictors with an honest record when nothing has settled", async () => {
+    mockApi();
     render(<HomePage />);
-
-    expect(screen.getByText(/Trending Belief Markets/i)).toBeInTheDocument();
-    expect(screen.getByText("All")).toBeInTheDocument();
-    expect(screen.getAllByText("ETH").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("BTC").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("ARB").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Macro").length).toBeGreaterThan(0);
+    expect(await screen.findByText("Yes2Crypto")).toBeInTheDocument();
+    expect(screen.getByText("No calls settled yet")).toBeInTheDocument();
   });
 
-  it("renders the 5-stage protocol lifecycle flow", () => {
+  it("shows empty states when there are no markets or predictors", async () => {
+    mockApi({ markets: [], creators: [] });
     render(<HomePage />);
-
-    expect(screen.getByText(/From a Take to a Track Record/i)).toBeInTheDocument();
-    expect(screen.getByText("A belief appears")).toBeInTheDocument();
-    expect(screen.getByText("The market opens")).toBeInTheDocument();
-    expect(screen.getByText("The author confirms")).toBeInTheDocument();
-    expect(screen.getByText("Oracle resolves")).toBeInTheDocument();
-    expect(screen.getByText("Record remembered")).toBeInTheDocument();
+    expect(await screen.findByText(/no live markets yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/no predictors are being tracked yet/i)).toBeInTheDocument();
   });
 
-  it("renders creator reputation highlight and live activity stream", () => {
+  it("shows an error state with a working retry", async () => {
+    mockApi({ fail: true });
     render(<HomePage />);
-
-    expect(screen.getByText(/Conviction Becomes a Record/i)).toBeInTheDocument();
-    expect(screen.getAllByText("@TraderX").length).toBeGreaterThan(0);
-    expect(screen.getByText(/Live On-Chain Activity/i)).toBeInTheDocument();
-  });
-
-  it("renders the dual-track consensus signal gap visualizer", async () => {
-    render(<HomePage />);
-
-    expect(screen.getByText(/The Signal Gap: Words vs\. Capital/i)).toBeInTheDocument();
-    expect(screen.getByText(/Dual-Track Consensus Engine/i)).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.getByText(/Track 1: Social Sentiments/i)).toBeInTheDocument();
-      expect(screen.getByText(/Track 2: Staked Capital Pool/i)).toBeInTheDocument();
-    });
-  });
-
-  it("renders the interactive FAQ accordion section", () => {
-    render(<HomePage />);
-
-    expect(screen.getByText(/Frequently Asked Questions/i)).toBeInTheDocument();
-    expect(screen.getByText(/What is an Omen Social Belief Market\?/i)).toBeInTheDocument();
+    const retry = await screen.findByRole("button", { name: /try again/i });
+    mockApi();
+    fireEvent.click(retry);
+    expect((await screen.findAllByText(/Next target is 100K/)).length).toBeGreaterThan(0);
   });
 });

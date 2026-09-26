@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { and, eq } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
+import { marketIdentifierFilter } from "@/lib/db/filters";
 import { isValidEvmAddress } from "@/lib/validators";
 
 export async function POST(
@@ -42,25 +44,10 @@ export async function POST(
     }
 
     const normalizedAddress = wallet_address.trim().toLowerCase();
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
+    const { market_events, market_positions } = schema;
 
-    let query = supabase.from("markets").select("*");
-    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-      query = query.eq("id", id);
-    } else if (!isNaN(Number(id))) {
-      query = query.eq("contract_market_id", Number(id));
-    } else {
-      query = query.or(`id.eq.${id},contract_address.eq.${id}`);
-    }
-
-    const { data: market, error: marketError } = await query.maybeSingle();
-
-    if (marketError) {
-      return NextResponse.json(
-        { success: false, error: marketError.message },
-        { status: 500 }
-      );
-    }
+    const market = await db.query.markets.findFirst({ where: marketIdentifierFilter(id) });
 
     if (!market) {
       return NextResponse.json(
@@ -69,33 +56,22 @@ export async function POST(
       );
     }
 
-    const { data: updatedPositions, error: updateError } = await supabase
-      .from("market_positions")
-      .update({
-        claimed: true,
-      })
-      .eq("market_id", market.id)
-      .eq("wallet_address", normalizedAddress)
-      .select("*");
-
-    if (updateError) {
-      return NextResponse.json(
-        { success: false, error: updateError.message },
-        { status: 500 }
-      );
-    }
+    const updatedPositions = await db
+      .update(market_positions)
+      .set({ claimed: true })
+      .where(and(eq(market_positions.market_id, market.id), eq(market_positions.wallet_address, normalizedAddress)))
+      .returning();
 
     if (typeof tx_hash === "string" && tx_hash.length > 0) {
-      try {
-        await supabase.from("market_events").insert({
+      await db
+        .insert(market_events)
+        .values({
           market_id: market.id,
           event_type: "MarketClaimed",
           wallet_address: normalizedAddress,
           tx_hash,
-        });
-      } catch {
-        void 0;
-      }
+        })
+        .onConflictDoNothing();
     }
 
     return NextResponse.json({
@@ -103,7 +79,7 @@ export async function POST(
       claimed: true,
       market_id: market.id,
       wallet_address: normalizedAddress,
-      updated_positions_count: updatedPositions ? updatedPositions.length : 0,
+      updated_positions_count: updatedPositions.length,
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Internal Server Error";

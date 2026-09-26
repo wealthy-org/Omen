@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { eq, sql } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
+import { isUuid } from "@/lib/db/filters";
 import { verifyBeliefConfirmationSignature } from "@/lib/eip712/confirmation";
 import { isValidEvmAddress } from "@/lib/validators";
 
@@ -65,15 +67,14 @@ export async function POST(
       );
     }
 
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
+    const { beliefs, creator_confirmations, creator_profiles } = schema;
 
-    const { data: belief, error: beliefError } = await supabase
-      .from("beliefs")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
+    const belief = isUuid(id)
+      ? await db.query.beliefs.findFirst({ where: eq(beliefs.id, id) })
+      : undefined;
 
-    if (beliefError || !belief) {
+    if (!belief) {
       return NextResponse.json(
         { success: false, error: "Belief not found" },
         { status: 404 }
@@ -96,50 +97,32 @@ export async function POST(
       );
     }
 
-    await supabase
-      .from("beliefs")
-      .update({ status: "CONFIRMED" })
-      .eq("id", id);
+    await db.update(beliefs).set({ status: "CONFIRMED" }).where(eq(beliefs.id, id));
 
     const normalizedWallet = creator_address.trim().toLowerCase();
 
-    const { data: confirmation } = await supabase
-      .from("creator_confirmations")
-      .insert({
+    const [confirmation] = await db
+      .insert(creator_confirmations)
+      .values({
         belief_id: id,
         creator_wallet: normalizedWallet,
         signature,
         tx_hash: typeof tx_hash === "string" ? tx_hash : null,
       })
-      .select()
-      .single();
+      .returning();
 
-    const { data: profile } = await supabase
-      .from("creator_profiles")
-      .select("*")
-      .eq("wallet_address", normalizedWallet)
-      .maybeSingle();
-
-    if (profile) {
-      await supabase
-        .from("creator_profiles")
-        .upsert({
-          ...profile,
-          wallet_address: normalizedWallet,
-          confirmed_beliefs_count: (profile.confirmed_beliefs_count || 0) + 1,
-        })
-        .select();
-    } else {
-      await supabase
-        .from("creator_profiles")
-        .upsert({
-          wallet_address: normalizedWallet,
-          confirmed_beliefs_count: 1,
-          resolved_count: 0,
-          correct_count: 0,
-        })
-        .select();
-    }
+    await db
+      .insert(creator_profiles)
+      .values({
+        wallet_address: normalizedWallet,
+        confirmed_beliefs_count: 1,
+        resolved_count: 0,
+        correct_count: 0,
+      })
+      .onConflictDoUpdate({
+        target: creator_profiles.wallet_address,
+        set: { confirmed_beliefs_count: sql`${creator_profiles.confirmed_beliefs_count} + 1` },
+      });
 
     return NextResponse.json({
       success: true,

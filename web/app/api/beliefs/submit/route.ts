@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { keccak256, toHex } from "viem";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { eq, ilike, or } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { computeBeliefHashes, createOnChainMarket } from "@/lib/market/factory-client";
 import { ETHEREUM_SEPOLIA_CHAIN_ID, DEFAULT_MARKET_DURATION_SECONDS } from "@/lib/constants";
 
@@ -20,13 +21,10 @@ export async function POST(req: NextRequest) {
     const { belief_id, contract_address, tx_hash } = body;
 
     if (belief_id && contract_address) {
-      const supabase = getSupabaseAdminClient();
-      await supabase
-        .from("markets")
-        .update({
-          contract_address,
-        })
-        .eq("belief_id", belief_id);
+      await getDb()
+        .update(schema.markets)
+        .set({ contract_address })
+        .where(eq(schema.markets.belief_id, belief_id));
 
       return NextResponse.json({
         success: true,
@@ -79,11 +77,12 @@ export async function POST(req: NextRequest) {
       resolution_config || null
     );
 
-    const supabase = getSupabaseAdminClient();
+    const db = getDb();
+    const { beliefs, belief_sources, markets, market_events, creator_profiles } = schema;
 
-    const { data: belief, error: beliefError } = await supabase
-      .from("beliefs")
-      .insert({
+    const [belief] = await db
+      .insert(beliefs)
+      .values({
         statement: statement.trim(),
         author: author || null,
         source_url: source_url || null,
@@ -92,25 +91,13 @@ export async function POST(req: NextRequest) {
         ai_confidence: ai_confidence !== undefined && ai_confidence !== null ? Number(ai_confidence) : null,
         status: "DETECTED",
       })
-      .select()
-      .single();
+      .returning();
 
-    if (beliefError || !belief) {
-      return NextResponse.json(
-        { success: false, error: beliefError?.message || "Failed to create belief" },
-        { status: 500 }
-      );
-    }
-
-    await supabase
-      .from("belief_sources")
-      .insert({
-        belief_id: belief.id,
-        raw_text: raw_text.trim(),
-        submitted_by_wallet: submitted_by_wallet || null,
-      })
-      .select()
-      .single();
+    await db.insert(belief_sources).values({
+      belief_id: belief.id,
+      raw_text: raw_text.trim(),
+      submitted_by_wallet: submitted_by_wallet || null,
+    });
 
     const onChainResult = await createOnChainMarket({
       beliefHash,
@@ -123,9 +110,9 @@ export async function POST(req: NextRequest) {
     });
 
     const generatedMarketId = Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 1000);
-    const { data: market, error: marketError } = await supabase
-      .from("markets")
-      .insert({
+    const [market] = await db
+      .insert(markets)
+      .values({
         belief_id: belief.id,
         contract_market_id: generatedMarketId,
         title: statement.trim(),
@@ -141,57 +128,31 @@ export async function POST(req: NextRequest) {
         resolution_config: resolution_config || null,
         metadata_hash: resolutionHash,
       })
-      .select()
-      .single();
+      .returning();
 
-    if (marketError || !market) {
-      return NextResponse.json(
-        { success: false, error: marketError?.message || "Failed to create market record" },
-        { status: 500 }
-      );
-    }
-
-    await supabase
-      .from("market_events")
-      .insert({
-        market_id: market.id,
-        event_type: "MarketCreated",
-        wallet_address: submitted_by_wallet || author || null,
-        amount: null,
-        tx_hash: onChainResult.txHash,
-      })
-      .select()
-      .single();
+    await db.insert(market_events).values({
+      market_id: market.id,
+      event_type: "MarketCreated",
+      wallet_address: submitted_by_wallet || author || null,
+      amount: null,
+      tx_hash: onChainResult.txHash,
+    }).onConflictDoNothing();
 
     if (author && typeof author === "string" && author.trim()) {
       try {
         const cleanHandle = author.trim().startsWith("@") ? author.trim() : `@${author.trim()}`;
         const cleanName = author.trim().replace(/^@/, "");
 
-        const { data: existingProfile } = await supabase
-          .from("creator_profiles")
-          .select("*")
-          .or(`handle.ilike.${cleanHandle},handle.ilike.${cleanName}`)
-          .maybeSingle();
+        const existingProfile = await db.query.creator_profiles.findFirst({
+          where: or(ilike(creator_profiles.handle, cleanHandle), ilike(creator_profiles.handle, cleanName)),
+        });
 
         if (!existingProfile) {
           const fallbackWallet = submitted_by_wallet || `0x${keccak256(toHex(cleanHandle.toLowerCase())).slice(26)}`;
-          await supabase
-            .from("creator_profiles")
-            .insert({
-              handle: cleanHandle,
-              wallet_address: fallbackWallet.toLowerCase(),
-              confirmed_beliefs_count: 1,
-              resolved_count: 0,
-              correct_count: 0,
-            });
-        } else {
-          await supabase
-            .from("creator_profiles")
-            .update({
-              confirmed_beliefs_count: (existingProfile.confirmed_beliefs_count || 0) + 1,
-            })
-            .eq("id", existingProfile.id);
+          await db.insert(creator_profiles).values({
+            handle: cleanHandle,
+            wallet_address: fallbackWallet.toLowerCase(),
+          });
         }
       } catch {
       }

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { and, desc, eq, ilike } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import type { DbBeliefStatus } from "@/types/database";
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = getSupabaseAdminClient();
     const { searchParams } = req.nextUrl;
 
     const statusParam = searchParams.get("status")?.toUpperCase();
@@ -13,35 +13,32 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(Math.max(parseInt(searchParams.get("limit") || "20", 10) || 20, 1), 100);
     const offset = Math.max(parseInt(searchParams.get("offset") || "0", 10) || 0, 0);
 
-    let query = supabase
-      .from("beliefs")
-      .select("*, belief_sources(*), markets(*)", { count: "exact" });
+    const db = getDb();
+    const { beliefs } = schema;
+    const where = and(
+      statusParam && statusParam !== "ALL" ? eq(beliefs.status, statusParam as DbBeliefStatus) : undefined,
+      authorParam ? ilike(beliefs.author, `%${authorParam}%`) : undefined
+    );
+    const orderBy = sortParam === "highest_confidence"
+      ? desc(beliefs.ai_confidence)
+      : desc(beliefs.created_at);
 
-    if (statusParam && statusParam !== "ALL") {
-      query = query.eq("status", statusParam as DbBeliefStatus);
-    }
-
-    if (authorParam) {
-      query = query.ilike("author", `%${authorParam}%`);
-    }
-
-    if (sortParam === "highest_confidence") {
-      query = query.order("ai_confidence", { ascending: false });
-    } else {
-      query = query.order("created_at", { ascending: false });
-    }
-
-    const { data: beliefs, error, count } = await query.range(offset, offset + limit - 1);
-
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
+    const [beliefList, count] = await Promise.all([
+      db.query.beliefs.findMany({
+        where,
+        orderBy,
+        limit,
+        offset,
+        with: { belief_sources: true, markets: true },
+      }),
+      db.$count(beliefs, where),
+    ]);
 
     return NextResponse.json({
       success: true,
-      count: beliefs ? beliefs.length : 0,
+      count: beliefList.length,
       total: count || 0,
-      beliefs: beliefs || [],
+      beliefs: beliefList,
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Internal Server Error";

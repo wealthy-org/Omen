@@ -1,6 +1,8 @@
 import { createPublicClient, createWalletClient, http, parseEther, formatEther, defineChain, Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { createClient } from "@supabase/supabase-js";
+import { config } from "dotenv";
+import { and, eq } from "drizzle-orm";
+import { getDb, schema } from "../lib/db";
 import { OMEN_MARKET_ABI } from "../lib/contracts";
 import {
   ETHEREUM_SEPOLIA_CHAIN_ID,
@@ -40,23 +42,15 @@ const robinhoodChain = defineChain({
 });
 
 async function main() {
+  config({ path: [".env.local", ".env"] });
+
   const seedKeys = [
     process.env.SEED_WALLET_PRIVATE_KEY_1,
     process.env.SEED_WALLET_PRIVATE_KEY_2,
     process.env.SEED_WALLET_PRIVATE_KEY_3,
   ].filter((key): key is string => Boolean(key && key.startsWith("0x")));
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  const supabase = (supabaseUrl && serviceRoleKey)
-    ? createClient(supabaseUrl.trim().replace(/\/rest\/v1\/?$/, "").replace(/\/+$/, ""), serviceRoleKey, {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      })
-    : null;
+  const db = process.env.DATABASE_URL ? getDb() : null;
 
   if (seedKeys.length === 0) {
     console.log("No SEED_WALLET_PRIVATE_KEY_1/2/3 provided. Seed script running in dry-run verification mode.");
@@ -76,17 +70,16 @@ async function main() {
       transport: http(),
     });
 
-    let targetMarkets: { id: string; contract_address?: string | null; title?: string }[] = [];
+    let targetMarkets: { id: string; contract_address?: string | null; title?: string | null }[] = [];
 
-    if (supabase) {
-      const { data } = await supabase
-        .from("markets")
-        .select("id, contract_address, title, chain_id")
-        .eq("status", "OPEN")
-        .eq("chain_id", chainId)
-        .limit(5);
+    if (db) {
+      const data = await db.query.markets.findMany({
+        columns: { id: true, contract_address: true, title: true, chain_id: true },
+        where: and(eq(schema.markets.status, "OPEN"), eq(schema.markets.chain_id, chainId)),
+        limit: 5,
+      });
 
-      if (data && data.length > 0) {
+      if (data.length > 0) {
         targetMarkets = data;
       }
     }
@@ -137,8 +130,8 @@ async function main() {
         const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
         console.log(`Tx confirmed in block ${receipt.blockNumber}! Status: ${receipt.status}`);
 
-        if (supabase) {
-          await supabase.from("market_events").insert({
+        if (db) {
+          await db.insert(schema.market_events).values({
             market_id: market.id,
             event_type: side,
             wallet_address: account.address,
@@ -147,7 +140,7 @@ async function main() {
             block_number: Number(receipt.blockNumber),
           });
 
-          await supabase.from("market_positions").insert({
+          await db.insert(schema.market_positions).values({
             market_id: market.id,
             wallet_address: account.address,
             side,

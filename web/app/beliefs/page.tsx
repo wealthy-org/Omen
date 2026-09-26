@@ -30,7 +30,7 @@ export default function BeliefsPage() {
                   id: b.id,
                   statement: b.statement,
                   author: b.author ?? "Unknown",
-                  authorHandle: b.source_platform ? `@${b.source_platform}` : undefined,
+                  authorHandle: typeof b.author === "string" && b.author.startsWith("@") ? b.author : undefined,
                   isConfirmed: b.status === "CONFIRMED" || b.status === "MARKET_OPEN",
                   status: (b.status as BeliefCardStatus) || "DETECTED",
                   confidenceScore: b.ai_confidence !== null ? Number(b.ai_confidence) : undefined,

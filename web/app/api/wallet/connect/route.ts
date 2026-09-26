@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { sql } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { isValidEvmAddress } from "@/lib/validators";
 
 export async function POST(req: NextRequest) {
@@ -21,23 +22,12 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedAddress = rawAddress.toLowerCase();
-    const supabase = getSupabaseAdminClient();
-
-    const { data: user, error } = await supabase
-      .from("users")
-      .upsert(
-        { wallet_address: normalizedAddress },
-        { onConflict: "wallet_address" }
-      )
-      .select("id, wallet_address, created_at")
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
-    }
+    const { users } = schema;
+    const [user] = await getDb()
+      .insert(users)
+      .values({ wallet_address: normalizedAddress })
+      .onConflictDoUpdate({ target: users.wallet_address, set: { wallet_address: sql`excluded.wallet_address` } })
+      .returning({ id: users.id, wallet_address: users.wallet_address, created_at: users.created_at });
 
     return NextResponse.json({
       success: true,

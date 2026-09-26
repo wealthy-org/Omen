@@ -25,8 +25,21 @@ export interface MarketCardProps {
   onSelectOutcome?: (market: MarketData, outcome: MarketOutcome) => void;
 }
 
+export interface MarketDetailPosition {
+  id: string;
+  side: "AGREE" | "DISAGREE";
+  amount: number;
+  wallet_address: string;
+  tx_hash: string;
+  created_at: string;
+}
+
 export interface MarketDetailData {
   id: string;
+  positions?: MarketDetailPosition[];
+  sourceText?: string | null;
+  resolutionCriteria?: string | null;
+  authorAvatarUrl?: string | null;
   title?: string;
   statement?: string;
   category?: string;
@@ -167,7 +180,7 @@ export interface BeliefMarketCardProps {
   onSelect?: (market: BeliefMarket) => void;
 }
 
-export type TabCategory = "all" | "eth" | "btc" | "arb" | "macro";
+export type TabCategory = "all" | "btc" | "eth" | "alts" | "tradfi" | "events";
 
 export interface CategoryTabItem {
   id: TabCategory;
@@ -250,7 +263,7 @@ export interface LandingFAQProps {
 }
 
 export type DiscoveryTab = "trending" | "newest" | "ending_soon" | "volume" | "confirmed";
-export type MarketCategoryFilter = "all" | "eth" | "btc" | "arb" | "macro";
+export type MarketCategoryFilter = "all" | "btc" | "eth" | "alts" | "tradfi" | "events";
 
 export interface DiscoveryFilterProps {
   activeTab: DiscoveryTab;

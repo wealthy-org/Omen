@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { desc, eq } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import { isValidEvmAddress } from "@/lib/validators";
 
 export async function GET(req: NextRequest) {
@@ -15,22 +16,14 @@ export async function GET(req: NextRequest) {
     }
 
     const normalizedAddress = walletAddress!.toLowerCase();
-    const supabase = getSupabaseAdminClient();
+    const { market_positions } = schema;
+    const positions = await getDb().query.market_positions.findMany({
+      where: eq(market_positions.wallet_address, normalizedAddress),
+      orderBy: desc(market_positions.created_at),
+      with: { markets: { with: { beliefs: true } } },
+    });
 
-    const { data: positions, error } = await supabase
-      .from("market_positions")
-      .select("*, markets(*, beliefs(*))")
-      .eq("wallet_address", normalizedAddress)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
-
-    const formattedPositions = (positions || []).map((p: any) => {
+    const formattedPositions = positions.map((p: any) => {
       const market = p.markets ?? {};
       const agreePool = Number(market.agree_pool ?? 0);
       const disagreePool = Number(market.disagree_pool ?? 0);

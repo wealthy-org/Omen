@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import DeployBeliefButton, { buildDeployParams } from "./DeployBeliefButton";
+import { useConnection } from "wagmi";
+import { useAdminCreateMarket } from "@/hooks/useAdminCreateMarket";
+import { formatUserErrorMessage } from "@/lib/format-error";
 
 import { BeliefPipelineItem } from "@/types";
 
@@ -43,9 +47,10 @@ function mapBeliefToPipelineItem(b: any): BeliefPipelineItem {
         b.creator_confirmed ??
         (b.status === "CONFIRMED" ||
           b.status === "RESOLVED" ||
-          b.status === "SETTLED" ||
-          (b.markets && b.markets.length > 0))
+          b.status === "SETTLED")
     ),
+    source_url: b.source_url ?? undefined,
+    has_market: Array.isArray(b.markets) && b.markets.length > 0,
     created_at: b.created_at || new Date().toISOString(),
   };
 }
@@ -59,6 +64,10 @@ export default function AdminBeliefPipelineTable({
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { address } = useConnection();
+  const { createMarket } = useAdminCreateMarket();
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number; failed: number } | null>(null);
+  const [bulkError, setBulkError] = useState<string | null>(null);
 
   const fetchBeliefs = async () => {
     setIsLoading(true);
@@ -95,6 +104,33 @@ export default function AdminBeliefPipelineTable({
       ignore = true;
     };
   }, []);
+
+  const deployQueue = items
+    .filter((item) => !item.has_market)
+    .map((item) => buildDeployParams(item.id, item.statement, item.source_url))
+    .filter((params): params is NonNullable<typeof params> => params !== null);
+
+  const deployAll = async () => {
+    setBulkError(null);
+    setBulkProgress({ done: 0, total: deployQueue.length, failed: 0 });
+    let failed = 0;
+    for (let i = 0; i < deployQueue.length; i++) {
+      try {
+        await createMarket(deployQueue[i]);
+      } catch (err) {
+        failed += 1;
+        const message = formatUserErrorMessage(err);
+        setBulkError(message);
+        if (/reject|denied|cancel/i.test(message)) {
+          setBulkProgress({ done: i, total: deployQueue.length, failed });
+          break;
+        }
+      }
+      setBulkProgress({ done: i + 1, total: deployQueue.length, failed });
+    }
+    await fetchBeliefs();
+    setBulkProgress(null);
+  };
 
   const filteredItems = items.filter((item) => {
     const matchesStatus =
@@ -151,6 +187,19 @@ export default function AdminBeliefPipelineTable({
           </p>
         </div>
 
+        <div className="flex flex-col items-end gap-1.5">
+        <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={deployAll}
+          disabled={!address || deployQueue.length === 0 || bulkProgress !== null}
+          title={address ? undefined : "Connect your admin wallet to deploy"}
+          className="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+        >
+          {bulkProgress
+            ? `Deploying ${Math.min(bulkProgress.done + 1, bulkProgress.total)}/${bulkProgress.total}...`
+            : `Deploy all (${deployQueue.length})`}
+        </button>
         <button
           type="button"
           aria-label="Sync Pipeline"
@@ -167,6 +216,9 @@ export default function AdminBeliefPipelineTable({
           </svg>
           <span>{isLoading ? "Syncing..." : "Sync Pipeline"}</span>
         </button>
+        </div>
+        {bulkError && <span className="text-[11px] text-no-red max-w-xs text-right">{bulkError}</span>}
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -209,13 +261,14 @@ export default function AdminBeliefPipelineTable({
                 <th className="py-3 px-4">AI Confidence</th>
                 <th className="py-3 px-4">Consensus / Pool</th>
                 <th className="py-3 px-4">EIP-712 Auth</th>
+                <th className="py-3 px-4">Market</th>
                 <th className="py-3 px-4 text-right">Created</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle dark:divide-white/5">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-text-muted dark:text-[#A9B3AD]">
+                  <td colSpan={7} className="py-8 text-center text-text-muted dark:text-[#A9B3AD]">
                     No belief pipeline records match the active criteria.
                   </td>
                 </tr>
@@ -247,7 +300,7 @@ export default function AdminBeliefPipelineTable({
 
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 font-bold text-accent-navy dark:text-white">
-                        <span>{item.ai_confidence || 85}%</span>
+                        <span>{item.ai_confidence ? `${item.ai_confidence}%` : "n/a"}</span>
                         <span className="text-[10px] text-text-muted">score</span>
                       </div>
                     </td>
@@ -273,6 +326,19 @@ export default function AdminBeliefPipelineTable({
                         <span className="text-text-muted dark:text-[#A9B3AD] text-[11px]">
                           Unsigned
                         </span>
+                      )}
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      {item.has_market ? (
+                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Live</span>
+                      ) : (
+                        <DeployBeliefButton
+                          beliefId={item.id}
+                          statement={item.statement}
+                          sourceUrl={item.source_url}
+                          onDeployed={fetchBeliefs}
+                        />
                       )}
                     </td>
 

@@ -73,21 +73,22 @@ describe("ActivityPage (/activity)", () => {
     render(<ActivityPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/CryptoWhale/i)).toBeInTheDocument();
+      expect(screen.getByText("0x1111...1111")).toBeInTheDocument();
     });
+    expect(screen.queryByText(/CryptoWhale/i)).not.toBeInTheDocument();
 
     const confirmsTab = screen.getByRole("button", { name: /Confirmations/i });
     fireEvent.click(confirmsTab);
 
     expect(screen.getByText(/Vitalik/i)).toBeInTheDocument();
-    expect(screen.queryByText(/CryptoWhale/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("0x1111...1111")).not.toBeInTheDocument();
   });
 
   it("links to market page and block explorer via receipt modal", async () => {
     render(<ActivityPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/CryptoWhale/i)).toBeInTheDocument();
+      expect(screen.getByText("0x1111...1111")).toBeInTheDocument();
     });
 
     const marketLinks = screen.getAllByRole("link", { name: /view market/i });

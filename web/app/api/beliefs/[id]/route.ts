@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdminClient } from "@/lib/supabase";
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
+import { isUuid } from "@/lib/db/filters";
 
 export async function GET(
   req: NextRequest,
@@ -14,19 +16,12 @@ export async function GET(
       );
     }
 
-    const supabase = getSupabaseAdminClient();
-    const { data: belief, error } = await supabase
-      .from("beliefs")
-      .select("*, belief_sources(*), markets(*), creator_confirmations(*)")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
+    const belief = isUuid(id)
+      ? await getDb().query.beliefs.findFirst({
+          where: eq(schema.beliefs.id, id),
+          with: { belief_sources: true, markets: true, creator_confirmations: true },
+        })
+      : undefined;
 
     if (!belief) {
       return NextResponse.json(

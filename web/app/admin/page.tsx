@@ -8,6 +8,7 @@ import AdminOracleMonitor from "../../components/AdminOracleMonitor";
 import AdminBeliefPipelineTable from "../../components/AdminBeliefPipelineTable";
 import AdminEmergencyControls from "../../components/AdminEmergencyControls";
 import AdminLoginForm from "../../components/AdminLoginForm";
+import ConnectWalletButton from "../../components/ConnectWalletButton";
 import type {
   AdminTab,
   AdminDashboardProps,
@@ -207,7 +208,8 @@ export default function AdminDashboardPage({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="px-3 py-1.5 rounded-xl border text-xs font-mono flex items-center gap-2 bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 text-accent-navy dark:text-text-muted">
+          <ConnectWalletButton />
+          <div className="px-3 py-1.5 rounded-xl border text-xs font-mono flex items-center gap-2 bg-white dark:bg-white/5 border-border-subtle dark:border-white/10 text-accent-navy dark:text-[#DCE5DF]">
             <span className="w-2 h-2 rounded-full bg-yes-green" />
             <span>{connectedAddress ? `${connectedAddress.slice(0, 6)}...${connectedAddress.slice(-4)}` : "0xAdmin"}</span>
           </div>

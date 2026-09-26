@@ -4,15 +4,36 @@ import fs from "node:fs";
 import path from "node:path";
 import { GET as getBeliefsList } from "../app/api/beliefs/route";
 import { GET as getBeliefDetail } from "../app/api/beliefs/[id]/route";
-import * as supabaseLib from "../lib/supabase";
+import { useTestDb, failingDb, schema } from "./helpers/test-db";
 
 describe("TICKET-83: Beliefs API Routes (GET /api/beliefs & GET /api/beliefs/[id])", () => {
-  beforeEach(() => {
+
+  const testDb = useTestDb();
+
+  beforeEach(async () => {
     vi.restoreAllMocks();
+    await testDb.reset();
   });
 
   function createMockRequest(url: string) {
     return new NextRequest(url, { method: "GET" });
+  }
+
+  async function seedBeliefs() {
+    const [low, high, confirmed] = await testDb.db
+      .insert(schema.beliefs)
+      .values([
+        { statement: "BTC above 100k", author: "@traderx", ai_confidence: 40, status: "DETECTED", created_at: "2026-09-10T00:00:00Z" },
+        { statement: "ETH above 5k", author: "@macrodad", ai_confidence: 95, status: "DETECTED", created_at: "2026-09-11T00:00:00Z" },
+        { statement: "SOL flips ETH", author: "@VitalikFan", ai_confidence: 70, status: "CONFIRMED", created_at: "2026-09-12T00:00:00Z" },
+      ])
+      .returning();
+    await testDb.db.insert(schema.belief_sources).values({
+      belief_id: low.id,
+      raw_text: "BTC will be above 100k",
+      submitted_by_wallet: "0x1111111111111111111111111111111111111111",
+    });
+    return { low, high, confirmed };
   }
 
   it("should adhere strictly to Zero-Comment Policy in belief route files", () => {
@@ -36,141 +57,77 @@ describe("TICKET-83: Beliefs API Routes (GET /api/beliefs & GET /api/beliefs/[id
   });
 
   it("should return beliefs list with default parameters", async () => {
-    const mockBeliefs = [
-      {
-        id: "b-1",
-        author: "@vitalik",
-        statement: "ETH will outperform SOL",
-        source_url: "https://x.com/post/1",
-        source_platform: "manual",
-        ai_confidence: 0.95,
-        status: "OPEN",
-        created_at: "2026-09-01T00:00:00Z",
-        belief_sources: [{ id: "bs-1", raw_text: "ETH will outperform SOL" }],
-        markets: [{ id: "m-1", agree_pool: 10, disagree_pool: 5 }],
-      },
-    ];
+    const { low, confirmed } = await seedBeliefs();
 
-    const mockChain: any = {};
-    mockChain.order = vi.fn().mockReturnValue(mockChain);
-    mockChain.range = vi.fn().mockResolvedValue({ data: mockBeliefs, error: null, count: 1 });
-
-    const mockSelect = vi.fn().mockReturnValue(mockChain);
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: mockSelect }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
-    const req = createMockRequest("http://localhost:3000/api/beliefs");
-    const res = await getBeliefsList(req);
+    const res = await getBeliefsList(createMockRequest("http://localhost:3000/api/beliefs"));
     expect(res.status).toBe(200);
 
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.count).toBe(1);
-    expect(body.beliefs[0].id).toBe("b-1");
+    expect(body.count).toBe(3);
+    expect(body.total).toBe(3);
+    expect(body.beliefs[0].id).toBe(confirmed.id);
+    const withSource = body.beliefs.find((b: { id: string }) => b.id === low.id);
+    expect(withSource.belief_sources).toHaveLength(1);
+    expect(withSource.markets).toEqual([]);
   });
 
   it("should apply status and author filters", async () => {
-    const mockChain: any = {};
-    mockChain.eq = vi.fn().mockReturnValue(mockChain);
-    mockChain.ilike = vi.fn().mockReturnValue(mockChain);
-    mockChain.order = vi.fn().mockReturnValue(mockChain);
-    mockChain.range = vi.fn().mockResolvedValue({ data: [], error: null, count: 0 });
+    const { confirmed } = await seedBeliefs();
 
-    const mockSelect = vi.fn().mockReturnValue(mockChain);
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: mockSelect }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
-    const req = createMockRequest("http://localhost:3000/api/beliefs?status=CONFIRMED&author=vitalik");
-    const res = await getBeliefsList(req);
+    const res = await getBeliefsList(createMockRequest("http://localhost:3000/api/beliefs?status=CONFIRMED&author=vitalik"));
     expect(res.status).toBe(200);
-    expect(mockChain.eq).toHaveBeenCalledWith("status", "CONFIRMED");
-    expect(mockChain.ilike).toHaveBeenCalledWith("author", "%vitalik%");
+
+    const body = await res.json();
+    expect(body.count).toBe(1);
+    expect(body.beliefs[0].id).toBe(confirmed.id);
   });
 
   it("should apply highest_confidence sort", async () => {
-    const mockChain: any = {};
-    mockChain.order = vi.fn().mockReturnValue(mockChain);
-    mockChain.range = vi.fn().mockResolvedValue({ data: [], error: null, count: 0 });
+    const { high } = await seedBeliefs();
 
-    const mockSelect = vi.fn().mockReturnValue(mockChain);
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: mockSelect }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
-    const req = createMockRequest("http://localhost:3000/api/beliefs?sort=highest_confidence");
-    const res = await getBeliefsList(req);
+    const res = await getBeliefsList(createMockRequest("http://localhost:3000/api/beliefs?sort=highest_confidence"));
     expect(res.status).toBe(200);
-    expect(mockChain.order).toHaveBeenCalledWith("ai_confidence", { ascending: false });
+
+    const body = await res.json();
+    expect(body.beliefs[0].id).toBe(high.id);
+    expect(body.beliefs.map((b: { ai_confidence: number }) => b.ai_confidence)).toEqual([95, 70, 40]);
   });
 
   it("should return single belief detail by ID", async () => {
-    const mockBelief = {
-      id: "b-123",
-      author: "@satoshi",
-      statement: "Bitcoin will hit 100k",
-      status: "OPEN",
-      belief_sources: [],
-      markets: [],
-      creator_confirmations: [],
-    };
+    const { low } = await seedBeliefs();
 
-    const mockChain: any = {};
-    mockChain.eq = vi.fn().mockReturnValue(mockChain);
-    mockChain.maybeSingle = vi.fn().mockResolvedValue({ data: mockBelief, error: null });
-
-    const mockSelect = vi.fn().mockReturnValue(mockChain);
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: mockSelect }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
-    const req = createMockRequest("http://localhost:3000/api/beliefs/b-123");
-    const res = await getBeliefDetail(req, { params: Promise.resolve({ id: "b-123" }) });
+    const res = await getBeliefDetail(
+      createMockRequest(`http://localhost:3000/api/beliefs/${low.id}`),
+      { params: Promise.resolve({ id: low.id }) }
+    );
     expect(res.status).toBe(200);
 
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.belief.id).toBe("b-123");
+    expect(body.belief.id).toBe(low.id);
+    expect(body.belief.belief_sources[0].raw_text).toBe("BTC will be above 100k");
+    expect(body.belief.creator_confirmations).toEqual([]);
   });
 
   it("should return HTTP 404 when belief is not found", async () => {
-    const mockChain: any = {};
-    mockChain.eq = vi.fn().mockReturnValue(mockChain);
-    mockChain.maybeSingle = vi.fn().mockResolvedValue({ data: null, error: null });
+    for (const id of ["non-existent", "00000000-0000-0000-0000-000000000000"]) {
+      const res = await getBeliefDetail(
+        createMockRequest(`http://localhost:3000/api/beliefs/${id}`),
+        { params: Promise.resolve({ id }) }
+      );
+      expect(res.status).toBe(404);
 
-    const mockSelect = vi.fn().mockReturnValue(mockChain);
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: mockSelect }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
-    const req = createMockRequest("http://localhost:3000/api/beliefs/non-existent");
-    const res = await getBeliefDetail(req, { params: Promise.resolve({ id: "non-existent" }) });
-    expect(res.status).toBe(404);
-
-    const body = await res.json();
-    expect(body.success).toBe(false);
-    expect(body.error).toContain("not found");
+      const body = await res.json();
+      expect(body.success).toBe(false);
+      expect(body.error).toContain("not found");
+    }
   });
 
   it("should return HTTP 500 when database error occurs in list query", async () => {
-    const mockChain: any = {};
-    mockChain.order = vi.fn().mockReturnValue(mockChain);
-    mockChain.range = vi.fn().mockResolvedValue({ data: null, error: { message: "DB timeout" } });
+    failingDb("DB timeout");
 
-    const mockSelect = vi.fn().mockReturnValue(mockChain);
-
-    vi.spyOn(supabaseLib, "getSupabaseAdminClient").mockReturnValue({
-      from: vi.fn().mockReturnValue({ select: mockSelect }),
-    } as unknown as ReturnType<typeof supabaseLib.getSupabaseAdminClient>);
-
-    const req = createMockRequest("http://localhost:3000/api/beliefs");
-    const res = await getBeliefsList(req);
+    const res = await getBeliefsList(createMockRequest("http://localhost:3000/api/beliefs"));
     expect(res.status).toBe(500);
 
     const body = await res.json();

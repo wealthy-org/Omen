@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseClient } from "@/lib/supabase";
+import { desc, ilike, or } from "drizzle-orm";
+import { getDb, schema } from "@/lib/db";
 import type { CreatorProfileDetail, Belief } from "@/types";
 
 export async function GET(
@@ -19,44 +20,35 @@ export async function GET(
     const rawAddress = decodeURIComponent(address).trim();
     const cleanHandle = rawAddress.startsWith("@") ? rawAddress : `@${rawAddress}`;
     const cleanName = rawAddress.replace(/^@/, "");
-    const supabase = getSupabaseClient();
+    const db = getDb();
+    const { beliefs, creator_profiles } = schema;
+    const findBeliefsByAuthor = (...authors: string[]) =>
+      db.query.beliefs.findMany({
+        where: or(...authors.map((a) => ilike(beliefs.author, a))),
+        orderBy: desc(beliefs.created_at),
+      });
 
-    const { data: profile, error: profileError } = await supabase
-      .from("creator_profiles")
-      .select("*")
-      .or(`wallet_address.ilike.${rawAddress},handle.ilike.${cleanHandle},handle.ilike.${cleanName}`)
-      .maybeSingle();
+    const profile = await db.query.creator_profiles.findFirst({
+      where: or(
+        ilike(creator_profiles.wallet_address, rawAddress),
+        ilike(creator_profiles.handle, cleanHandle),
+        ilike(creator_profiles.handle, cleanName)
+      ),
+    });
 
-    if (profileError) {
-      return NextResponse.json(
-        { success: false, error: profileError.message },
-        { status: 500 }
-      );
-    }
-
-    let creatorProfile: CreatorProfileDetail | null = profile as CreatorProfileDetail | null;
+    let creatorProfile: CreatorProfileDetail | null = (profile ?? null) as CreatorProfileDetail | null;
     let creatorBeliefs: Belief[] = [];
 
     if (creatorProfile) {
-      const handleFilter = creatorProfile.handle ? `author.ilike.${creatorProfile.handle},` : "";
-      const baseQuery = supabase.from("beliefs").select("*");
-      const builder = "or" in baseQuery && typeof baseQuery.or === "function"
-        ? baseQuery.or(`${handleFilter}author.ilike.${creatorProfile.wallet_address},author.ilike.${cleanName}`)
-        : baseQuery;
+      const authors = [creatorProfile.wallet_address, cleanName];
+      if (creatorProfile.handle) authors.unshift(creatorProfile.handle);
 
-      const { data: beliefs } = await builder.order("created_at", { ascending: false });
-
-      creatorBeliefs = (beliefs as Belief[]) ?? [];
+      creatorBeliefs = (await findBeliefsByAuthor(...authors)) as Belief[];
     } else {
-      const baseQuery = supabase.from("beliefs").select("*");
-      const builder = "or" in baseQuery && typeof baseQuery.or === "function"
-        ? baseQuery.or(`author.ilike.${rawAddress},author.ilike.${cleanHandle},author.ilike.${cleanName}`)
-        : baseQuery;
+      const authoredBeliefs = await findBeliefsByAuthor(rawAddress, cleanHandle, cleanName);
 
-      const { data: beliefs } = await builder.order("created_at", { ascending: false });
-
-      if (beliefs && beliefs.length > 0) {
-        const typedBeliefs = beliefs as Belief[];
+      if (authoredBeliefs.length > 0) {
+        const typedBeliefs = authoredBeliefs as Belief[];
         creatorBeliefs = typedBeliefs;
         const firstBelief = typedBeliefs[0];
         const confirmedCount = typedBeliefs.filter((b) => b.status === "CONFIRMED").length;

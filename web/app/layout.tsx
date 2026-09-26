@@ -4,8 +4,7 @@ import { JetBrains_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Web3Providers } from "./providers";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import SiteChrome from "@/components/SiteChrome";
 import "./globals.css";
 
 const proximaNova = localFont({
@@ -116,13 +115,7 @@ export default async function RootLayout({
         <ThemeProvider initialTheme={savedTheme}>
           <Web3Providers>
             <div className="min-h-screen flex flex-col w-full">
-              <Navbar />
-              <main className="flex-1 w-full px-4 sm:px-6 lg:px-8 xl:px-10 py-6 sm:py-8">
-                <div className="max-w-[1400px] w-full mx-auto">
-                  {children}
-                </div>
-              </main>
-              <Footer />
+              <SiteChrome>{children}</SiteChrome>
             </div>
           </Web3Providers>
         </ThemeProvider>
