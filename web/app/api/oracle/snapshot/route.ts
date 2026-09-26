@@ -2,22 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 import { getDb, schema } from "@/lib/db";
 import { fetchChainlinkPrice } from "@/lib/oracle/chainlink";
+import { isAuthorizedAdmin } from "@/lib/admin-auth";
 import { ETHEREUM_SEPOLIA_CHAIN_ID } from "@/lib/constants";
 import type { SnapshotType, OracleSnapshotSource } from "@/types/database";
 
 export async function POST(req: NextRequest) {
   try {
-    const adminKeyHeader = req.headers.get("x-admin-key")?.trim();
-    const authHeader = req.headers.get("authorization")?.trim();
-    const configuredKey = process.env.ADMIN_API_KEY?.trim() || process.env.CRON_SECRET?.trim();
-
-    const bearerToken = authHeader && authHeader.toLowerCase().startsWith("bearer ")
-      ? authHeader.slice(7).trim()
-      : null;
-
-    const providedKey = adminKeyHeader || bearerToken;
-
-    if (!configuredKey || !providedKey || providedKey !== configuredKey) {
+    if (!isAuthorizedAdmin(req)) {
       return NextResponse.json(
         { success: false, error: "Unauthorized: Invalid or missing admin key" },
         { status: 401 }

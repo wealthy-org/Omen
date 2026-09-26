@@ -10,7 +10,6 @@ export function isAuthorizedAdmin(req: NextRequest): boolean {
 
   const validAdminKeys = [
     process.env.ADMIN_SECRET_KEY?.trim(),
-    process.env.ADMIN_API_KEY?.trim(),
   ].filter(Boolean) as string[];
 
   const validAdminWallets = [
